@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            // Esta é a pasta raiz do seu projeto Flutter
+            "name": "Flutter App",
+            "path": "."
+        }
+    ],
+    "settings": {
+        // Esta configuração diz ao ESLint para funcionar
+        // corretamente dentro da subpasta "functions".
+        "eslint.workingDirectories": [
+            { "directory": "functions", "changeProcessCWD": true }
+        ]
+    }
+}

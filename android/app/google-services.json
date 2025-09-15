@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "407489622309",
+    "firebase_url": "https://gerenciar-acdf5-default-rtdb.firebaseio.com",
+    "project_id": "gerenciar-acdf5",
+    "storage_bucket": "gerenciar-acdf5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:407489622309:android:61b9326e0aa5389d65aacc",
+        "android_client_info": {
+          "package_name": "com.flaviosamuel.gerenciar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRQrPODzoH4CNIFElbub87wy2TEjVs_7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

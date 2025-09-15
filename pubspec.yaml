@@ -1,0 +1,37 @@
+name: gerenciar
+description: "Projeto de TFC Sistema de gestão para tecnicos de manutenção de ar condicionado"
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  cloud_firestore: ^6.0.0
+  sqflite: ^2.4.1
+  path: ^1.9.0
+  connectivity_plus: ^7.0.0
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.1
+  firebase_messaging: ^16.0.0
+  uuid: ^4.5.1
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/imagens/logo_gerenciar.png
