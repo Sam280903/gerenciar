@@ -33,7 +33,7 @@ void main() {
     // Configura o mock
     when(mockRepositorio.adicionar(any)).thenAnswer((_) async => {});
 
-    // 2. Ação (Act)
+    /// 2. Ação (Act)
     await casoDeUso.executar(formaPagamentoExemplo);
 
     // 3. Verificação (Assert)

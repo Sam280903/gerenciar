@@ -94,3 +94,4 @@ class MockTecnicoRepositorioInterface extends _i1.Mock
         returnValue: _i3.Future<List<_i4.Tecnico>>.value(<_i4.Tecnico>[]),
       ) as _i3.Future<List<_i4.Tecnico>>);
 }
+//

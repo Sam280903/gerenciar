@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/inativar_tecnico.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/reativar_tecnico.dart';
-import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart';
 
 // Usa o mock já gerado em cadastrar_tecnico_test.dart
 import 'cadastrar_tecnico_test.mocks.dart';
