@@ -67,3 +67,20 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Arquivos e pastas gerados pelo Flutter.
+.dart_tool/
+.idea/
+.packages
+.pub/
+build/
+
+# Arquivos de dependências.
+pubspec.lock
+
+# Arquivos de configuração do editor.
+.vscode/
+
+# Arquivos do sistema operacional.
+.DS_Store
+Thumbs.db
