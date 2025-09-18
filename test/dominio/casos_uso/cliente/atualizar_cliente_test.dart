@@ -3,11 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/atualizar_cliente.dart';
-<<<<<<< HEAD
-// ignore: unused_import
-import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart';
-=======
->>>>>>> e9b0753b2afe838214f05be953ba2d4f74fe5032
 
 // Usa o mock já gerado em cadastrar_cliente_test.dart
 import 'cadastrar_cliente_test.mocks.dart';

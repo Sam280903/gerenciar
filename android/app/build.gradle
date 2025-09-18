@@ -1,15 +1,8 @@
-// O bloco 'buildscript' DEVE vir primeiro, antes de 'plugins'.
-buildscript {
-    dependencies {
-        // Esta linha adiciona o plugin do Google Services ao classpath do build.
-        classpath 'com.google.gms:google-services:4.3.15'
-    }
-}
-
 plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
+    id 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -31,8 +24,11 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "gerenciar.tfc.gerenciar"
-    compileSdk = 36 // Recomendo usar a versão mais recente ou a que o Flutter sugere
+    // --- CORREÇÃO APLICADA AQUI ---
+    // O namespace deve ser o mesmo do seu applicationId
+    namespace = "com.flaviosamuel.gerenciar" 
+    compileSdk = 36 // Atualizado para a versão que os plugins pedem
+
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -49,8 +45,9 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.flaviosamuel.gerenciar" // Altere para o nome do pacote do Firebase
-        minSdkVersion flutter.minSdkVersion
+        applicationId = "com.flaviosamuel.gerenciar"
+        // --- CORREÇÃO APLICADA AQUI ---
+        minSdkVersion flutter.minSdkVersion // Versão mínima recomendada pelo Flutter
         targetSdkVersion flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -68,8 +65,5 @@ flutter {
 }
 
 dependencies {
-    // Adicione outras dependências do Android aqui, se necessário
+    // Dependências
 }
-
-// O plugin do Google Services é aplicado no final do arquivo.
-apply plugin: 'com.google.gms.google-services'

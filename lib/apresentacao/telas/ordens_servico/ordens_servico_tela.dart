@@ -21,42 +21,75 @@ class OrdensServicoTela extends StatefulWidget {
 class _OrdensServicoTelaState extends State<OrdensServicoTela>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _buscaController = TextEditingController();
 
-  List<OrdemServicoDetalhada> _pendentes = [];
-  List<OrdemServicoDetalhada> _emAndamento = [];
-  List<OrdemServicoDetalhada> _concluidas = [];
-  List<OrdemServicoDetalhada> _reabertas = [];
+  // Listas para armazenar todos os dados carregados
+  List<OrdemServicoDetalhada> _todosPendentes = [];
+  List<OrdemServicoDetalhada> _todosEmAndamento = [];
+  List<OrdemServicoDetalhada> _todosConcluidas = [];
+  List<OrdemServicoDetalhada> _todosReabertas = [];
+
+  // Listas para exibir os dados filtrados
+  List<OrdemServicoDetalhada> _pendentesFiltrados = [];
+  List<OrdemServicoDetalhada> _emAndamentoFiltrados = [];
+  List<OrdemServicoDetalhada> _concluidasFiltrados = [];
+  List<OrdemServicoDetalhada> _reabertasFiltrados = [];
 
   bool _carregando = true;
-  bool _ordenarCrescente = false; // false = Decrescente (padrão)
+  bool _ordenarCrescente = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _carregarOS();
+    _buscaController.addListener(_filtrarOS);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _buscaController.dispose();
     super.dispose();
   }
 
-  Future<void> _carregarOS() async {
-    setState(() => _carregando = true);
+  void _filtrarOS() {
+    final query = _buscaController.text.toLowerCase();
+    setState(() {
+      _pendentesFiltrados = _todosPendentes.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+      _emAndamentoFiltrados = _todosEmAndamento.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+      _concluidasFiltrados = _todosConcluidas.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+      _reabertasFiltrados = _todosReabertas.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+    });
+  }
 
+  Future<void> _carregarOS() async {
+    // ... (código de carregamento existente)
+    setState(() => _carregando = true);
     final osRepo = OrdemServicoRepositorioAdaptativo();
     final clienteRepo = ClienteRepositorioAdaptativo();
     final tecnicoRepo = TecnicoRepositorioAdaptativo();
-
     final ordensDeServico = await osRepo.listarTodos();
-
     List<OrdemServicoDetalhada> pendentesTemp = [];
     List<OrdemServicoDetalhada> emAndamentoTemp = [];
     List<OrdemServicoDetalhada> concluidasTemp = [];
     List<OrdemServicoDetalhada> reabertasTemp = [];
-
     for (final os in ordensDeServico) {
       final cliente =
           await BuscarClientePorId(clienteRepo).executar(os.idCliente);
@@ -67,7 +100,6 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         cliente: cliente,
         tecnico: tecnico,
       );
-
       switch (os.status) {
         case 'Pendente':
           pendentesTemp.add(itemDetalhado);
@@ -83,8 +115,6 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
           break;
       }
     }
-
-    // Função para ordenar as listas
     void ordenar(List<OrdemServicoDetalhada> lista) {
       lista.sort((a, b) {
         if (_ordenarCrescente) {
@@ -101,11 +131,12 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
 
     if (mounted) {
       setState(() {
-        _pendentes = pendentesTemp;
-        _emAndamento = emAndamentoTemp;
-        _concluidas = concluidasTemp;
-        _reabertas = reabertasTemp;
+        _todosPendentes = pendentesTemp;
+        _todosEmAndamento = emAndamentoTemp;
+        _todosConcluidas = concluidasTemp;
+        _todosReabertas = reabertasTemp;
         _carregando = false;
+        _filtrarOS(); // Aplica o filtro inicial
       });
     }
   }
@@ -143,7 +174,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
             onPressed: () {
               setState(() {
                 _ordenarCrescente = !_ordenarCrescente;
-                _carregarOS(); // Recarrega e reordena
+                _carregarOS();
               });
             },
           )
@@ -164,25 +195,52 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         icon: const Icon(Icons.add),
         label: const Text('NOVA OS'),
       ),
-      body: _carregando
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildListaOS(_pendentes, 'Nenhuma OS pendente.'),
-                _buildListaOS(_emAndamento, 'Nenhuma OS em andamento.'),
-                _buildListaOS(_concluidas, 'Nenhuma OS concluída.'),
-                _buildListaOS(_reabertas, 'Nenhuma OS reaberta.'),
-              ],
+      body: Column(
+        children: [
+          // --- CAMPO DE BUSCA ADICIONADO ---
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              controller: _buscaController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar por cliente ou técnico...',
+                prefixIcon: Icon(Icons.search),
+              ),
             ),
+          ),
+          // --- FIM DO CAMPO DE BUSCA ---
+          Expanded(
+            child: _carregando
+                ? const Center(child: CircularProgressIndicator())
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildListaOS(
+                          _pendentesFiltrados, 'Nenhuma OS pendente.'),
+                      _buildListaOS(
+                          _emAndamentoFiltrados, 'Nenhuma OS em andamento.'),
+                      _buildListaOS(
+                          _concluidasFiltrados, 'Nenhuma OS concluída.'),
+                      _buildListaOS(
+                          _reabertasFiltrados, 'Nenhuma OS reaberta.'),
+                    ],
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
+  // ... (buildListaOS, getPrioridadeIcon, getStatusColor)
+  // O restante do código permanece igual
   Widget _buildListaOS(
       List<OrdemServicoDetalhada> lista, String mensagemVazia) {
     if (lista.isEmpty) {
       return Center(
-          child: Text(mensagemVazia,
+          child: Text(
+              _buscaController.text.isNotEmpty
+                  ? 'Nenhum resultado encontrado.'
+                  : mensagemVazia,
               style: const TextStyle(color: Colors.white70)));
     }
     return RefreshIndicator(

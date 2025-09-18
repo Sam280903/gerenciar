@@ -22,11 +22,19 @@ class AgendamentosTela extends StatefulWidget {
 class _AgendamentosTelaState extends State<AgendamentosTela>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _buscaController = TextEditingController();
 
-  List<AgendamentoDetalhado> _proximos = [];
-  List<AgendamentoDetalhado> _concluidos = [];
-  List<AgendamentoDetalhado> _antigos = [];
-  List<AgendamentoDetalhado> _inativos = []; // Nova lista para inativos
+  // Listas para armazenar todos os dados carregados
+  List<AgendamentoDetalhado> _todosProximos = [];
+  List<AgendamentoDetalhado> _todosConcluidos = [];
+  List<AgendamentoDetalhado> _todosAntigos = [];
+  List<AgendamentoDetalhado> _todosInativos = [];
+
+  // Listas para exibir os dados filtrados
+  List<AgendamentoDetalhado> _proximosFiltrados = [];
+  List<AgendamentoDetalhado> _concluidosFiltrados = [];
+  List<AgendamentoDetalhado> _antigosFiltrados = [];
+  List<AgendamentoDetalhado> _inativosFiltrados = [];
 
   bool _carregando = true;
   bool _ordenarCrescente = true;
@@ -34,45 +42,62 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   @override
   void initState() {
     super.initState();
-    // Controlador com 4 abas
     _tabController = TabController(length: 4, vsync: this);
     initializeDateFormatting('pt_BR', null);
     _carregarAgendamentos();
+    _buscaController.addListener(_filtrarAgendamentos);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _buscaController.dispose();
     super.dispose();
   }
 
-  Future<void> _carregarAgendamentos() async {
-    setState(() => _carregando = true);
+  void _filtrarAgendamentos() {
+    final query = _buscaController.text.toLowerCase();
+    setState(() {
+      _proximosFiltrados = _todosProximos.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+      _concluidosFiltrados = _todosConcluidos.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+      _antigosFiltrados = _todosAntigos.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+      _inativosFiltrados = _todosInativos.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
+    });
+  }
 
+  Future<void> _carregarAgendamentos() async {
+    // ... (código de carregamento existente)
+    setState(() => _carregando = true);
     final agendamentoRepo = AgendamentoRepositorioAdaptativo();
     final clienteRepo = ClienteRepositorioAdaptativo();
     final tecnicoRepo = TecnicoRepositorioAdaptativo();
-
-    // Busca todos, incluindo inativos
     final agendamentos =
         await agendamentoRepo.listarTodos(incluirInativos: true);
-
     final hoje = DateUtils.dateOnly(DateTime.now());
-
     List<AgendamentoDetalhado> proximosTemp = [];
     List<AgendamentoDetalhado> concluidosTemp = [];
     List<AgendamentoDetalhado> antigosTemp = [];
     List<AgendamentoDetalhado> inativosTemp = [];
-
     for (final ag in agendamentos) {
-      // --- CORREÇÃO DE SEGURANÇA CONTRA DADOS CORROMPIDOS ---
-      // Se o ID do cliente ou técnico for nulo/vazio, pula para o próximo para não quebrar a tela.
       if (ag.idCliente.isEmpty || ag.idTecnico.isEmpty) {
-        // print('Agendamento ${ag.id} ignorado por falta de ID de cliente ou técnico.');
         continue;
       }
-      // --- FIM DA CORREÇÃO ---
-
       final cliente =
           await BuscarClientePorId(clienteRepo).executar(ag.idCliente);
       final tecnico =
@@ -82,8 +107,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         cliente: cliente,
         tecnico: tecnico,
       );
-
-      // Nova lógica de separação com 4 listas
       if (!ag.ativo) {
         inativosTemp.add(itemDetalhado);
       } else if (ag.status == 'Concluído') {
@@ -94,8 +117,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         proximosTemp.add(itemDetalhado);
       }
     }
-
-    // Ordenação
     void ordenar(List<AgendamentoDetalhado> lista) {
       lista.sort((a, b) {
         if (_ordenarCrescente) {
@@ -112,11 +133,12 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
 
     if (mounted) {
       setState(() {
-        _proximos = proximosTemp;
-        _concluidos = concluidosTemp;
-        _antigos = antigosTemp;
-        _inativos = inativosTemp;
+        _todosProximos = proximosTemp;
+        _todosConcluidos = concluidosTemp;
+        _todosAntigos = antigosTemp;
+        _todosInativos = inativosTemp;
         _carregando = false;
+        _filtrarAgendamentos(); // Aplica o filtro inicial
       });
     }
   }
@@ -159,12 +181,12 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         ],
         bottom: TabBar(
           controller: _tabController,
-          isScrollable: true, // Permite rolar as abas se não couberem na tela
+          isScrollable: true,
           tabs: const [
             Tab(text: 'PRÓXIMOS'),
             Tab(text: 'CONCLUÍDOS'),
             Tab(text: 'ANTIGOS'),
-            Tab(text: 'INATIVOS'), // Nova aba
+            Tab(text: 'INATIVOS'),
           ],
         ),
       ),
@@ -173,28 +195,52 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         icon: const Icon(Icons.add),
         label: const Text('NOVO'),
       ),
-      body: _carregando
-          ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildListaAgendamentos(
-                    _proximos, 'Nenhum agendamento próximo.'),
-                _buildListaAgendamentos(
-                    _concluidos, 'Nenhum agendamento concluído.'),
-                _buildListaAgendamentos(_antigos, 'Nenhum agendamento antigo.'),
-                _buildListaAgendamentos(
-                    _inativos, 'Nenhum agendamento inativo.'), // Nova lista
-              ],
+      body: Column(
+        children: [
+          // --- CAMPO DE BUSCA ADICIONADO ---
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              controller: _buscaController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar por cliente ou técnico...',
+                prefixIcon: Icon(Icons.search),
+              ),
             ),
+          ),
+          // --- FIM DO CAMPO DE BUSCA ---
+          Expanded(
+            child: _carregando
+                ? const Center(child: CircularProgressIndicator())
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildListaAgendamentos(
+                          _proximosFiltrados, 'Nenhum agendamento próximo.'),
+                      _buildListaAgendamentos(_concluidosFiltrados,
+                          'Nenhum agendamento concluído.'),
+                      _buildListaAgendamentos(
+                          _antigosFiltrados, 'Nenhum agendamento antigo.'),
+                      _buildListaAgendamentos(
+                          _inativosFiltrados, 'Nenhum agendamento inativo.'),
+                    ],
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
+  // ... (buildListaAgendamentos, buildAgendamentoCard, getStatusColor, getStatusIcon)
+  // O restante do código permanece igual
   Widget _buildListaAgendamentos(
       List<AgendamentoDetalhado> lista, String mensagemVazia) {
     if (lista.isEmpty) {
       return Center(
-          child: Text(mensagemVazia,
+          child: Text(
+              _buscaController.text.isNotEmpty
+                  ? 'Nenhum resultado encontrado.'
+                  : mensagemVazia,
               style: const TextStyle(color: Colors.white70)));
     }
     return RefreshIndicator(
