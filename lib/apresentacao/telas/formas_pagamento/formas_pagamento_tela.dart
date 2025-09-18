@@ -1,4 +1,3 @@
-// lib/apresentacao/telas/formas_pagamento/formas_pagamento_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
@@ -17,16 +16,47 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   Future<List<FormaPagamento>>? _futureFormas;
   bool _mostrarInativos = false;
 
+  List<FormaPagamento> _todasFormas = [];
+  List<FormaPagamento> _formasFiltradas = [];
+  final _buscaController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _listar = ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
     _carregar();
+    _buscaController.addListener(_filtrarFormas);
+  }
+
+  @override
+  void dispose() {
+    _buscaController.dispose();
+    super.dispose();
+  }
+
+  void _filtrarFormas() {
+    final query = _buscaController.text.toLowerCase();
+    setState(() {
+      _formasFiltradas = _todasFormas
+          .where((forma) => forma.nome.toLowerCase().contains(query))
+          .toList();
+    });
   }
 
   void _carregar() {
+    final future = _listar.executar(incluirInativos: _mostrarInativos);
     setState(() {
-      _futureFormas = _listar.executar(incluirInativos: _mostrarInativos);
+      _futureFormas = future;
+    });
+
+    future.then((lista) {
+      if (mounted) {
+        setState(() {
+          _todasFormas = lista;
+          _formasFiltradas = lista;
+          _filtrarFormas();
+        });
+      }
     });
   }
 
@@ -75,50 +105,72 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
         icon: const Icon(Icons.add),
         label: const Text('NOVA FORMA'),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => _carregar(),
-        child: FutureBuilder<List<FormaPagamento>>(
-          future: _futureFormas,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(child: Text('Erro ao carregar: ${snapshot.error}'));
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(
-                  child: Text(_mostrarInativos
-                      ? 'Nenhuma forma de pagamento encontrada.'
-                      : 'Nenhuma forma de pagamento ativa.'));
-            }
-            final formas = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
-              itemCount: formas.length,
-              itemBuilder: (context, index) {
-                final forma = formas[index];
-                return Card(
-                  color:
-                      forma.ativo ? null : Colors.grey.shade800.withAlpha(150),
-                  child: ListTile(
-                    leading: Icon(forma.ativo
-                        ? Icons.payment_outlined
-                        : Icons.money_off_csred_outlined),
-                    title: Text(forma.nome,
-                        style: TextStyle(
-                            decoration: forma.ativo
-                                ? TextDecoration.none
-                                : TextDecoration.lineThrough)),
-                    subtitle: Text(forma.descricao ?? 'Sem descrição'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () => _abrirDetalhes(forma),
-                  ),
-                );
-              },
-            );
-          },
-        ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              controller: _buscaController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar por nome...',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async => _carregar(),
+              child: FutureBuilder<List<FormaPagamento>>(
+                future: _futureFormas,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                        child: Text('Erro ao carregar: ${snapshot.error}'));
+                  }
+                  if (_formasFiltradas.isEmpty) {
+                    return Center(
+                        child: Text(_buscaController.text.isNotEmpty
+                            ? 'Nenhuma forma de pagamento encontrada.'
+                            : 'Nenhuma forma de pagamento ativa.'));
+                  }
+                  final formas = _formasFiltradas;
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
+                    itemCount: formas.length,
+                    itemBuilder: (context, index) {
+                      final forma = formas[index];
+                      return Card(
+                        color: forma.ativo
+                            ? null
+                            : Colors.grey.shade800.withAlpha(150),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 6, horizontal: 8),
+                        child: ListTile(
+                          leading: Icon(forma.ativo
+                              ? Icons.payment_outlined
+                              : Icons.money_off_csred_outlined),
+                          title: Text(forma.nome,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  decoration: forma.ativo
+                                      ? TextDecoration.none
+                                      : TextDecoration.lineThrough)),
+                          subtitle: Text(forma.descricao ?? 'Sem descrição'),
+                          trailing:
+                              const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () => _abrirDetalhes(forma),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

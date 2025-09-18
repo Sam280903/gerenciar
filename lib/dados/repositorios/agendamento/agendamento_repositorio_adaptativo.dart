@@ -1,5 +1,3 @@
-// lib/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'package:gerenciar/dominio/interfaces/agendamento_repositorio_interface.dart';
@@ -14,21 +12,16 @@ class AgendamentoRepositorioAdaptativo
   Future<bool> _temConexao() async {
     final List<ConnectivityResult> status =
         await Connectivity().checkConnectivity();
-    // Verifica se a lista de conexões NÃO contém o status 'none'.
-    return !status.contains(ConnectivityResult.none); // <-- CORREÇÃO AQUI
+    return !status.contains(ConnectivityResult.none);
   }
 
-  // O método _escolherRepositorio agora é privado, pois só é usado aqui dentro.
   Future<AgendamentoRepositorioInterface> _escolherRepositorio() async {
     return await _temConexao() ? _firebase : _sqlite;
   }
 
-  // MÉTODO NOVO IMPLEMENTADO
   @override
   Future<bool> verificarDisponibilidade(
       String idTecnico, DateTime dataHora) async {
-    // A lógica é a mesma: escolhe o repositório correto (online/offline)
-    // e repassa a chamada para ele.
     final repo = await _escolherRepositorio();
     return repo.verificarDisponibilidade(idTecnico, dataHora);
   }
@@ -52,14 +45,20 @@ class AgendamentoRepositorioAdaptativo
   }
 
   @override
+  Future<void> reativar(String id) async {
+    final repo = await _escolherRepositorio();
+    await repo.reativar(id);
+  }
+
+  @override
   Future<Agendamento?> buscarPorId(String id) async {
     final repo = await _escolherRepositorio();
     return await repo.buscarPorId(id);
   }
 
   @override
-  Future<List<Agendamento>> listarTodos() async {
+  Future<List<Agendamento>> listarTodos({bool incluirInativos = false}) async {
     final repo = await _escolherRepositorio();
-    return await repo.listarTodos();
+    return await repo.listarTodos(incluirInativos: incluirInativos);
   }
 }

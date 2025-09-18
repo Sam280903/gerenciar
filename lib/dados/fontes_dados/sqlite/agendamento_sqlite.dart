@@ -1,5 +1,3 @@
-// lib/dados/fontes_dados/sqlite/agendamento_sqlite.dart
-
 import 'package:sqflite/sqflite.dart';
 import 'package:gerenciar/dados/fontes_dados/sqlite/sqlite_conexao.dart';
 import '../../modelos/agendamento_model.dart';
@@ -7,7 +5,6 @@ import '../../modelos/agendamento_model.dart';
 class AgendamentoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
-  // Novo método para fazer a consulta no SQLite
   Future<bool> verificarConflito(String idTecnico, DateTime dataHora) async {
     final db = await _db;
     final resultado = await db.query(
@@ -16,7 +13,6 @@ class AgendamentoSQLite {
       whereArgs: [idTecnico, dataHora.toIso8601String(), 1],
       limit: 1,
     );
-    // Se a consulta retornar alguma linha, o horário está ocupado.
     return resultado.isNotEmpty;
   }
 
@@ -24,7 +20,7 @@ class AgendamentoSQLite {
     final db = await _db;
     await db.insert(
       'agendamentos',
-      agendamento.toMap(),
+      agendamento.toMapForDb(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -33,7 +29,7 @@ class AgendamentoSQLite {
     final db = await _db;
     await db.update(
       'agendamentos',
-      agendamento.toMap(),
+      agendamento.toMapForDb(),
       where: 'id = ?',
       whereArgs: [agendamento.id],
     );
@@ -47,6 +43,12 @@ class AgendamentoSQLite {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<void> reativar(String id) async {
+    final db = await _db;
+    await db.update('agendamentos', {'ativo': 1},
+        where: 'id = ?', whereArgs: [id]);
   }
 
   Future<AgendamentoModel?> buscarPorId(String id) async {
@@ -65,12 +67,13 @@ class AgendamentoSQLite {
     return null;
   }
 
-  Future<List<AgendamentoModel>> listarTodos() async {
+  Future<List<AgendamentoModel>> listarTodos(
+      {bool incluirInativos = false}) async {
     final db = await _db;
     final resultado = await db.query(
       'agendamentos',
-      where: 'ativo = ?',
-      whereArgs: [1],
+      where: incluirInativos ? null : 'ativo = ?',
+      whereArgs: incluirInativos ? null : [1],
     );
     return resultado.map((linha) {
       return AgendamentoModel.fromMap(

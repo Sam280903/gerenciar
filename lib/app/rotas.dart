@@ -2,7 +2,7 @@
 
 class Rotas {
   static const boasVindas = '/';
-  static const verificador = '/verificador'; // Rota inicial
+  static const verificador = '/verificador';
   static const login = '/login';
   static const cadastroGestor = '/cadastro-gestor';
   static const redefinirSenha = '/redefinir-senha';
@@ -14,6 +14,8 @@ class Rotas {
   static const relatorios = '/relatorios';
   static const tutoriais = '/tutoriais';
   static const formasPagamento = '/formas-pagamento';
-  static const comuntem = '/comuntem';
-  // Adicione outras rotas conforme for criando novas telas
+  // --- CORREÇÃO APLICADA ---
+  static const suporte =
+      '/suporte'; // Garante que o nome da rota seja 'suporte'
+  // --- FIM DA CORREÇÃO ---
 }

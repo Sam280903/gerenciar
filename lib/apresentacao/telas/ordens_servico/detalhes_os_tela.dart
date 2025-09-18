@@ -8,6 +8,7 @@ import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'editar_os_tela.dart';
 
 class DetalhesOSTela extends StatefulWidget {
@@ -40,6 +41,35 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
       'cliente': resultados[0] as Cliente?,
       'tecnico': resultados[1] as Tecnico?,
     };
+  }
+
+  Future<void> _abrirMapa(String? endereco) async {
+    if (endereco == null || endereco.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Endereço não disponível.'),
+            backgroundColor: Colors.orangeAccent),
+      );
+      return;
+    }
+    // --- CORREÇÃO APLICADA AQUI ---
+    final query = Uri.encodeComponent(endereco);
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+    // --- FIM DA CORREÇÃO ---
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Não foi possível abrir o mapa para: $endereco'),
+              backgroundColor: Colors.redAccent),
+        );
+      }
+    }
   }
 
   void _abrirEdicao() async {
@@ -82,6 +112,13 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
                     Icons.person_outline),
                 const SizedBox(height: 16),
                 _buildInfoCard(
+                  'Endereço do Cliente',
+                  cliente?.endereco ?? 'Não informado',
+                  Icons.location_on_outlined,
+                  onTap: () => _abrirMapa(cliente?.endereco),
+                ),
+                const SizedBox(height: 16),
+                _buildInfoCard(
                     'Técnico Responsável',
                     tecnico?.nome ?? 'Não encontrado',
                     Icons.engineering_outlined),
@@ -96,11 +133,14 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
                 Row(
                   children: [
                     Expanded(
-                        child: _buildInfoCard(
-                            'Data',
-                            DateFormat('dd/MM/yyyy')
-                                .format(widget.ordemServico.dataHoraInicio),
-                            Icons.calendar_today_outlined)),
+                      // --- CORREÇÃO AQUI ---
+                      child: _buildInfoCard(
+                          'Data e Hora',
+                          DateFormat('dd/MM/yyyy \'às\' HH:mm')
+                              .format(widget.ordemServico.dataHoraInicio),
+                          Icons.calendar_today_outlined),
+                      // --- FIM DA CORREÇÃO ---
+                    ),
                     const SizedBox(width: 16),
                     Expanded(
                         child: _buildInfoCard(
@@ -152,31 +192,44 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
   }
 
   Widget _buildInfoCard(String title, String value, IconData icon,
-      {Color? valueColor}) {
+      {Color? valueColor, VoidCallback? onTap}) {
     return Card(
       color: Colors.white.withAlpha(15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Icon(icon, color: Colors.white70, size: 20),
-              const SizedBox(width: 8),
-              Text(title,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14))
-            ]),
-            const SizedBox(height: 8),
-            Text(
-              value.isNotEmpty ? value : 'Não informado',
-              style: TextStyle(
-                color: valueColor ?? Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Icon(icon, color: Colors.white70, size: 20),
+                      const SizedBox(width: 8),
+                      Text(title,
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 14))
+                    ]),
+                    const SizedBox(height: 8),
+                    Text(
+                      value.isNotEmpty ? value : 'Não informado',
+                      style: TextStyle(
+                        color: valueColor ?? Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              if (onTap != null)
+                const Icon(Icons.map_outlined, color: Colors.blueAccent),
+            ],
+          ),
         ),
       ),
     );

@@ -1,4 +1,3 @@
-// lib/apresentacao/telas/clientes/clientes_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
@@ -17,17 +16,46 @@ class _ClientesTelaState extends State<ClientesTela> {
   Future<List<Cliente>>? _futureClientes;
   bool _mostrarInativos = false;
 
+  List<Cliente> _todosClientes = [];
+  List<Cliente> _clientesFiltrados = [];
+  final _buscaController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _listarClientes = ListarClientes(ClienteRepositorioAdaptativo());
     _carregarClientes();
+    _buscaController.addListener(_filtrarClientes);
+  }
+
+  @override
+  void dispose() {
+    _buscaController.dispose();
+    super.dispose();
+  }
+
+  void _filtrarClientes() {
+    final query = _buscaController.text.toLowerCase();
+    setState(() {
+      _clientesFiltrados = _todosClientes
+          .where((cliente) => cliente.nome.toLowerCase().contains(query))
+          .toList();
+    });
   }
 
   void _carregarClientes() {
+    final future = _listarClientes.executar(incluirInativos: _mostrarInativos);
     setState(() {
-      _futureClientes =
-          _listarClientes.executar(incluirInativos: _mostrarInativos);
+      _futureClientes = future;
+    });
+    future.then((lista) {
+      if (mounted) {
+        setState(() {
+          _todosClientes = lista;
+          _clientesFiltrados = lista;
+          _filtrarClientes();
+        });
+      }
     });
   }
 
@@ -68,62 +96,81 @@ class _ClientesTelaState extends State<ClientesTela> {
         icon: const Icon(Icons.add),
         label: const Text('NOVO CLIENTE'),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => _carregarClientes(),
-        child: FutureBuilder<List<Cliente>>(
-          future: _futureClientes,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                          'Erro ao carregar clientes:\n${snapshot.error}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white70))));
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(
-                  child: Text(
-                      _mostrarInativos
-                          ? 'Nenhum cliente encontrado.'
-                          : 'Nenhum cliente ativo cadastrado.',
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 16)));
-            }
-            final clientes = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
-              itemCount: clientes.length,
-              itemBuilder: (context, index) {
-                final cliente = clientes[index];
-                return Card(
-                  color: cliente.ativo
-                      ? null
-                      : Colors.grey.shade800.withAlpha(150),
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                  child: ListTile(
-                    leading: Icon(cliente.ativo
-                        ? Icons.person_outline
-                        : Icons.person_off_outlined),
-                    title: Text(cliente.nome,
-                        style: TextStyle(
-                            decoration: cliente.ativo
-                                ? TextDecoration.none
-                                : TextDecoration.lineThrough)),
-                    subtitle: Text(cliente.endereco),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () => _abrirDetalhes(cliente),
-                  ),
-                );
-              },
-            );
-          },
-        ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: TextField(
+              controller: _buscaController,
+              decoration: const InputDecoration(
+                labelText: 'Buscar por nome...',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async => _carregarClientes(),
+              child: FutureBuilder<List<Cliente>>(
+                future: _futureClientes,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                        child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                                'Erro ao carregar clientes:\n${snapshot.error}',
+                                textAlign: TextAlign.center,
+                                style:
+                                    const TextStyle(color: Colors.white70))));
+                  }
+                  if (_clientesFiltrados.isEmpty) {
+                    return Center(
+                        child: Text(
+                            _buscaController.text.isNotEmpty
+                                ? 'Nenhum cliente encontrado.'
+                                : 'Nenhum cliente ativo cadastrado.',
+                            style: const TextStyle(
+                                color: Colors.white70, fontSize: 16)));
+                  }
+                  final clientes = _clientesFiltrados;
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
+                    itemCount: clientes.length,
+                    itemBuilder: (context, index) {
+                      final cliente = clientes[index];
+                      return Card(
+                        color: cliente.ativo
+                            ? null
+                            : Colors.grey.shade800.withAlpha(150),
+                        margin: const EdgeInsets.symmetric(
+                            vertical: 6, horizontal: 8),
+                        child: ListTile(
+                          leading: Icon(cliente.ativo
+                              ? Icons.person_outline
+                              : Icons.person_off_outlined),
+                          title: Text(cliente.nome,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  decoration: cliente.ativo
+                                      ? TextDecoration.none
+                                      : TextDecoration.lineThrough)),
+                          subtitle: Text(cliente.telefone),
+                          trailing:
+                              const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () => _abrirDetalhes(cliente),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

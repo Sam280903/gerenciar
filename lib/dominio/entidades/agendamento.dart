@@ -4,6 +4,7 @@ class Agendamento {
   final String idCliente;
   final DateTime dataHora;
   final String? observacao;
+  final String status;
   final bool ativo;
 
   Agendamento({
@@ -12,6 +13,7 @@ class Agendamento {
     required this.idCliente,
     required this.dataHora,
     this.observacao,
+    this.status = 'Pendente',
     required this.ativo,
   });
 }

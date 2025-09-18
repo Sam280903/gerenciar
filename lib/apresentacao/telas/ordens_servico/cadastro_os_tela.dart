@@ -1,5 +1,6 @@
 // lib/apresentacao/telas/ordens_servico/cadastro_os_tela.dart
 import 'package:flutter/material.dart';
+import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
@@ -29,13 +30,16 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   final _descricaoController = TextEditingController();
   final _valorController = TextEditingController();
   final _dataController = TextEditingController();
+  final _horaController = TextEditingController();
 
   Cliente? _clienteSelecionado;
   Tecnico? _tecnicoSelecionado;
   FormaPagamento? _formaPagamentoSelecionada;
   String _prioridadeSelecionada = 'Baixa';
   DateTime _dataSelecionada = DateTime.now();
+  TimeOfDay _horaSelecionada = TimeOfDay.now();
   bool _carregando = false;
+  bool _isInit = true;
 
   @override
   void initState() {
@@ -43,11 +47,23 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
     _dataController.text = DateFormat('dd/MM/yyyy').format(_dataSelecionada);
   }
 
+  // --- CORREÇÃO AQUI ---
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInit) {
+      _horaController.text = _horaSelecionada.format(context);
+      _isInit = false;
+    }
+  }
+  // --- FIM DA CORREÇÃO ---
+
   @override
   void dispose() {
     _descricaoController.dispose();
     _valorController.dispose();
     _dataController.dispose();
+    _horaController.dispose();
     super.dispose();
   }
 
@@ -119,16 +135,52 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
     }
   }
 
+  Future<void> _selecionarHora() async {
+    final hora = await showTimePicker(
+      context: context,
+      initialTime: _horaSelecionada,
+    );
+    if (hora != null) {
+      setState(() {
+        _horaSelecionada = hora;
+        _horaController.text = hora.format(context);
+      });
+    }
+  }
+
   Future<void> _salvarOS() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
+
+      final dataHoraCompleta = DateTime(
+        _dataSelecionada.year,
+        _dataSelecionada.month,
+        _dataSelecionada.day,
+        _horaSelecionada.hour,
+        _horaSelecionada.minute,
+      );
+
+      final agendamentoRepo = AgendamentoRepositorioAdaptativo();
+      final ocupado = await agendamentoRepo.verificarDisponibilidade(
+        _tecnicoSelecionado!.id,
+        dataHoraCompleta,
+      );
+
+      if (ocupado && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Conflito! O técnico já possui um agendamento ou OS neste horário.'),
+            backgroundColor: Colors.redAccent));
+        setState(() => _carregando = false);
+        return;
+      }
 
       final novaOS = OrdemServico(
         id: const Uuid().v4(),
         idCliente: _clienteSelecionado!.id,
         idTecnico: _tecnicoSelecionado!.id,
         idFormaPagamento: _formaPagamentoSelecionada!.id,
-        dataHoraInicio: _dataSelecionada,
+        dataHoraInicio: dataHoraCompleta,
         descricao: _descricaoController.text,
         valor:
             double.tryParse(_valorController.text.replaceAll(',', '.')) ?? 0.0,
@@ -202,30 +254,34 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
                   Expanded(
                     child: TextFormField(
                       controller: _dataController,
-                      decoration:
-                          const InputDecoration(labelText: 'Data de Abertura'),
+                      decoration: const InputDecoration(labelText: 'Data'),
                       readOnly: true,
                       onTap: _selecionarData,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _prioridadeSelecionada,
-                      decoration:
-                          const InputDecoration(labelText: 'Prioridade'),
-                      items: ['Baixa', 'Média', 'Alta']
-                          .map(
-                              (p) => DropdownMenuItem(value: p, child: Text(p)))
-                          .toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() => _prioridadeSelecionada = val);
-                        }
-                      },
+                    child: TextFormField(
+                      controller: _horaController,
+                      decoration: const InputDecoration(labelText: 'Hora'),
+                      readOnly: true,
+                      onTap: _selecionarHora,
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _prioridadeSelecionada,
+                decoration: const InputDecoration(labelText: 'Prioridade'),
+                items: ['Baixa', 'Média', 'Alta']
+                    .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                    .toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _prioridadeSelecionada = val);
+                  }
+                },
               ),
               const SizedBox(height: 16),
               WidgetSelecao(

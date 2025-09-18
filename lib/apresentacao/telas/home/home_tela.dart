@@ -119,8 +119,10 @@ class _HomeTelaState extends State<HomeTela>
                     Rotas.tutoriais, context),
                 _buildItem(Icons.payment_outlined, 'Pagamentos',
                     Rotas.formasPagamento, context),
+                // --- ALTERAÇÃO AQUI ---
                 _buildItem(Icons.support_agent_outlined, 'Suporte',
-                    Rotas.comuntem, context),
+                    Rotas.suporte, context),
+                // --- FIM DA ALTERAÇÃO ---
               ],
             ),
             const SizedBox(height: 24),
@@ -133,8 +135,7 @@ class _HomeTelaState extends State<HomeTela>
   Widget _buildCartaoDestaque() {
     return Card(
       elevation: 8,
-      // CORREÇÃO: Uso de .withAlpha() em vez de .withOpacity()
-      shadowColor: Colors.black.withAlpha(102), // 0.4 opacidade
+      shadowColor: Colors.black.withAlpha(102),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -183,11 +184,8 @@ class _HomeTelaState extends State<HomeTela>
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              // CORREÇÃO: Uso de .withAlpha() em vez de .withOpacity()
-              color: Cores.azulCard.withAlpha(128), // 0.5 opacidade
-              // CORREÇÃO: Uso de .withAlpha() em vez de .withOpacity()
-              border: Border.all(
-                  color: Colors.white.withAlpha(51)), // 0.2 opacidade
+              color: Cores.azulCard.withAlpha(128),
+              border: Border.all(color: Colors.white.withAlpha(51)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

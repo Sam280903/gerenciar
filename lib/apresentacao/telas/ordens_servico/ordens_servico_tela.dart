@@ -1,8 +1,12 @@
 // lib/apresentacao/telas/ordens_servico/ordens_servico_tela.dart
 import 'package:flutter/material.dart';
+import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
-import 'package:gerenciar/dominio/casos_uso/ordem_servico/listar_ordens_servico.dart';
+import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
+import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
+import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
+import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
 import 'package:intl/intl.dart';
 import 'cadastro_os_tela.dart';
 import 'detalhes_os_tela.dart';
@@ -14,21 +18,96 @@ class OrdensServicoTela extends StatefulWidget {
   State<OrdensServicoTela> createState() => _OrdensServicoTelaState();
 }
 
-class _OrdensServicoTelaState extends State<OrdensServicoTela> {
-  late final ListarOrdensServico _listarOS;
-  Future<List<OrdemServico>>? _futureOS;
+class _OrdensServicoTelaState extends State<OrdensServicoTela>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  List<OrdemServicoDetalhada> _pendentes = [];
+  List<OrdemServicoDetalhada> _emAndamento = [];
+  List<OrdemServicoDetalhada> _concluidas = [];
+  List<OrdemServicoDetalhada> _reabertas = [];
+
+  bool _carregando = true;
+  bool _ordenarCrescente = false; // false = Decrescente (padrão)
 
   @override
   void initState() {
     super.initState();
-    _listarOS = ListarOrdensServico(OrdemServicoRepositorioAdaptativo());
+    _tabController = TabController(length: 4, vsync: this);
     _carregarOS();
   }
 
-  void _carregarOS() {
-    setState(() {
-      _futureOS = _listarOS.executar();
-    });
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _carregarOS() async {
+    setState(() => _carregando = true);
+
+    final osRepo = OrdemServicoRepositorioAdaptativo();
+    final clienteRepo = ClienteRepositorioAdaptativo();
+    final tecnicoRepo = TecnicoRepositorioAdaptativo();
+
+    final ordensDeServico = await osRepo.listarTodos();
+
+    List<OrdemServicoDetalhada> pendentesTemp = [];
+    List<OrdemServicoDetalhada> emAndamentoTemp = [];
+    List<OrdemServicoDetalhada> concluidasTemp = [];
+    List<OrdemServicoDetalhada> reabertasTemp = [];
+
+    for (final os in ordensDeServico) {
+      final cliente =
+          await BuscarClientePorId(clienteRepo).executar(os.idCliente);
+      final tecnico =
+          await BuscarTecnicoPorId(tecnicoRepo).executar(os.idTecnico);
+      final itemDetalhado = OrdemServicoDetalhada(
+        os: os,
+        cliente: cliente,
+        tecnico: tecnico,
+      );
+
+      switch (os.status) {
+        case 'Pendente':
+          pendentesTemp.add(itemDetalhado);
+          break;
+        case 'Em Andamento':
+          emAndamentoTemp.add(itemDetalhado);
+          break;
+        case 'Concluída':
+          concluidasTemp.add(itemDetalhado);
+          break;
+        case 'Reaberta':
+          reabertasTemp.add(itemDetalhado);
+          break;
+      }
+    }
+
+    // Função para ordenar as listas
+    void ordenar(List<OrdemServicoDetalhada> lista) {
+      lista.sort((a, b) {
+        if (_ordenarCrescente) {
+          return a.os.dataHoraInicio.compareTo(b.os.dataHoraInicio);
+        }
+        return b.os.dataHoraInicio.compareTo(a.os.dataHoraInicio);
+      });
+    }
+
+    ordenar(pendentesTemp);
+    ordenar(emAndamentoTemp);
+    ordenar(concluidasTemp);
+    ordenar(reabertasTemp);
+
+    if (mounted) {
+      setState(() {
+        _pendentes = pendentesTemp;
+        _emAndamento = emAndamentoTemp;
+        _concluidas = concluidasTemp;
+        _reabertas = reabertasTemp;
+        _carregando = false;
+      });
+    }
   }
 
   void _abrirFormularioCadastro() async {
@@ -51,21 +130,110 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela> {
     }
   }
 
-  // Helper para o ícone de prioridade
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ordens de Serviço'),
+        actions: [
+          IconButton(
+            icon: Icon(
+                _ordenarCrescente ? Icons.arrow_downward : Icons.arrow_upward),
+            tooltip: 'Ordenar por data',
+            onPressed: () {
+              setState(() {
+                _ordenarCrescente = !_ordenarCrescente;
+                _carregarOS(); // Recarrega e reordena
+              });
+            },
+          )
+        ],
+        bottom: TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          tabs: const [
+            Tab(text: 'PENDENTES'),
+            Tab(text: 'EM ANDAMENTO'),
+            Tab(text: 'CONCLUÍDAS'),
+            Tab(text: 'REABERTAS'),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _abrirFormularioCadastro,
+        icon: const Icon(Icons.add),
+        label: const Text('NOVA OS'),
+      ),
+      body: _carregando
+          ? const Center(child: CircularProgressIndicator())
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildListaOS(_pendentes, 'Nenhuma OS pendente.'),
+                _buildListaOS(_emAndamento, 'Nenhuma OS em andamento.'),
+                _buildListaOS(_concluidas, 'Nenhuma OS concluída.'),
+                _buildListaOS(_reabertas, 'Nenhuma OS reaberta.'),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildListaOS(
+      List<OrdemServicoDetalhada> lista, String mensagemVazia) {
+    if (lista.isEmpty) {
+      return Center(
+          child: Text(mensagemVazia,
+              style: const TextStyle(color: Colors.white70)));
+    }
+    return RefreshIndicator(
+      onRefresh: _carregarOS,
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
+        itemCount: lista.length,
+        itemBuilder: (context, index) {
+          final item = lista[index];
+          final os = item.os;
+          final statusColor = _getStatusColor(os.status);
+
+          return Card(
+            shape: RoundedRectangleBorder(
+              side: BorderSide(color: statusColor.withAlpha(80), width: 1.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ListTile(
+              leading: _getPrioridadeIcon(os.prioridade),
+              title: Text(item.cliente?.nome ?? 'Cliente não encontrado',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(
+                  'Técnico: ${item.tecnico?.nome ?? 'Não definido'}\nData: ${DateFormat('dd/MM/yyyy HH:mm').format(os.dataHoraInicio)}'),
+              isThreeLine: true,
+              trailing: Text(
+                os.status,
+                style:
+                    TextStyle(color: statusColor, fontWeight: FontWeight.bold),
+              ),
+              onTap: () => _abrirDetalhes(os),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _getPrioridadeIcon(String prioridade) {
-    switch (prioridade.toLowerCase()) {
-      case 'alta':
+    switch (prioridade) {
+      case 'Alta':
         return CircleAvatar(
           backgroundColor: Colors.redAccent.withAlpha(40),
           child: const Icon(Icons.keyboard_double_arrow_up,
               color: Colors.redAccent),
         );
-      case 'média':
+      case 'Média':
         return CircleAvatar(
           backgroundColor: Colors.orangeAccent.withAlpha(40),
           child: const Icon(Icons.remove, color: Colors.orangeAccent),
         );
-      default: // 'baixa'
+      default: // Baixa
         return CircleAvatar(
           backgroundColor: Colors.blueAccent.withAlpha(40),
           child: const Icon(Icons.keyboard_double_arrow_down,
@@ -74,93 +242,16 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela> {
     }
   }
 
-  // Helper para a cor do status
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'concluída':
+    switch (status) {
+      case 'Concluída':
         return Colors.greenAccent;
-      case 'reaberta':
+      case 'Reaberta':
         return Colors.redAccent;
-      case 'em andamento':
+      case 'Em Andamento':
         return Colors.lightBlueAccent;
-      default: // 'pendente'
+      default: // Pendente
         return Colors.orangeAccent;
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ordens de Serviço'),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _abrirFormularioCadastro,
-        icon: const Icon(Icons.add),
-        label: const Text('NOVA OS'),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async => _carregarOS(),
-        child: FutureBuilder<List<OrdemServico>>(
-          future: _futureOS,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Center(child: Text('Erro: ${snapshot.error}'));
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(
-                  child: Text('Nenhuma Ordem de Serviço encontrada.'));
-            }
-            final ordens = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
-              itemCount: ordens.length,
-              itemBuilder: (context, index) {
-                final os = ordens[index];
-                final statusColor = _getStatusColor(os.status);
-
-                return Card(
-                  // Borda colorida para indicar o status
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                        color: statusColor.withAlpha(80), width: 1.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    leading: _getPrioridadeIcon(
-                        os.prioridade), // Ícone de prioridade
-                    title: Text('OS #${os.id.substring(0, 6)}...'),
-                    subtitle: RichText(
-                      text: TextSpan(
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .copyWith(color: Colors.white70, fontSize: 12),
-                        children: <TextSpan>[
-                          const TextSpan(text: 'Status: '),
-                          TextSpan(
-                            text: os.status, // Texto do status colorido
-                            style: TextStyle(
-                                color: statusColor,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(
-                              text:
-                                  '\nData: ${DateFormat('dd/MM/yyyy').format(os.dataHoraInicio)}'),
-                        ],
-                      ),
-                    ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    onTap: () => _abrirDetalhes(os),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      ),
-    );
   }
 }

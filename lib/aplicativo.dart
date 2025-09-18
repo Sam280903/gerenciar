@@ -1,9 +1,6 @@
-// lib/
+// lib/aplicativo.dart
 
-// CORREÇÃO: Corrigido o erro de digitação no import.
 import 'package:flutter/material.dart';
-
-// Import das telas
 import 'package:gerenciar/apresentacao/telas/boas_vindas/boas_vindas_tela.dart';
 import 'package:gerenciar/apresentacao/telas/verificador_inicial_tela.dart';
 import 'package:gerenciar/apresentacao/telas/login/login_tela.dart';
@@ -16,10 +13,10 @@ import 'package:gerenciar/apresentacao/telas/clientes/clientes_tela.dart';
 import 'package:gerenciar/apresentacao/telas/relatorios/relatorios_tela.dart';
 import 'package:gerenciar/apresentacao/telas/tutoriais/tutoriais_tela.dart';
 import 'package:gerenciar/apresentacao/telas/formas_pagamento/formas_pagamento_tela.dart';
-import 'package:gerenciar/apresentacao/telas/comuntem/comuntem_tela.dart';
+// --- CORREÇÃO APLICADA ---
+import 'package:gerenciar/apresentacao/telas/suporte/suporte_tela.dart'; // Importa a tela correta
+// --- FIM DA CORREÇÃO ---
 import 'package:gerenciar/apresentacao/telas/redefinir_senha/redefinir_senha_tela.dart';
-
-// Import das configurações do app
 import 'app/rotas.dart';
 import 'app/tema.dart';
 
@@ -31,7 +28,6 @@ class GerenciarApp extends StatelessWidget {
     return MaterialApp(
       title: 'GerenciAR',
       debugShowCheckedModeBanner: false,
-      // CORREÇÃO: Usando o nome correto da variável do tema
       theme: temaProfissional,
       initialRoute: Rotas.boasVindas,
       routes: {
@@ -46,9 +42,11 @@ class GerenciarApp extends StatelessWidget {
         Rotas.agendamentos: (_) => const AgendamentosTela(),
         Rotas.clientes: (_) => const ClientesTela(),
         Rotas.relatorios: (_) => const RelatoriosTela(),
-        Rotas.tutoriais: (_) => const TutoriaisTela(),
+        Rotas.tutoriais: (_) => TutoriaisTela(),
         Rotas.formasPagamento: (_) => const FormasPagamentoTela(),
-        Rotas.comuntem: (_) => const ComuntemTela(),
+        // --- CORREÇÃO APLICADA ---
+        Rotas.suporte: (_) => const SuporteTela(), // Aponta para a tela correta
+        // --- FIM DA CORREÇÃO ---
       },
     );
   }

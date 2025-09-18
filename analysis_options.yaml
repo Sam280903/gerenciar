@@ -5,6 +5,8 @@
 include: package:lints/recommended.yaml
 
 analyzer:
+  errors:
+    deprecated_member_use: ignore
   # Exclui arquivos gerados automaticamente da análise, pois não devemos editá-los.
   exclude:
     - "**/*.mocks.dart" # Exclui os arquivos de mock que geramos para os testes

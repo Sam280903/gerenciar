@@ -4,6 +4,7 @@ import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptat
 import 'package:gerenciar/dominio/casos_uso/cliente/inativar_cliente.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/reativar_cliente.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'editar_cliente_tela.dart';
 
 class DetalhesClienteTela extends StatefulWidget {
@@ -23,6 +24,37 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
     _clienteAtual = widget.cliente;
   }
 
+  // --- CORREÇÃO DEFINITIVA DA URL AQUI ---
+  Future<void> _abrirMapa(String endereco) async {
+    if (endereco.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Endereço não disponível.'),
+            backgroundColor: Colors.orangeAccent),
+      );
+      return;
+    }
+    // --- CORREÇÃO APLICADA AQUI ---
+    final query = Uri.encodeComponent(endereco);
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+    // --- FIM DA CORREÇÃO ---
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Não foi possível abrir o mapa para: $endereco'),
+              backgroundColor: Colors.redAccent),
+        );
+      }
+    }
+  }
+  // --- FIM DA CORREÇÃO ---
+
   Future<void> _toggleAtivo() async {
     final bool vaiInativar = _clienteAtual.ativo;
     final acao = vaiInativar ? 'inativar' : 'reativar';
@@ -38,7 +70,6 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
             child: const Text('Cancelar'),
           ),
           TextButton(
-            // CORREÇÃO: Argumento 'style' movido para antes de 'child'
             style: TextButton.styleFrom(
                 foregroundColor:
                     vaiInativar ? Colors.redAccent : Colors.greenAccent),
@@ -108,7 +139,8 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
             _buildInfoCard('E-mail', _clienteAtual.email, Icons.email_outlined),
             const SizedBox(height: 16),
             _buildInfoCard(
-                'Endereço', _clienteAtual.endereco, Icons.location_on_outlined),
+                'Endereço', _clienteAtual.endereco, Icons.location_on_outlined,
+                onTap: () => _abrirMapa(_clienteAtual.endereco)),
             const SizedBox(height: 16),
             _buildInfoCard(
                 'Status',
@@ -159,28 +191,41 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
   }
 
   Widget _buildInfoCard(String title, String value, IconData icon,
-      {Color? valueColor}) {
+      {Color? valueColor, VoidCallback? onTap}) {
     return Card(
       color: Colors.white.withAlpha(15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Icon(icon, color: Colors.white70, size: 20),
-              const SizedBox(width: 8),
-              Text(title,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14))
-            ]),
-            const SizedBox(height: 8),
-            Text(value.isNotEmpty ? value : 'Não informado',
-                style: TextStyle(
-                    color: valueColor ?? Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-          ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Icon(icon, color: Colors.white70, size: 20),
+                      const SizedBox(width: 8),
+                      Text(title,
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 14))
+                    ]),
+                    const SizedBox(height: 8),
+                    Text(value.isNotEmpty ? value : 'Não informado',
+                        style: TextStyle(
+                            color: valueColor ?? Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              if (onTap != null)
+                const Icon(Icons.map_outlined, color: Colors.blueAccent),
+            ],
+          ),
         ),
       ),
     );
