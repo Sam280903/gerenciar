@@ -25,7 +25,7 @@ void main() {
     telefone: '64999999999',
     ativo: true,
   );
-
+//
   group('Busca de Técnicos', () {
     test('Deve retornar um técnico ao buscar por id', () async {
       when(mockRepositorio.buscarPorId(any))

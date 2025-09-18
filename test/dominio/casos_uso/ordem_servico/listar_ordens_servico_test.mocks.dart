@@ -28,7 +28,7 @@ import 'package:mockito/mockito.dart' as _i1;
 
 /// A class which mocks [OrdemServicoRepositorioInterface].
 ///
-/// See the documentation for Mockito's code generation for more information.
+// See the documentation for Mockito's code generation for more information.
 class MockOrdemServicoRepositorioInterface extends _i1.Mock
     implements _i2.OrdemServicoRepositorioInterface {
   MockOrdemServicoRepositorioInterface() {

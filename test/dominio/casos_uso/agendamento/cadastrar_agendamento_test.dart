@@ -61,7 +61,7 @@ void main() {
       )),
     );
 
-    // Verifica que o método 'adicionar' NUNCA foi chamado
+    // Verifica que o método 'adicionar' NUNCA foi chamado //
     verify(mockRepositorio.verificarDisponibilidade(
         agendamentoExemplo.idTecnico, agendamentoExemplo.dataHora));
     verifyNever(mockRepositorio.adicionar(any));

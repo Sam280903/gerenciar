@@ -25,7 +25,7 @@ void main() {
       await casoDeUso.executar(formaPagamento);
       verify(mockRepositorio.atualizar(formaPagamento));
     });
-
+//
     test('Deve chamar o método INATIVAR do repositório', () async {
       final casoDeUso = InativarFormaPagamento(mockRepositorio);
       when(mockRepositorio.inativar(any)).thenAnswer((_) async => {});

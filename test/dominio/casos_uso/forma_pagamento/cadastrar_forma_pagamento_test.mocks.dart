@@ -9,7 +9,7 @@ import 'package:gerenciar/dominio/entidades/forma_pagamento.dart' as _i4;
 import 'package:gerenciar/dominio/interfaces/forma_pagamento_repositorio_interface.dart'
     as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-
+//
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
 // ignore_for_file: avoid_setters_without_getters

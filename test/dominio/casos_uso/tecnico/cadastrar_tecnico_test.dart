@@ -60,7 +60,7 @@ void main() {
     );
 
     // Verifica se a execução do caso de uso com dados inválidos
-    // lança (throws) uma Exceção.
+    // lança (throws) uma Exceção.//
     expect(
       () => casoDeUso.executar(tecnicoInvalido),
       throwsA(isA<Exception>()),
