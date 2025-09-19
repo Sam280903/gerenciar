@@ -2,7 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-    id 'com.google.gms.google-services'
+    id "com.google.gms.google-services"
 }
 
 def localProperties = new Properties()
@@ -24,16 +24,14 @@ if (flutterVersionName == null) {
 }
 
 android {
-    // --- CORREÇÃO APLICADA AQUI ---
-    // O namespace deve ser o mesmo do seu applicationId
-    namespace = "com.flaviosamuel.gerenciar" 
-    compileSdk = 36 // Atualizado para a versão que os plugins pedem
+    namespace = "com.flaviosamuel.gerenciar"
+    compileSdk = 36
 
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
@@ -46,9 +44,8 @@ android {
 
     defaultConfig {
         applicationId = "com.flaviosamuel.gerenciar"
-        // --- CORREÇÃO APLICADA AQUI ---
-        minSdkVersion flutter.minSdkVersion // Versão mínima recomendada pelo Flutter
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion flutter.minSdkVersion
+        targetSdkVersion 36
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
@@ -65,5 +62,5 @@ flutter {
 }
 
 dependencies {
-    // Dependências
+    // Suas dependências.
 }
