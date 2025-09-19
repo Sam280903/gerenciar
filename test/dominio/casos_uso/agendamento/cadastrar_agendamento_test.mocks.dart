@@ -9,7 +9,7 @@ import 'package:gerenciar/dominio/entidades/agendamento.dart' as _i4;
 import 'package:gerenciar/dominio/interfaces/agendamento_repositorio_interface.dart'
     as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-//
+
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
 // ignore_for_file: avoid_setters_without_getters
@@ -83,6 +83,16 @@ class MockAgendamentoRepositorioInterface extends _i1.Mock
       ) as _i3.Future<void>);
 
   @override
+  _i3.Future<void> reativar(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #reativar,
+          [id],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
   _i3.Future<_i4.Agendamento?> buscarPorId(String? id) => (super.noSuchMethod(
         Invocation.method(
           #buscarPorId,
@@ -92,10 +102,13 @@ class MockAgendamentoRepositorioInterface extends _i1.Mock
       ) as _i3.Future<_i4.Agendamento?>);
 
   @override
-  _i3.Future<List<_i4.Agendamento>> listarTodos() => (super.noSuchMethod(
+  _i3.Future<List<_i4.Agendamento>> listarTodos(
+          {bool? incluirInativos = false}) =>
+      (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
+          {#incluirInativos: incluirInativos},
         ),
         returnValue:
             _i3.Future<List<_i4.Agendamento>>.value(<_i4.Agendamento>[]),
