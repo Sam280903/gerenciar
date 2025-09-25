@@ -107,8 +107,10 @@ class _HomeTelaState extends State<HomeTela>
               children: [
                 _buildItem(Icons.assignment_outlined, 'Ordens de Serviço',
                     Rotas.ordensServico, context),
-                _buildItem(Icons.engineering_outlined, 'Técnicos',
-                    Rotas.tecnicos, context),
+                // Condição para exibir o menu "Técnicos"
+                if (_perfilUsuario == 'gestor')
+                  _buildItem(Icons.engineering_outlined, 'Técnicos',
+                      Rotas.tecnicos, context),
                 _buildItem(Icons.calendar_today_outlined, 'Agendamentos',
                     Rotas.agendamentos, context),
                 _buildItem(Icons.people_alt_outlined, 'Clientes',

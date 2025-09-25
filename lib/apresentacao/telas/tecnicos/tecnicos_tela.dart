@@ -1,7 +1,9 @@
+// lib/apresentacao/telas/tecnicos/tecnicos_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/listar_tecnicos.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'cadastro_tecnico_tela.dart';
 import 'detalhes_tecnico_tela.dart';
 
@@ -20,12 +22,26 @@ class _TecnicosTelaState extends State<TecnicosTela> {
   List<Tecnico> _tecnicosFiltrados = [];
   final _buscaController = TextEditingController();
 
+  // Variável para armazenar o perfil do usuário logado
+  String _perfilUsuario = "";
+
   @override
   void initState() {
     super.initState();
     _listarTecnicos = ListarTecnicos(TecnicoRepositorioAdaptativo());
     _carregarTecnicos();
     _buscaController.addListener(_filtrarTecnicos);
+    _carregarPerfilUsuario(); // Carrega o perfil do usuário
+  }
+
+  // Função para buscar os dados do usuário e atualizar o estado
+  Future<void> _carregarPerfilUsuario() async {
+    final dados = await AutenticacaoServico().buscarDadosUsuarioLogado();
+    if (dados != null && mounted) {
+      setState(() {
+        _perfilUsuario = dados['perfil'] ?? '';
+      });
+    }
   }
 
   @override
@@ -92,11 +108,14 @@ class _TecnicosTelaState extends State<TecnicosTela> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _abrirFormularioCadastro,
-        icon: const Icon(Icons.add),
-        label: const Text('NOVO TÉCNICO'),
-      ),
+      // O botão só é construído se o perfil do usuário for 'gestor'
+      floatingActionButton: _perfilUsuario == 'gestor'
+          ? FloatingActionButton.extended(
+              onPressed: _abrirFormularioCadastro,
+              icon: const Icon(Icons.add),
+              label: const Text('NOVO TÉCNICO'),
+            )
+          : null,
       body: Column(
         children: [
           Padding(
