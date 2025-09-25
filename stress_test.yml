@@ -1,0 +1,48 @@
+# stress_test.yml
+config:
+  # Vamos apontar para o emulador do Firestore que roda localmente
+  target: "http://localhost:8080"
+  phases:
+    # Cenário de teste: 20 novos "usuários" chegam a cada segundo durante 60 segundos.
+    # Isso simula um total de 1200 usuários em um minuto.
+    - duration: 60
+      arrivalRate: 20
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Técnico cria Cliente e Ordem de Serviço"
+    flow:
+      # Etapa 1: Simular a criação de um novo cliente.
+      # Cada usuário virtual irá executar esta etapa.
+      - post:
+          url: "/v1/projects/gerenciar-acdf5/databases/(default)/documents/clientes"
+          json:
+            fields:
+              id: { stringValue: "{{ $randomString() }}" }
+              nome: { stringValue: "Cliente Estresse {{ $randomString(10) }}" }
+              email: { stringValue: "cliente{{ $randomInt(1000, 9999) }}@estresse.com" }
+              telefone: { stringValue: "64987654321" }
+              endereco: { stringValue: "Endereço de Teste de Carga" }
+              ativo: { booleanValue: true }
+          # Capturamos o ID do cliente recém-criado para usar na próxima etapa.
+          capture:
+            - json: "fields.id.stringValue"
+              as: "clienteId"
+
+      # Etapa 2: Usar o ID do cliente para criar uma Ordem de Serviço associada a ele.
+      - post:
+          url: "/v1/projects/gerenciar-acdf5/databases/(default)/documents/ordens_servico"
+          json:
+            fields:
+              id: { stringValue: "{{ $randomString() }}" }
+              idCliente: { stringValue: "{{ clienteId }}" }
+              idTecnico: { stringValue: "tecnico_carga_{{ $randomString(5) }}" }
+              idFormaPagamento: { stringValue: "pix" }
+              dataHoraInicio: { timestampValue: "2025-09-18T22:00:00Z" }
+              descricao: { stringValue: "OS gerada sob teste de estresse." }
+              valor: { doubleValue: 250.00 }
+              prioridade: { stringValue: "Média" }
+              status: { stringValue: "Pendente" }
+              ativo: { booleanValue: true }
