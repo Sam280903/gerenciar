@@ -6,7 +6,9 @@ import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
+import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/pdf_servico.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'editar_os_tela.dart';
@@ -53,11 +55,8 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
       );
       return;
     }
-    // --- CORREÇÃO APLICADA AQUI ---
     final query = Uri.encodeComponent(endereco);
-    final uri =
-        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
-    // --- FIM DA CORREÇÃO ---
+    final uri = Uri.parse('https://maps.google.com/maps?q=$query');
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -79,8 +78,44 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
             builder: (_) => EditarOSTela(ordemServico: widget.ordemServico)));
 
     if (resultado == true && mounted) {
-      // Retorna true para a tela anterior para recarregar a lista
       Navigator.of(context).pop(true);
+    }
+  }
+
+  Future<void> _exportarPDF() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Gerando PDF...')),
+    );
+
+    final dados = await _carregarDados();
+    final cliente = dados['cliente'];
+    final tecnico = dados['tecnico'];
+
+    if (cliente == null || tecnico == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Não foi possível carregar os dados para o PDF.'),
+            backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    final osDetalhada = OrdemServicoDetalhada(
+      os: widget.ordemServico,
+      cliente: cliente,
+      tecnico: tecnico,
+    );
+
+    try {
+      await PdfServico().gerarPdfOS(osDetalhada);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao gerar PDF: $e'),
+            backgroundColor: Colors.redAccent),
+      );
     }
   }
 
@@ -133,13 +168,11 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
                 Row(
                   children: [
                     Expanded(
-                      // --- CORREÇÃO AQUI ---
                       child: _buildInfoCard(
                           'Data e Hora',
                           DateFormat('dd/MM/yyyy \'às\' HH:mm')
                               .format(widget.ordemServico.dataHoraInicio),
                           Icons.calendar_today_outlined),
-                      // --- FIM DA CORREÇÃO ---
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -165,15 +198,25 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
   }
 
   Widget _buildActionButtons() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: _abrirEdicao,
-            icon: const Icon(Icons.edit_outlined),
-            label: const Text('EDITAR'),
-          ),
+        ElevatedButton.icon(
+          onPressed: _abrirEdicao,
+          icon: const Icon(Icons.edit_outlined),
+          label: const Text('EDITAR'),
         ),
+        const SizedBox(height: 12),
+        if (widget.ordemServico.status == 'Concluída')
+          OutlinedButton.icon(
+            onPressed: _exportarPDF,
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            label: const Text('EXPORTAR PDF'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.blueAccent,
+              side: const BorderSide(color: Colors.blueAccent),
+            ),
+          ),
       ],
     );
   }
