@@ -9,6 +9,7 @@ import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'package:gerenciar/dominio/entidades/agendamento_detalhado.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'cadastro_agendamento_tela.dart';
 import 'detalhes_agendamento_tela.dart';
 
@@ -163,6 +164,54 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     }
   }
 
+  Future<void> _otimizarRota() async {
+    final hoje = DateUtils.dateOnly(DateTime.now());
+
+    // Cria uma nova lista e a ordena por data/hora, independentemente da ordenação da UI.
+    final agendamentosDoDia = _todosProximos
+        .where((item) =>
+            DateUtils.dateOnly(item.agendamento.dataHora) == hoje &&
+            item.cliente?.endereco.isNotEmpty == true)
+        .toList()
+      ..sort(
+          (a, b) => a.agendamento.dataHora.compareTo(b.agendamento.dataHora));
+
+    if (agendamentosDoDia.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'São necessários pelo menos 2 agendamentos com endereço para otimizar a rota.'),
+          backgroundColor: Colors.orangeAccent,
+        ),
+      );
+      return;
+    }
+
+    final enderecos =
+        agendamentosDoDia.map((item) => item.cliente!.endereco).toList();
+    final destination =
+        enderecos.removeLast(); // O último da lista cronológica é o destino
+    final waypoints = enderecos.join('|'); // Os demais são pontos de parada
+
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(destination)}&waypoints=${Uri.encodeComponent(waypoints)}&travelmode=driving';
+
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível abrir o mapa para traçar a rota.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,10 +239,24 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _abrirFormularioCadastro,
-        icon: const Icon(Icons.add),
-        label: const Text('NOVO'),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'novoAgendamento',
+            onPressed: _abrirFormularioCadastro,
+            icon: const Icon(Icons.add),
+            label: const Text('NOVO'),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton.extended(
+            heroTag: 'otimizarRota',
+            onPressed: _otimizarRota,
+            icon: const Icon(Icons.route_outlined),
+            label: const Text('OTIMIZAR ROTA DO DIA'),
+            backgroundColor: Colors.blueAccent,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -246,7 +309,8 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     return RefreshIndicator(
       onRefresh: _carregarAgendamentos,
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 80),
+        padding: const EdgeInsets.fromLTRB(
+            8, 8, 8, 160), // Aumentar padding inferior
         itemCount: lista.length,
         itemBuilder: (context, index) {
           final item = lista[index];

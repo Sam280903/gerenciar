@@ -1,8 +1,12 @@
 // lib/apresentacao/telas/clientes/cadastro_cliente_tela.dart
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/cadastrar_cliente.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:uuid/uuid.dart';
 
 class CadastroClienteTela extends StatefulWidget {
@@ -17,18 +21,76 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   final _cpfController = TextEditingController();
   final _telefoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _enderecoController = TextEditingController();
+
+  // Controllers para o endereço
+  final _cepController = TextEditingController();
+  final _logradouroController = TextEditingController();
+  final _numeroController = TextEditingController();
+  final _complementoController = TextEditingController();
+  final _bairroController = TextEditingController();
+  final _cidadeController = TextEditingController();
+  final _ufController = TextEditingController();
+
   bool _carregando = false;
+  bool _buscandoCep = false;
+  // Novo estado para controlar a visibilidade dos campos
+  bool _isCadastroRapido = false;
+
+  Future<void> _buscarCep() async {
+    final cep = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cep.length != 8) return;
+
+    setState(() => _buscandoCep = true);
+    try {
+      final response =
+          await http.get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['erro'] != true) {
+          setState(() {
+            _logradouroController.text = data['logradouro'] ?? '';
+            _bairroController.text = data['bairro'] ?? '';
+            _cidadeController.text = data['localidade'] ?? '';
+            _ufController.text = data['uf'] ?? '';
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Erro ao buscar CEP.'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _buscandoCep = false);
+      }
+    }
+  }
 
   Future<void> _salvarCliente() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
+
+      // Constrói o endereço completo a partir dos campos
+      final enderecoCompleto = [
+        _logradouroController.text.trim(),
+        if (_numeroController.text.isNotEmpty)
+          'Nº ${_numeroController.text.trim()}',
+        if (_complementoController.text.isNotEmpty)
+          _complementoController.text.trim(),
+        _bairroController.text.trim(),
+        _cidadeController.text.trim(),
+        _ufController.text.trim()
+      ].where((s) => s.isNotEmpty).join(', ');
+
       final novoCliente = Cliente(
         id: const Uuid().v4(),
         nome: _nomeController.text.trim(),
         email: _emailController.text.trim(),
         telefone: _telefoneController.text.trim(),
-        endereco: _enderecoController.text.trim(),
+        endereco: enderecoCompleto,
         cpf: _cpfController.text.trim(),
         ativo: true,
       );
@@ -59,7 +121,13 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
     _cpfController.dispose();
     _telefoneController.dispose();
     _emailController.dispose();
-    _enderecoController.dispose();
+    _cepController.dispose();
+    _logradouroController.dispose();
+    _numeroController.dispose();
+    _complementoController.dispose();
+    _bairroController.dispose();
+    _cidadeController.dispose();
+    _ufController.dispose();
     super.dispose();
   }
 
@@ -74,37 +142,162 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Botão para alternar entre cadastro rápido e completo
+              SwitchListTile(
+                title: const Text('Cadastro Rápido',
+                    style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Cadastrar apenas nome e telefone',
+                    style: TextStyle(color: Colors.white70)),
+                value: _isCadastroRapido,
+                onChanged: (bool value) {
+                  setState(() {
+                    _isCadastroRapido = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
               TextFormField(
                   controller: _nomeController,
-                  decoration: const InputDecoration(labelText: 'Nome completo'),
+                  decoration: const InputDecoration(
+                      labelText: 'Nome completo *',
+                      prefixIcon: Icon(Icons.person_outline)),
                   validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
               const SizedBox(height: 16),
-              Row(children: [
-                Expanded(
-                    child: TextFormField(
-                        controller: _telefoneController,
-                        decoration:
-                            const InputDecoration(labelText: 'Telefone'),
-                        keyboardType: TextInputType.phone,
-                        validator: (v) =>
-                            v!.isEmpty ? 'Campo obrigatório' : null)),
-                const SizedBox(width: 16),
-                Expanded(
-                    child: TextFormField(
+
+              TextFormField(
+                  controller: _telefoneController,
+                  decoration: const InputDecoration(
+                      labelText: 'Telefone *',
+                      prefixIcon: Icon(Icons.phone_outlined)),
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    TelefoneInputFormatter(),
+                  ],
+                  validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
+              const SizedBox(height: 16),
+
+              // Campos que serão ocultados no cadastro rápido
+              Visibility(
+                visible: !_isCadastroRapido,
+                child: Column(
+                  children: [
+                    TextFormField(
                         controller: _cpfController,
-                        decoration: const InputDecoration(labelText: 'CPF'),
-                        keyboardType: TextInputType.number)),
-              ]),
-              const SizedBox(height: 16),
-              TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(labelText: 'E-mail'),
-                  keyboardType: TextInputType.emailAddress),
-              const SizedBox(height: 16),
-              TextFormField(
-                  controller: _enderecoController,
-                  decoration: const InputDecoration(labelText: 'Endereço'),
-                  validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
+                        decoration: const InputDecoration(
+                            labelText: 'CPF/CNPJ',
+                            prefixIcon: Icon(Icons.badge_outlined)),
+                        keyboardType: TextInputType.number,
+                        // ADICIONA A MÁSCARA AQUI
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          CpfOuCnpjFormatter(),
+                        ]),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                            labelText: 'E-mail',
+                            prefixIcon: Icon(Icons.email_outlined)),
+                        keyboardType: TextInputType.emailAddress),
+                    const SizedBox(height: 24),
+                    const Divider(),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text('Endereço',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white70)),
+                    ),
+                    TextFormField(
+                      controller: _cepController,
+                      decoration: InputDecoration(
+                        labelText: 'CEP',
+                        suffixIcon: _buscandoCep
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2))
+                            : IconButton(
+                                icon: const Icon(Icons.search),
+                                onPressed: _buscarCep),
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        CepInputFormatter(),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                        controller: _logradouroController,
+                        decoration: const InputDecoration(
+                            labelText: 'Logradouro (Rua, Av.) *'),
+                        validator: (v) => !_isCadastroRapido && v!.isEmpty
+                            ? 'Campo obrigatório'
+                            : null),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _numeroController,
+                            decoration:
+                                const InputDecoration(labelText: 'Número'),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            controller: _complementoController,
+                            decoration:
+                                const InputDecoration(labelText: 'Complemento'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                        controller: _bairroController,
+                        decoration:
+                            const InputDecoration(labelText: 'Bairro *'),
+                        validator: (v) => !_isCadastroRapido && v!.isEmpty
+                            ? 'Campo obrigatório'
+                            : null),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: TextFormField(
+                              controller: _cidadeController,
+                              decoration:
+                                  const InputDecoration(labelText: 'Cidade *'),
+                              validator: (v) => !_isCadastroRapido && v!.isEmpty
+                                  ? 'Campo obrigatório'
+                                  : null),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: TextFormField(
+                              controller: _ufController,
+                              decoration:
+                                  const InputDecoration(labelText: 'UF *'),
+                              validator: (v) => !_isCadastroRapido && v!.isEmpty
+                                  ? 'Campo obrigatório'
+                                  : null),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 32),
               _carregando
                   ? const Center(child: CircularProgressIndicator())
