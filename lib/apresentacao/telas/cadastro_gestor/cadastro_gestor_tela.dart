@@ -5,7 +5,10 @@ import 'package:gerenciar/app/rotas.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
 
 class CadastroGestorTela extends StatefulWidget {
-  const CadastroGestorTela({super.key});
+  // Adicionando o serviço como um parâmetro opcional para injeção.
+  final AutenticacaoServico? authServico;
+
+  const CadastroGestorTela({super.key, this.authServico});
 
   @override
   State<CadastroGestorTela> createState() => _CadastroGestorTelaState();
@@ -17,10 +20,19 @@ class _CadastroGestorTelaState extends State<CadastroGestorTela> {
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _authServico = AutenticacaoServico();
+
+  // A dependência será inicializada no initState.
+  late final AutenticacaoServico _authServico;
 
   String? _mensagemErro;
   bool _carregando = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Usa o serviço injetado ou cria uma nova instância.
+    _authServico = widget.authServico ?? AutenticacaoServico();
+  }
 
   Future<void> _cadastrarGestor() async {
     if (!(_formKey.currentState?.validate() ?? false)) {
@@ -39,6 +51,8 @@ class _CadastroGestorTelaState extends State<CadastroGestorTela> {
         senha: _senhaController.text,
       );
       if (mounted) {
+        // Em um teste, a navegação pode não funcionar como esperado,
+        // mas no app real, isso levará para a home.
         Navigator.pushReplacementNamed(context, Rotas.home);
       }
     } catch (e) {

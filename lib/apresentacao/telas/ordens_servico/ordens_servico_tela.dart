@@ -4,6 +4,7 @@ import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptat
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
+import 'package:gerenciar/dominio/casos_uso/ordem_servico/listar_ordens_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
@@ -12,7 +13,13 @@ import 'cadastro_os_tela.dart';
 import 'detalhes_os_tela.dart';
 
 class OrdensServicoTela extends StatefulWidget {
-  const OrdensServicoTela({super.key});
+  // Adicionando as dependências para injeção
+  final ListarOrdensServico? listarOS;
+  final BuscarClientePorId? buscarCliente;
+  final BuscarTecnicoPorId? buscarTecnico;
+
+  const OrdensServicoTela(
+      {super.key, this.listarOS, this.buscarCliente, this.buscarTecnico});
 
   @override
   State<OrdensServicoTela> createState() => _OrdensServicoTelaState();
@@ -23,13 +30,16 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   late TabController _tabController;
   final _buscaController = TextEditingController();
 
-  // Listas para armazenar todos os dados carregados
+  // Dependências que serão inicializadas
+  late final ListarOrdensServico _listarOS;
+  late final BuscarClientePorId _buscarCliente;
+  late final BuscarTecnicoPorId _buscarTecnico;
+
   List<OrdemServicoDetalhada> _todosPendentes = [];
   List<OrdemServicoDetalhada> _todosEmAndamento = [];
   List<OrdemServicoDetalhada> _todosConcluidas = [];
   List<OrdemServicoDetalhada> _todosReabertas = [];
 
-  // Listas para exibir os dados filtrados
   List<OrdemServicoDetalhada> _pendentesFiltrados = [];
   List<OrdemServicoDetalhada> _emAndamentoFiltrados = [];
   List<OrdemServicoDetalhada> _concluidasFiltrados = [];
@@ -42,6 +52,15 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+
+    // Inicializa as dependências a partir do widget ou cria novas instâncias
+    _listarOS =
+        widget.listarOS ?? ListarOrdensServico(OrdemServicoRepositorioAdaptativo());
+    _buscarCliente =
+        widget.buscarCliente ?? BuscarClientePorId(ClienteRepositorioAdaptativo());
+    _buscarTecnico =
+        widget.buscarTecnico ?? BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
+
     _carregarOS();
     _buscaController.addListener(_filtrarOS);
   }
@@ -80,21 +99,16 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   }
 
   Future<void> _carregarOS() async {
-    // ... (código de carregamento existente)
     setState(() => _carregando = true);
-    final osRepo = OrdemServicoRepositorioAdaptativo();
-    final clienteRepo = ClienteRepositorioAdaptativo();
-    final tecnicoRepo = TecnicoRepositorioAdaptativo();
-    final ordensDeServico = await osRepo.listarTodos();
+    
+    final ordensDeServico = await _listarOS.executar();
     List<OrdemServicoDetalhada> pendentesTemp = [];
     List<OrdemServicoDetalhada> emAndamentoTemp = [];
     List<OrdemServicoDetalhada> concluidasTemp = [];
     List<OrdemServicoDetalhada> reabertasTemp = [];
     for (final os in ordensDeServico) {
-      final cliente =
-          await BuscarClientePorId(clienteRepo).executar(os.idCliente);
-      final tecnico =
-          await BuscarTecnicoPorId(tecnicoRepo).executar(os.idTecnico);
+      final cliente = await _buscarCliente.executar(os.idCliente);
+      final tecnico = await _buscarTecnico.executar(os.idTecnico);
       final itemDetalhado = OrdemServicoDetalhada(
         os: os,
         cliente: cliente,
@@ -136,7 +150,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         _todosConcluidas = concluidasTemp;
         _todosReabertas = reabertasTemp;
         _carregando = false;
-        _filtrarOS(); // Aplica o filtro inicial
+        _filtrarOS();
       });
     }
   }
@@ -197,7 +211,6 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
       ),
       body: Column(
         children: [
-          // --- CAMPO DE BUSCA ADICIONADO ---
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
@@ -208,7 +221,6 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
               ),
             ),
           ),
-          // --- FIM DO CAMPO DE BUSCA ---
           Expanded(
             child: _carregando
                 ? const Center(child: CircularProgressIndicator())
@@ -231,8 +243,6 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     );
   }
 
-  // ... (buildListaOS, getPrioridadeIcon, getStatusColor)
-  // O restante do código permanece igual
   Widget _buildListaOS(
       List<OrdemServicoDetalhada> lista, String mensagemVazia) {
     if (lista.isEmpty) {

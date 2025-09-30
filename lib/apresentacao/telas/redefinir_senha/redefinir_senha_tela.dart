@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
 
 class RedefinirSenhaTela extends StatefulWidget {
-  const RedefinirSenhaTela({super.key});
+  final AutenticacaoServico? authServico;
+
+  const RedefinirSenhaTela({super.key, this.authServico});
 
   @override
   State<RedefinirSenhaTela> createState() => _RedefinirSenhaTelaState();
@@ -13,11 +15,17 @@ class RedefinirSenhaTela extends StatefulWidget {
 class _RedefinirSenhaTelaState extends State<RedefinirSenhaTela> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
 
   bool _carregando = false;
   String? _mensagemErro;
   String? _mensagemSucesso;
+
+  @override
+  void initState() {
+    super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
+  }
 
   Future<void> _enviarEmail() async {
     if (_formKey.currentState!.validate()) {

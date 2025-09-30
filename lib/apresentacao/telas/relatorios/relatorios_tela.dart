@@ -12,7 +12,16 @@ import 'package:gerenciar/servicos/relatorio_servico.dart';
 import 'package:intl/intl.dart';
 
 class RelatoriosTela extends StatefulWidget {
-  const RelatoriosTela({super.key});
+  // Adicionando dependências para injeção
+  final RelatorioServico? relatorioServico;
+  final ListarTecnicos? listarTecnicos;
+  final ListarClientes? listarClientes;
+
+  const RelatoriosTela(
+      {super.key,
+      this.relatorioServico,
+      this.listarTecnicos,
+      this.listarClientes});
 
   @override
   State<RelatoriosTela> createState() => _RelatoriosTelaState();
@@ -28,6 +37,22 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
 
   final _dataInicialController = TextEditingController();
   final _dataFinalController = TextEditingController();
+
+  // Declarando as dependências
+  late final RelatorioServico _relatorioServico;
+  late final ListarTecnicos _listarTecnicos;
+  late final ListarClientes _listarClientes;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializando as dependências
+    _relatorioServico = widget.relatorioServico ?? RelatorioServico();
+    _listarTecnicos =
+        widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
+    _listarClientes =
+        widget.listarClientes ?? ListarClientes(ClienteRepositorioAdaptativo());
+  }
 
   @override
   void dispose() {
@@ -70,7 +95,7 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
 
     try {
       final resultado =
-          await RelatorioServico().gerarRelatorioOrdensServico(filtros);
+          await _relatorioServico.gerarRelatorioOrdensServico(filtros);
 
       if (mounted) {
         Navigator.push(
@@ -115,8 +140,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-
-            // Filtros de Data
             Row(
               children: [
                 Expanded(
@@ -140,8 +163,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Filtro de Técnico
             InkWell(
               onTap: () async {
                 final tecnico = await Navigator.push<Tecnico>(
@@ -149,9 +170,7 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
                     MaterialPageRoute(
                         builder: (_) => TelaBusca<Tecnico>(
                             titulo: 'Selecionar Técnico',
-                            futureItens:
-                                ListarTecnicos(TecnicoRepositorioAdaptativo())
-                                    .executar(),
+                            futureItens: _listarTecnicos.executar(),
                             getNomeItem: (t) => t.nome)));
                 if (tecnico != null) {
                   setState(() => _tecnicoSelecionado = tecnico);
@@ -164,8 +183,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Filtro de Cliente
             InkWell(
               onTap: () async {
                 final cliente = await Navigator.push<Cliente>(
@@ -173,9 +190,7 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
                     MaterialPageRoute(
                         builder: (_) => TelaBusca<Cliente>(
                             titulo: 'Selecionar Cliente',
-                            futureItens:
-                                ListarClientes(ClienteRepositorioAdaptativo())
-                                    .executar(),
+                            futureItens: _listarClientes.executar(),
                             getNomeItem: (c) => c.nome)));
                 if (cliente != null) {
                   setState(() => _clienteSelecionado = cliente);
@@ -188,8 +203,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Filtro de Status
             DropdownButtonFormField<String>(
               value: _statusSelecionado,
               hint: const Text('Todos'),
@@ -205,8 +218,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               },
             ),
             const SizedBox(height: 40),
-
-            // Botão
             _carregando
                 ? const Center(child: CircularProgressIndicator())
                 : ElevatedButton.icon(

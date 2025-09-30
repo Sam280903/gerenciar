@@ -7,7 +7,10 @@ import '../../../app/rotas.dart';
 import 'dart:ui'; // Para o efeito de vidro
 
 class HomeTela extends StatefulWidget {
-  const HomeTela({super.key});
+  // Adicionando o serviço como um parâmetro opcional
+  final AutenticacaoServico? authServico;
+
+  const HomeTela({super.key, this.authServico});
 
   @override
   State<HomeTela> createState() => _HomeTelaState();
@@ -15,6 +18,9 @@ class HomeTela extends StatefulWidget {
 
 class _HomeTelaState extends State<HomeTela>
     with SingleTickerProviderStateMixin {
+  // A dependência será inicializada no initState
+  late final AutenticacaoServico _authServico;
+
   String _nomeUsuario = "Usuário";
   String _perfilUsuario = "";
   late AnimationController _controller;
@@ -23,6 +29,9 @@ class _HomeTelaState extends State<HomeTela>
   @override
   void initState() {
     super.initState();
+    // Usa o serviço injetado ou cria uma nova instância
+    _authServico = widget.authServico ?? AutenticacaoServico();
+
     _carregarDadosUsuario();
 
     _controller = AnimationController(
@@ -40,7 +49,7 @@ class _HomeTelaState extends State<HomeTela>
   }
 
   void _carregarDadosUsuario() async {
-    final dados = await AutenticacaoServico().buscarDadosUsuarioLogado();
+    final dados = await _authServico.buscarDadosUsuarioLogado();
     if (dados != null && mounted) {
       setState(() {
         _nomeUsuario = dados['nome'] ?? 'Usuário';
@@ -50,7 +59,7 @@ class _HomeTelaState extends State<HomeTela>
   }
 
   void _fazerLogout() async {
-    await AutenticacaoServico().logout();
+    await _authServico.logout();
     if (mounted) {
       Navigator.of(context).pushNamedAndRemoveUntil(
           Rotas.login, (Route<dynamic> route) => false);
@@ -107,7 +116,6 @@ class _HomeTelaState extends State<HomeTela>
               children: [
                 _buildItem(Icons.assignment_outlined, 'Ordens de Serviço',
                     Rotas.ordensServico, context),
-                // Condição para exibir o menu "Técnicos"
                 if (_perfilUsuario == 'gestor')
                   _buildItem(Icons.engineering_outlined, 'Técnicos',
                       Rotas.tecnicos, context),
@@ -121,10 +129,8 @@ class _HomeTelaState extends State<HomeTela>
                     Rotas.tutoriais, context),
                 _buildItem(Icons.payment_outlined, 'Pagamentos',
                     Rotas.formasPagamento, context),
-                // --- ALTERAÇÃO AQUI ---
                 _buildItem(Icons.support_agent_outlined, 'Suporte',
                     Rotas.suporte, context),
-                // --- FIM DA ALTERAÇÃO ---
               ],
             ),
             const SizedBox(height: 24),

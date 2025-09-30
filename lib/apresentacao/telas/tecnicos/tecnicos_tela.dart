@@ -8,13 +8,20 @@ import 'cadastro_tecnico_tela.dart';
 import 'detalhes_tecnico_tela.dart';
 
 class TecnicosTela extends StatefulWidget {
-  const TecnicosTela({super.key});
+  // Adicionamos os serviços como parâmetros opcionais para facilitar a injeção nos testes.
+  final AutenticacaoServico? authServico;
+  final ListarTecnicos? listarTecnicos;
+
+  const TecnicosTela({super.key, this.authServico, this.listarTecnicos});
   @override
   State<TecnicosTela> createState() => _TecnicosTelaState();
 }
 
 class _TecnicosTelaState extends State<TecnicosTela> {
+  // As dependências agora são inicializadas a partir dos parâmetros do widget.
   late final ListarTecnicos _listarTecnicos;
+  late final AutenticacaoServico _authServico;
+
   Future<List<Tecnico>>? _futureTecnicos;
   bool _mostrarInativos = false;
 
@@ -22,21 +29,23 @@ class _TecnicosTelaState extends State<TecnicosTela> {
   List<Tecnico> _tecnicosFiltrados = [];
   final _buscaController = TextEditingController();
 
-  // Variável para armazenar o perfil do usuário logado
   String _perfilUsuario = "";
 
   @override
   void initState() {
     super.initState();
-    _listarTecnicos = ListarTecnicos(TecnicoRepositorioAdaptativo());
+    // Se um serviço foi injetado, use-o. Senão, crie uma nova instância.
+    _listarTecnicos =
+        widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
+    _authServico = widget.authServico ?? AutenticacaoServico();
+
     _carregarTecnicos();
     _buscaController.addListener(_filtrarTecnicos);
-    _carregarPerfilUsuario(); // Carrega o perfil do usuário
+    _carregarPerfilUsuario();
   }
 
-  // Função para buscar os dados do usuário e atualizar o estado
   Future<void> _carregarPerfilUsuario() async {
-    final dados = await AutenticacaoServico().buscarDadosUsuarioLogado();
+    final dados = await _authServico.buscarDadosUsuarioLogado();
     if (dados != null && mounted) {
       setState(() {
         _perfilUsuario = dados['perfil'] ?? '';
@@ -108,7 +117,6 @@ class _TecnicosTelaState extends State<TecnicosTela> {
           ),
         ],
       ),
-      // O botão só é construído se o perfil do usuário for 'gestor'
       floatingActionButton: _perfilUsuario == 'gestor'
           ? FloatingActionButton.extended(
               onPressed: _abrirFormularioCadastro,

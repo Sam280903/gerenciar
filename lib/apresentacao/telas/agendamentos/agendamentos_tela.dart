@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
+import 'package:gerenciar/dominio/casos_uso/agendamento/listar_agendamentos.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
@@ -13,8 +14,17 @@ import 'package:url_launcher/url_launcher.dart';
 import 'cadastro_agendamento_tela.dart';
 import 'detalhes_agendamento_tela.dart';
 
+// Adicionando as dependências no construtor para injeção
 class AgendamentosTela extends StatefulWidget {
-  const AgendamentosTela({super.key});
+  final AgendamentoRepositorioAdaptativo? agendamentoRepo;
+  final ClienteRepositorioAdaptativo? clienteRepo;
+  final TecnicoRepositorioAdaptativo? tecnicoRepo;
+
+  const AgendamentosTela(
+      {super.key,
+      this.agendamentoRepo,
+      this.clienteRepo,
+      this.tecnicoRepo});
 
   @override
   State<AgendamentosTela> createState() => _AgendamentosTelaState();
@@ -25,13 +35,16 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   late TabController _tabController;
   final _buscaController = TextEditingController();
 
-  // Listas para armazenar todos os dados carregados
+  // Repositórios que serão inicializados
+  late final AgendamentoRepositorioAdaptativo _agendamentoRepo;
+  late final ClienteRepositorioAdaptativo _clienteRepo;
+  late final TecnicoRepositorioAdaptativo _tecnicoRepo;
+
   List<AgendamentoDetalhado> _todosProximos = [];
   List<AgendamentoDetalhado> _todosConcluidos = [];
   List<AgendamentoDetalhado> _todosAntigos = [];
   List<AgendamentoDetalhado> _todosInativos = [];
 
-  // Listas para exibir os dados filtrados
   List<AgendamentoDetalhado> _proximosFiltrados = [];
   List<AgendamentoDetalhado> _concluidosFiltrados = [];
   List<AgendamentoDetalhado> _antigosFiltrados = [];
@@ -44,6 +57,12 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+
+    // Inicializa os repositórios a partir do widget ou cria novas instâncias
+    _agendamentoRepo = widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
+    _clienteRepo = widget.clienteRepo ?? ClienteRepositorioAdaptativo();
+    _tecnicoRepo = widget.tecnicoRepo ?? TecnicoRepositorioAdaptativo();
+
     initializeDateFormatting('pt_BR', null);
     _carregarAgendamentos();
     _buscaController.addListener(_filtrarAgendamentos);
@@ -83,13 +102,9 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   }
 
   Future<void> _carregarAgendamentos() async {
-    // ... (código de carregamento existente)
     setState(() => _carregando = true);
-    final agendamentoRepo = AgendamentoRepositorioAdaptativo();
-    final clienteRepo = ClienteRepositorioAdaptativo();
-    final tecnicoRepo = TecnicoRepositorioAdaptativo();
     final agendamentos =
-        await agendamentoRepo.listarTodos(incluirInativos: true);
+        await ListarAgendamentos(_agendamentoRepo).executar();
     final hoje = DateUtils.dateOnly(DateTime.now());
     List<AgendamentoDetalhado> proximosTemp = [];
     List<AgendamentoDetalhado> concluidosTemp = [];
@@ -100,9 +115,9 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         continue;
       }
       final cliente =
-          await BuscarClientePorId(clienteRepo).executar(ag.idCliente);
+          await BuscarClientePorId(_clienteRepo).executar(ag.idCliente);
       final tecnico =
-          await BuscarTecnicoPorId(tecnicoRepo).executar(ag.idTecnico);
+          await BuscarTecnicoPorId(_tecnicoRepo).executar(ag.idTecnico);
       final itemDetalhado = AgendamentoDetalhado(
         agendamento: ag,
         cliente: cliente,
@@ -139,7 +154,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         _todosAntigos = antigosTemp;
         _todosInativos = inativosTemp;
         _carregando = false;
-        _filtrarAgendamentos(); // Aplica o filtro inicial
+        _filtrarAgendamentos();
       });
     }
   }
@@ -167,7 +182,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   Future<void> _otimizarRota() async {
     final hoje = DateUtils.dateOnly(DateTime.now());
 
-    // Cria uma nova lista e a ordena por data/hora, independentemente da ordenação da UI.
     final agendamentosDoDia = _todosProximos
         .where((item) =>
             DateUtils.dateOnly(item.agendamento.dataHora) == hoje &&
@@ -190,8 +204,8 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     final enderecos =
         agendamentosDoDia.map((item) => item.cliente!.endereco).toList();
     final destination =
-        enderecos.removeLast(); // O último da lista cronológica é o destino
-    final waypoints = enderecos.join('|'); // Os demais são pontos de parada
+        enderecos.removeLast();
+    final waypoints = enderecos.join('|');
 
     final url =
         'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(destination)}&waypoints=${Uri.encodeComponent(waypoints)}&travelmode=driving';
@@ -260,7 +274,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       ),
       body: Column(
         children: [
-          // --- CAMPO DE BUSCA ADICIONADO ---
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: TextField(
@@ -271,7 +284,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
               ),
             ),
           ),
-          // --- FIM DO CAMPO DE BUSCA ---
           Expanded(
             child: _carregando
                 ? const Center(child: CircularProgressIndicator())
@@ -294,8 +306,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     );
   }
 
-  // ... (buildListaAgendamentos, buildAgendamentoCard, getStatusColor, getStatusIcon)
-  // O restante do código permanece igual
   Widget _buildListaAgendamentos(
       List<AgendamentoDetalhado> lista, String mensagemVazia) {
     if (lista.isEmpty) {
@@ -310,7 +320,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       onRefresh: _carregarAgendamentos,
       child: ListView.builder(
         padding: const EdgeInsets.fromLTRB(
-            8, 8, 8, 160), // Aumentar padding inferior
+            8, 8, 8, 160),
         itemCount: lista.length,
         itemBuilder: (context, index) {
           final item = lista[index];
@@ -390,7 +400,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         return Colors.blueAccent;
       case 'Cancelado':
         return Colors.redAccent;
-      default: // Pendente
+      default:
         return Colors.orangeAccent;
     }
   }
@@ -403,7 +413,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         return Icons.check_circle_outline;
       case 'Cancelado':
         return Icons.cancel_outlined;
-      default: // Pendente
+      default:
         return Icons.pending_actions;
     }
   }

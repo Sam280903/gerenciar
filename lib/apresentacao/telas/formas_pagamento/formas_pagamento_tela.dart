@@ -1,3 +1,4 @@
+// lib/apresentacao/telas/formas_pagamento/formas_pagamento_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
@@ -6,7 +7,10 @@ import 'cadastro_forma_pagamento_tela.dart';
 import 'detalhes_forma_pagamento_tela.dart';
 
 class FormasPagamentoTela extends StatefulWidget {
-  const FormasPagamentoTela({super.key});
+  // Adicionando o caso de uso como dependência injetável
+  final ListarFormasPagamento? listarFormasPagamento;
+
+  const FormasPagamentoTela({super.key, this.listarFormasPagamento});
   @override
   State<FormasPagamentoTela> createState() => _FormasPagamentoTelaState();
 }
@@ -23,7 +27,9 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   @override
   void initState() {
     super.initState();
-    _listar = ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
+    // Inicializa a dependência a partir do widget ou cria uma nova instância
+    _listar = widget.listarFormasPagamento ??
+        ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
     _carregar();
     _buscaController.addListener(_filtrarFormas);
   }

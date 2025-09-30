@@ -1,12 +1,12 @@
 name: gerenciar
 description: "Projeto de TFC Sistema de gestão para tecnicos de manutenção de ar condicionado"
 
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.5.0 <4.0.0'
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -46,6 +46,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  http: ^1.2.1
   flutter_lints: ^6.0.0
   build_runner: ^2.8.0
   mockito: ^5.5.1

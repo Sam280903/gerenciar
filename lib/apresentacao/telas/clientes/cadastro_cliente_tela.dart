@@ -10,7 +10,11 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 
 class CadastroClienteTela extends StatefulWidget {
-  const CadastroClienteTela({super.key});
+  // Adicionando as dependências para injeção
+  final CadastrarCliente? cadastrarCliente;
+  final http.Client? httpClient;
+
+  const CadastroClienteTela({super.key, this.cadastrarCliente, this.httpClient});
   @override
   State<CadastroClienteTela> createState() => _CadastroClienteTelaState();
 }
@@ -22,7 +26,6 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   final _telefoneController = TextEditingController();
   final _emailController = TextEditingController();
 
-  // Controllers para o endereço
   final _cepController = TextEditingController();
   final _logradouroController = TextEditingController();
   final _numeroController = TextEditingController();
@@ -31,10 +34,21 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   final _cidadeController = TextEditingController();
   final _ufController = TextEditingController();
 
+  late final CadastrarCliente _cadastrarCliente;
+  late final http.Client _httpClient;
+
   bool _carregando = false;
   bool _buscandoCep = false;
-  // Novo estado para controlar a visibilidade dos campos
-  bool _isCadastroRapido = false;
+  bool _isCadastroRapido = true; // Inicia como verdadeiro por padrão
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa as dependências a partir do widget ou cria novas instâncias
+    _cadastrarCliente =
+        widget.cadastrarCliente ?? CadastrarCliente(ClienteRepositorioAdaptativo());
+    _httpClient = widget.httpClient ?? http.Client();
+  }
 
   Future<void> _buscarCep() async {
     final cep = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
@@ -42,8 +56,8 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
 
     setState(() => _buscandoCep = true);
     try {
-      final response =
-          await http.get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
+      final response = await _httpClient
+          .get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['erro'] != true) {
@@ -73,7 +87,6 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
-      // Constrói o endereço completo a partir dos campos
       final enderecoCompleto = [
         _logradouroController.text.trim(),
         if (_numeroController.text.isNotEmpty)
@@ -94,9 +107,9 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
         cpf: _cpfController.text.trim(),
         ativo: true,
       );
-      final cadastrarCliente = CadastrarCliente(ClienteRepositorioAdaptativo());
+
       try {
-        await cadastrarCliente.executar(novoCliente);
+        await _cadastrarCliente.executar(novoCliente);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Cliente salvo com sucesso!'),
@@ -142,7 +155,6 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Botão para alternar entre cadastro rápido e completo
               SwitchListTile(
                 title: const Text('Cadastro Rápido',
                     style: TextStyle(color: Colors.white)),
@@ -178,7 +190,6 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
                   validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
               const SizedBox(height: 16),
 
-              // Campos que serão ocultados no cadastro rápido
               Visibility(
                 visible: !_isCadastroRapido,
                 child: Column(
@@ -189,7 +200,6 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
                             labelText: 'CPF/CNPJ',
                             prefixIcon: Icon(Icons.badge_outlined)),
                         keyboardType: TextInputType.number,
-                        // ADICIONA A MÁSCARA AQUI
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           CpfOuCnpjFormatter(),
