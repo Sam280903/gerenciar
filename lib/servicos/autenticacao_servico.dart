@@ -28,6 +28,13 @@ class AutenticacaoServico {
         email: email,
         password: senha,
       );
+      
+      // *** MUDANÇA ADICIONADA AQUI ***
+      if (credenciais.user != null) {
+        // Agora, sempre que o login for bem-sucedido...
+        await salvarTokenDoDispositivo(); // ...o token do dispositivo é salvo no Firebase.
+      }
+      
       return credenciais.user;
     } on FirebaseAuthException catch (e) {
       throw Exception(_traduzirErro(e.code));
@@ -91,7 +98,6 @@ class AutenticacaoServico {
           'ativo': true,
         });
 
-        // --- ALTERAÇÃO AQUI ---
         // 3. Cria o documento correspondente na coleção 'gestores'
         await _firestore.collection('gestores').doc(usuario.uid).set({
           'nome': nome,
@@ -99,7 +105,6 @@ class AutenticacaoServico {
           'idUsuario': usuario.uid, // Vincula ao usuário
           'ativo': true,
         });
-        // --- FIM DA ALTERAÇÃO ---
 
         // 4. Atualiza a configuração do sistema
         await _firestore.collection('configuracao').doc('sistema').set({
@@ -118,7 +123,7 @@ class AutenticacaoServico {
     }
   }
 
-  // --- NOVO MÉTODO PARA CADASTRAR TÉCNICO ---
+  //MÉTODO PARA CADASTRAR TÉCNICO ---
   Future<User?> cadastrarTecnico({
     required String nome,
     required String email,
@@ -159,7 +164,6 @@ class AutenticacaoServico {
       throw Exception('Erro ao cadastrar técnico: ${e.message}');
     }
   }
-  // --- FIM DO NOVO MÉTODO ---
 
   Future<void> salvarTokenDoDispositivo() async {
     final usuario = _auth.currentUser;

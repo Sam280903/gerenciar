@@ -14,7 +14,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'cadastro_agendamento_tela.dart';
 import 'detalhes_agendamento_tela.dart';
 
-// Adicionando as dependências no construtor para injeção
 class AgendamentosTela extends StatefulWidget {
   final AgendamentoRepositorioAdaptativo? agendamentoRepo;
   final ClienteRepositorioAdaptativo? clienteRepo;
@@ -35,7 +34,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   late TabController _tabController;
   final _buscaController = TextEditingController();
 
-  // Repositórios que serão inicializados
   late final AgendamentoRepositorioAdaptativo _agendamentoRepo;
   late final ClienteRepositorioAdaptativo _clienteRepo;
   late final TecnicoRepositorioAdaptativo _tecnicoRepo;
@@ -58,7 +56,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
 
-    // Inicializa os repositórios a partir do widget ou cria novas instâncias
     _agendamentoRepo = widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
     _clienteRepo = widget.clienteRepo ?? ClienteRepositorioAdaptativo();
     _tecnicoRepo = widget.tecnicoRepo ?? TecnicoRepositorioAdaptativo();
@@ -179,6 +176,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     }
   }
 
+  // --- FUNÇÃO CORRIGIDA E FINALIZADA ---
   Future<void> _otimizarRota() async {
     final hoje = DateUtils.dateOnly(DateTime.now());
 
@@ -191,25 +189,26 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
           (a, b) => a.agendamento.dataHora.compareTo(b.agendamento.dataHora));
 
     if (agendamentosDoDia.length < 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'São necessários pelo menos 2 agendamentos com endereço para otimizar a rota.'),
-          backgroundColor: Colors.orangeAccent,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'São necessários pelo menos 2 agendamentos com endereço para otimizar a rota do dia.'),
+            backgroundColor: Colors.orangeAccent,
+          ),
+        );
+      }
       return;
     }
+    
+    // Constrói a URL para o Google Maps Directions
+    // O último endereço na lista cronológica será o destino final.
+    // Todos os outros serão pontos de parada (waypoints).
+    final enderecos = agendamentosDoDia.map((item) => item.cliente!.endereco).toList();
+    final destino = Uri.encodeComponent(enderecos.removeLast());
+    final waypoints = enderecos.map(Uri.encodeComponent).join('|');
 
-    final enderecos =
-        agendamentosDoDia.map((item) => item.cliente!.endereco).toList();
-    final destination =
-        enderecos.removeLast();
-    final waypoints = enderecos.join('|');
-
-    final url =
-        'https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(destination)}&waypoints=${Uri.encodeComponent(waypoints)}&travelmode=driving';
-
+    final url = 'https://www.google.com/maps/dir/?api=1&destination=$destino&waypoints=$waypoints&travelmode=driving';
     final uri = Uri.parse(url);
 
     if (await canLaunchUrl(uri)) {
@@ -225,6 +224,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       }
     }
   }
+  // --- FIM DA CORREÇÃO ---
 
   @override
   Widget build(BuildContext context) {
