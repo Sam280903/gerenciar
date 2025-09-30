@@ -12,7 +12,7 @@ import 'package:gerenciar/servicos/relatorio_servico.dart';
 import 'package:intl/intl.dart';
 
 class RelatoriosTela extends StatefulWidget {
-  // Adicionando dependências para injeção
+  // Adicionando as dependências para injeção
   final RelatorioServico? relatorioServico;
   final ListarTecnicos? listarTecnicos;
   final ListarClientes? listarClientes;
@@ -46,7 +46,7 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
   @override
   void initState() {
     super.initState();
-    // Inicializando as dependências
+    // Inicializando as dependências a partir do widget ou criando novas instâncias
     _relatorioServico = widget.relatorioServico ?? RelatorioServico();
     _listarTecnicos =
         widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
@@ -84,6 +84,7 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
 
   Future<void> _gerarRelatorio() async {
     setState(() => _carregando = true);
+    FocusScope.of(context).unfocus();
 
     final filtros = FiltrosRelatorio(
       dataInicial: _dataInicial,
@@ -112,7 +113,7 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao gerar relatório: $e'),
+            content: Text('Erro ao gerar relatório: ${e.toString().replaceFirst("Exception: ", "")}'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -140,6 +141,8 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
+
+            // Filtros de Data
             Row(
               children: [
                 Expanded(
@@ -163,6 +166,8 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ],
             ),
             const SizedBox(height: 16),
+
+            // Filtro de Técnico
             InkWell(
               onTap: () async {
                 final tecnico = await Navigator.push<Tecnico>(
@@ -183,6 +188,8 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Filtro de Cliente
             InkWell(
               onTap: () async {
                 final cliente = await Navigator.push<Cliente>(
@@ -203,6 +210,8 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Filtro de Status
             DropdownButtonFormField<String>(
               value: _statusSelecionado,
               hint: const Text('Todos'),
@@ -218,13 +227,23 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               },
             ),
             const SizedBox(height: 40),
-            _carregando
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton.icon(
-                    onPressed: _gerarRelatorio,
-                    icon: const Icon(Icons.search),
-                    label: const Text('GERAR RELATÓRIO'),
-                  ),
+
+            // Botão
+            ElevatedButton.icon(
+              onPressed: _carregando ? null : _gerarRelatorio,
+              icon: _carregando
+                  ? Container(
+                      width: 24,
+                      height: 24,
+                      padding: const EdgeInsets.all(2.0),
+                      child: const CircularProgressIndicator(
+                        color: Colors.blue,
+                        strokeWidth: 3,
+                      ),
+                    )
+                  : const Icon(Icons.search),
+              label: Text(_carregando ? 'GERANDO...' : 'GERAR RELATÓRIO'),
+            ),
           ],
         ),
       ),

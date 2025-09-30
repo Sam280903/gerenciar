@@ -1,3 +1,4 @@
+// lib/apresentacao/telas/agendamentos/cadastro_agendamento_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
@@ -14,7 +15,16 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class CadastroAgendamentoTela extends StatefulWidget {
-  const CadastroAgendamentoTela({super.key});
+  // Adicionando dependências para injeção
+  final CadastrarAgendamento? cadastrarAgendamento;
+  final ListarClientes? listarClientes;
+  final ListarTecnicos? listarTecnicos;
+
+  const CadastroAgendamentoTela(
+      {super.key,
+      this.cadastrarAgendamento,
+      this.listarClientes,
+      this.listarTecnicos});
 
   @override
   State<CadastroAgendamentoTela> createState() =>
@@ -34,9 +44,20 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   bool _carregando = false;
   bool _isInit = true;
 
+  late final CadastrarAgendamento _cadastrarAgendamento;
+  late final ListarClientes _listarClientes;
+  late final ListarTecnicos _listarTecnicos;
+
   @override
   void initState() {
     super.initState();
+    _cadastrarAgendamento = widget.cadastrarAgendamento ??
+        CadastrarAgendamento(AgendamentoRepositorioAdaptativo());
+    _listarClientes =
+        widget.listarClientes ?? ListarClientes(ClienteRepositorioAdaptativo());
+    _listarTecnicos =
+        widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
+
     _dataController.text = DateFormat('dd/MM/yyyy').format(_dataSelecionada);
   }
 
@@ -91,8 +112,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
       MaterialPageRoute(
         builder: (_) => TelaBusca<Cliente>(
           titulo: 'Selecionar Cliente',
-          futureItens:
-              ListarClientes(ClienteRepositorioAdaptativo()).executar(),
+          futureItens: _listarClientes.executar(),
           getNomeItem: (c) => c.nome,
         ),
       ),
@@ -108,8 +128,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
       MaterialPageRoute(
         builder: (_) => TelaBusca<Tecnico>(
           titulo: 'Selecionar Técnico',
-          futureItens:
-              ListarTecnicos(TecnicoRepositorioAdaptativo()).executar(),
+          futureItens: _listarTecnicos.executar(),
           getNomeItem: (t) => t.nome,
         ),
       ),
@@ -120,6 +139,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   }
 
   Future<void> _salvarAgendamento() async {
+    FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
       try {
@@ -140,9 +160,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           ativo: true,
         );
 
-        final cadastrar =
-            CadastrarAgendamento(AgendamentoRepositorioAdaptativo());
-        await cadastrar.executar(novoAgendamento);
+        await _cadastrarAgendamento.executar(novoAgendamento);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -222,12 +240,19 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
                 maxLines: 3,
               ),
               const SizedBox(height: 32),
-              _carregando
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _salvarAgendamento,
-                      child: const Text('SALVAR'),
-                    ),
+              ElevatedButton(
+                onPressed: _carregando ? null : _salvarAgendamento,
+                child: _carregando
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      )
+                    : const Text('SALVAR'),
+              ),
             ],
           ),
         ),

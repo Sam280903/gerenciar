@@ -45,6 +45,9 @@ class _LoginTelaState extends State<LoginTela>
   }
 
   Future<void> _fazerLogin() async {
+    // Esconde o teclado
+    FocusScope.of(context).unfocus();
+
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() {
@@ -87,7 +90,6 @@ class _LoginTelaState extends State<LoginTela>
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // --- ALTERAÇÃO AQUI ---
                     Image.asset('assets/imagens/logo_gerenciar.png',
                         height: 120),
                     const SizedBox(height: 48),
@@ -120,29 +122,50 @@ class _LoginTelaState extends State<LoginTela>
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () =>
+                        onPressed: _carregando ? null : () =>
                             Navigator.pushNamed(context, Rotas.redefinirSenha),
                         child: const Text('Esqueci a senha'),
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // Mensagem de Erro Aprimorada
                     if (_mensagemErro != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Text(
-                          _mensagemErro!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Colors.redAccent, fontSize: 14),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.redAccent)
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.redAccent),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _mensagemErro!,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 14),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    if (_carregando)
-                      const Center(child: CircularProgressIndicator())
-                    else
-                      ElevatedButton(
-                        onPressed: _fazerLogin,
-                        child: const Text('ENTRAR'),
-                      ),
+                    // Botão com Indicador de Carregamento Interno
+                    ElevatedButton(
+                      onPressed: _carregando ? null : _fazerLogin,
+                      child: _carregando
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.blue,
+                              ),
+                            )
+                          : const Text('ENTRAR'),
+                    ),
                   ],
                 ),
               ),

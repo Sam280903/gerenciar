@@ -1,10 +1,13 @@
 // lib/apresentacao/telas/tecnicos/cadastro_tecnico_tela.dart
 
 import 'package:flutter/material.dart';
-import 'package:gerenciar/servicos/autenticacao_servico.dart'; // Importe o serviço
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 
 class CadastroTecnicoTela extends StatefulWidget {
-  const CadastroTecnicoTela({super.key});
+  // Adicionando o serviço como um parâmetro opcional
+  final AutenticacaoServico? authServico;
+
+  const CadastroTecnicoTela({super.key, this.authServico});
 
   @override
   State<CadastroTecnicoTela> createState() => _CadastroTecnicoTelaState();
@@ -15,26 +18,29 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
   final _telefoneController = TextEditingController();
-  final _senhaController =
-      TextEditingController(); // Novo campo para a senha
+  final _senhaController = TextEditingController();
   bool _carregando = false;
-  final _authServico =
-      AutenticacaoServico(); // Instância do serviço de autenticação
+  late final AutenticacaoServico _authServico;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa a dependência a partir do widget ou cria uma nova instância
+    _authServico = widget.authServico ?? AutenticacaoServico();
+  }
 
   Future<void> _salvarTecnico() async {
+    FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
       try {
-        // --- ALTERAÇÃO PRINCIPAL AQUI ---
-        // Usa o novo método do serviço para criar o usuário e o técnico
         await _authServico.cadastrarTecnico(
           nome: _nomeController.text.trim(),
           email: _emailController.text.trim(),
           senha: _senhaController.text,
           telefone: _telefoneController.text.trim(),
         );
-        // --- FIM DA ALTERAÇÃO ---
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -43,7 +49,7 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
                 backgroundColor: Colors.green),
           );
           Navigator.of(context)
-              .pop(true); // Retorna 'true' para recarregar a lista
+              .pop(true);
         }
       } catch (e) {
         if (mounted) {
@@ -67,7 +73,7 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
     _nomeController.dispose();
     _emailController.dispose();
     _telefoneController.dispose();
-    _senhaController.dispose(); // Dispose do novo controller
+    _senhaController.dispose();
     super.dispose();
   }
 
@@ -106,7 +112,6 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
                     value!.isEmpty ? 'Campo obrigatório' : null,
               ),
               const SizedBox(height: 20),
-              // --- NOVO CAMPO DE SENHA ---
               TextFormField(
                 controller: _senhaController,
                 decoration: const InputDecoration(
@@ -124,7 +129,6 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
                   return null;
                 },
               ),
-              // --- FIM DO NOVO CAMPO ---
               const SizedBox(height: 20),
               TextFormField(
                 controller: _telefoneController,
@@ -135,12 +139,19 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 40),
-              _carregando
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _salvarTecnico,
-                      child: const Text('SALVAR'),
-                    ),
+              ElevatedButton(
+                onPressed: _carregando ? null : _salvarTecnico,
+                child: _carregando
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      )
+                    : const Text('SALVAR'),
+              ),
             ],
           ),
         ),

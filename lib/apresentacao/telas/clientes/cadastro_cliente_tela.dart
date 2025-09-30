@@ -10,7 +10,6 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 
 class CadastroClienteTela extends StatefulWidget {
-  // Adicionando as dependências para injeção
   final CadastrarCliente? cadastrarCliente;
   final http.Client? httpClient;
 
@@ -39,12 +38,11 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
 
   bool _carregando = false;
   bool _buscandoCep = false;
-  bool _isCadastroRapido = true; // Inicia como verdadeiro por padrão
+  bool _isCadastroRapido = true;
 
   @override
   void initState() {
     super.initState();
-    // Inicializa as dependências a partir do widget ou cria novas instâncias
     _cadastrarCliente =
         widget.cadastrarCliente ?? CadastrarCliente(ClienteRepositorioAdaptativo());
     _httpClient = widget.httpClient ?? http.Client();
@@ -53,6 +51,7 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   Future<void> _buscarCep() async {
     final cep = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (cep.length != 8) return;
+    FocusScope.of(context).unfocus();
 
     setState(() => _buscandoCep = true);
     try {
@@ -84,6 +83,7 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   }
 
   Future<void> _salvarCliente() async {
+    FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
@@ -309,11 +309,19 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
               ),
 
               const SizedBox(height: 32),
-              _carregando
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _salvarCliente,
-                      child: const Text('SALVAR CLIENTE')),
+              ElevatedButton(
+                onPressed: _carregando ? null : _salvarCliente,
+                child: _carregando
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      )
+                    : const Text('SALVAR CLIENTE'),
+              ),
             ],
           ),
         ),

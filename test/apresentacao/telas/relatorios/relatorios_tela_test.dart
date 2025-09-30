@@ -38,26 +38,31 @@ void main() {
 
     expect(find.widgetWithText(TextFormField, 'Data Inicial'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Data Final'), findsOneWidget);
-    expect(find.widgetWithText(InputDecorator, 'Todos'), findsNWidgets(2)); // Técnico e Cliente
+    // Os campos de Técnico e Cliente usam InputDecorator com o texto 'Todos'
+    expect(find.widgetWithText(InputDecorator, 'Todos'), findsNWidgets(2)); 
+    // O Dropdown de Status também tem o texto 'Todos' como hint
     expect(find.widgetWithText(DropdownButtonFormField<String>, 'Todos'), findsOneWidget);
     expect(find.text('GERAR RELATÓRIO'), findsOneWidget);
   });
 
-  testWidgets('Deve mostrar o indicador de progresso ao gerar relatório', (WidgetTester tester) async {
-    // ARRANGE
+  testWidgets('Deve mostrar o indicador de progresso e texto "GERANDO..." ao gerar relatório', (WidgetTester tester) async {
+    // ARRANGE: Configura o mock para simular a geração do relatório
     when(mockRelatorioServico.gerarRelatorioOrdensServico(any))
-        .thenAnswer((_) async => []);
+        .thenAnswer((_) async => []); // Retorna uma lista vazia para o teste
 
     await pumpTela(tester);
 
-    // ACT
+    // ACT: Toca no botão para gerar o relatório
     await tester.tap(find.text('GERAR RELATÓRIO'));
-    await tester.pump();
+    await tester.pump(); // Inicia o estado de carregamento
 
     // ASSERT
+    // Verifica se o indicador de progresso está visível dentro do botão
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    // Verifica se o texto do botão mudou para "GERANDO..."
+    expect(find.text('GERANDO...'), findsOneWidget);
     
-    // Verifica se o serviço foi chamado
+    // Verifica se o serviço para gerar o relatório foi chamado
     verify(mockRelatorioServico.gerarRelatorioOrdensServico(any)).called(1);
   });
 }

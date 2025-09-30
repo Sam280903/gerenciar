@@ -5,7 +5,6 @@ import 'package:gerenciar/app/rotas.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
 
 class CadastroGestorTela extends StatefulWidget {
-  // Adicionando o serviço como um parâmetro opcional para injeção.
   final AutenticacaoServico? authServico;
 
   const CadastroGestorTela({super.key, this.authServico});
@@ -20,8 +19,6 @@ class _CadastroGestorTelaState extends State<CadastroGestorTela> {
   final _senhaController = TextEditingController();
   final _confirmarSenhaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  // A dependência será inicializada no initState.
   late final AutenticacaoServico _authServico;
 
   String? _mensagemErro;
@@ -30,11 +27,11 @@ class _CadastroGestorTelaState extends State<CadastroGestorTela> {
   @override
   void initState() {
     super.initState();
-    // Usa o serviço injetado ou cria uma nova instância.
     _authServico = widget.authServico ?? AutenticacaoServico();
   }
 
   Future<void> _cadastrarGestor() async {
+    FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) {
       return;
     }
@@ -51,8 +48,6 @@ class _CadastroGestorTelaState extends State<CadastroGestorTela> {
         senha: _senhaController.text,
       );
       if (mounted) {
-        // Em um teste, a navegação pode não funcionar como esperado,
-        // mas no app real, isso levará para a home.
         Navigator.pushReplacementNamed(context, Rotas.home);
       }
     } catch (e) {
@@ -141,20 +136,41 @@ class _CadastroGestorTelaState extends State<CadastroGestorTela> {
                 ),
                 const SizedBox(height: 32),
                 if (_mensagemErro != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      _mensagemErro!,
-                      style: const TextStyle(color: Colors.redAccent),
-                      textAlign: TextAlign.center,
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                        color: Colors.redAccent.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.redAccent)),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline,
+                            color: Colors.redAccent),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _mensagemErro!,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 14),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                _carregando
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: _cadastrarGestor,
-                        child: const Text('CADASTRAR'),
-                      ),
+                ElevatedButton(
+                  onPressed: _carregando ? null : _cadastrarGestor,
+                  child: _carregando
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.blue,
+                          ),
+                        )
+                      : const Text('CADASTRAR'),
+                ),
               ],
             ),
           ),

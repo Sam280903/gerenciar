@@ -5,6 +5,7 @@ import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptat
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
+import 'package:gerenciar/dominio/casos_uso/agendamento/cadastrar_agendamento.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/cadastrar_ordem_servico.dart';
@@ -47,7 +48,6 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
     _dataController.text = DateFormat('dd/MM/yyyy').format(_dataSelecionada);
   }
 
-  // --- CORREÇÃO AQUI ---
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -56,7 +56,6 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
       _isInit = false;
     }
   }
-  // --- FIM DA CORREÇÃO ---
 
   @override
   void dispose() {
@@ -149,6 +148,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   }
 
   Future<void> _salvarOS() async {
+    FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
@@ -301,10 +301,19 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
                     const TextInputType.numberWithOptions(decimal: true),
               ),
               const SizedBox(height: 32),
-              _carregando
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _salvarOS, child: const Text('SALVAR OS')),
+              ElevatedButton(
+                onPressed: _carregando ? null : _salvarOS,
+                child: _carregando
+                    ? const SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blue,
+                        ),
+                      )
+                    : const Text('SALVAR OS'),
+              ),
             ],
           ),
         ),
