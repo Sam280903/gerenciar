@@ -1,9 +1,33 @@
+// lib/dados/fontes_dados/sqlite/agendamento_sqlite.dart
 import 'package:sqflite/sqflite.dart';
 import 'package:gerenciar/dados/fontes_dados/sqlite/sqlite_conexao.dart';
 import '../../modelos/agendamento_model.dart';
 
 class AgendamentoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
+
+  // Novos métodos para sincronização
+  Future<List<AgendamentoModel>> listarNaoSincronizados() async {
+    final db = await _db;
+    final resultado = await db.query(
+      'agendamentos',
+      where: 'sincronizado = ?',
+      whereArgs: [0],
+    );
+    return resultado
+        .map((linha) => AgendamentoModel.fromMap(linha, linha['id'] as String))
+        .toList();
+  }
+
+  Future<void> marcarComoSincronizado(String id) async {
+    final db = await _db;
+    await db.update(
+      'agendamentos',
+      {'sincronizado': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 
   Future<bool> verificarConflito(String idTecnico, DateTime dataHora) async {
     final db = await _db;
@@ -27,9 +51,10 @@ class AgendamentoSQLite {
 
   Future<void> atualizar(AgendamentoModel agendamento) async {
     final db = await _db;
+    final dados = agendamento.toMapForDb()..['sincronizado'] = 0;
     await db.update(
       'agendamentos',
-      agendamento.toMapForDb(),
+      dados,
       where: 'id = ?',
       whereArgs: [agendamento.id],
     );
@@ -39,7 +64,7 @@ class AgendamentoSQLite {
     final db = await _db;
     await db.update(
       'agendamentos',
-      {'ativo': 0},
+      {'ativo': 0, 'sincronizado': 0},
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -47,7 +72,7 @@ class AgendamentoSQLite {
 
   Future<void> reativar(String id) async {
     final db = await _db;
-    await db.update('agendamentos', {'ativo': 1},
+    await db.update('agendamentos', {'ativo': 1, 'sincronizado': 0},
         where: 'id = ?', whereArgs: [id]);
   }
 

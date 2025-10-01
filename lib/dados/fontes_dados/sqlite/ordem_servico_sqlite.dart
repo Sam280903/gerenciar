@@ -6,6 +6,27 @@ import '../../modelos/ordem_servico_model.dart';
 class OrdemServicoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
+  // Novos métodos para sincronização
+  Future<List<OrdemServicoModel>> listarNaoSincronizados() async {
+    final db = await _db;
+    final resultado = await db.query(
+      'ordens_servico',
+      where: 'sincronizado = ?',
+      whereArgs: [0],
+    );
+    return resultado.map((linha) => OrdemServicoModel.fromDbMap(linha)).toList();
+  }
+
+  Future<void> marcarComoSincronizado(String id) async {
+    final db = await _db;
+    await db.update(
+      'ordens_servico',
+      {'sincronizado': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> reabrir(
       {required String id, required String justificativa}) async {
     final db = await _db;
@@ -14,6 +35,7 @@ class OrdemServicoSQLite {
       {
         'status': 'Reaberto',
         'justificativaReabertura': justificativa,
+        'sincronizado': 0,
       },
       where: 'id = ?',
       whereArgs: [id],
@@ -24,16 +46,17 @@ class OrdemServicoSQLite {
     final db = await _db;
     await db.insert(
       'ordens_servico',
-      os.toMapForDb(), // CORRIGIDO
+      os.toMapForDb(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
   Future<void> atualizar(OrdemServicoModel os) async {
     final db = await _db;
+    final dados = os.toMapForDb()..['sincronizado'] = 0;
     await db.update(
       'ordens_servico',
-      os.toMapForDb(), // CORRIGIDO
+      dados,
       where: 'id = ?',
       whereArgs: [os.id],
     );
@@ -43,7 +66,7 @@ class OrdemServicoSQLite {
     final db = await _db;
     await db.update(
       'ordens_servico',
-      {'ativo': 0},
+      {'ativo': 0, 'sincronizado': 0},
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -57,7 +80,7 @@ class OrdemServicoSQLite {
       whereArgs: [id],
     );
     if (resultado.isNotEmpty) {
-      return OrdemServicoModel.fromDbMap(resultado.first); // CORRIGIDO
+      return OrdemServicoModel.fromDbMap(resultado.first);
     }
     return null;
   }
@@ -70,7 +93,7 @@ class OrdemServicoSQLite {
       whereArgs: [1],
     );
     return resultado
-        .map((linha) => OrdemServicoModel.fromDbMap(linha)) // CORRIGIDO
+        .map((linha) => OrdemServicoModel.fromDbMap(linha))
         .toList();
   }
 }

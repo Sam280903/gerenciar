@@ -6,6 +6,29 @@ import '../../modelos/forma_pagamento_model.dart';
 class FormaPagamentoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
+  // Novos métodos para sincronização
+  Future<List<FormaPagamentoModel>> listarNaoSincronizados() async {
+    final db = await _db;
+    final resultado = await db.query(
+      'formas_pagamento',
+      where: 'sincronizado = ?',
+      whereArgs: [0],
+    );
+    return resultado
+        .map((row) => FormaPagamentoModel.fromMap(row, row['id'] as String))
+        .toList();
+  }
+
+  Future<void> marcarComoSincronizado(String id) async {
+    final db = await _db;
+    await db.update(
+      'formas_pagamento',
+      {'sincronizado': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> adicionar(FormaPagamentoModel forma) async {
     final db = await _db;
     await db.insert('formas_pagamento', forma.toMap(),
@@ -14,19 +37,20 @@ class FormaPagamentoSQLite {
 
   Future<void> atualizar(FormaPagamentoModel forma) async {
     final db = await _db;
-    await db.update('formas_pagamento', forma.toMap(),
+    final dados = forma.toMap()..['sincronizado'] = 0;
+    await db.update('formas_pagamento', dados,
         where: 'id = ?', whereArgs: [forma.id]);
   }
 
   Future<void> inativar(String id) async {
     final db = await _db;
-    await db.update('formas_pagamento', {'ativo': 0},
+    await db.update('formas_pagamento', {'ativo': 0, 'sincronizado': 0},
         where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> reativar(String id) async {
     final db = await _db;
-    await db.update('formas_pagamento', {'ativo': 1},
+    await db.update('formas_pagamento', {'ativo': 1, 'sincronizado': 0},
         where: 'id = ?', whereArgs: [id]);
   }
 

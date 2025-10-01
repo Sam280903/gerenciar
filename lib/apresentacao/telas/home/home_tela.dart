@@ -1,7 +1,7 @@
 // lib/apresentacao/telas/home/home_tela.dart
-
 import 'package:flutter/material.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
+import 'package:gerenciar/servicos/sincronizacao_servico.dart'; // 1. ESTA LINHA FOI ADICIONADA
 import '../../../constantes/cores.dart';
 import '../../../app/rotas.dart';
 import 'dart:ui'; // Para o efeito de vidro
@@ -33,6 +33,9 @@ class _HomeTelaState extends State<HomeTela>
     _authServico = widget.authServico ?? AutenticacaoServico();
 
     _carregarDadosUsuario();
+
+    // 2. ESTA LINHA FOI ADICIONADA para iniciar a sincronização
+    SincronizacaoServico().sincronizarDados();
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800),
