@@ -18,10 +18,12 @@ void main() {
     casoDeUso = CadastrarAgendamento(mockRepositorio);
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final agendamentoExemplo = Agendamento(
     id: 'ag-1',
     idTecnico: 'tec-1',
     idCliente: 'cli-1',
+    idGestor: 'gestor-1', // ADICIONADO
     dataHora: DateTime(2025, 10, 20, 14, 30),
     ativo: true,
   );
@@ -61,7 +63,7 @@ void main() {
       )),
     );
 
-    // Verifica que o método 'adicionar' NUNCA foi chamado //
+    // Verifica que o método 'adicionar' NUNCA foi chamado
     verify(mockRepositorio.verificarDisponibilidade(
         agendamentoExemplo.idTecnico, agendamentoExemplo.dataHora));
     verifyNever(mockRepositorio.adicionar(any));

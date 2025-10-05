@@ -8,7 +8,6 @@ import 'cadastro_tecnico_tela.dart';
 import 'detalhes_tecnico_tela.dart';
 
 class TecnicosTela extends StatefulWidget {
-  // Adicionamos os serviços como parâmetros opcionais para facilitar a injeção nos testes.
   final AutenticacaoServico? authServico;
   final ListarTecnicos? listarTecnicos;
 
@@ -18,7 +17,6 @@ class TecnicosTela extends StatefulWidget {
 }
 
 class _TecnicosTelaState extends State<TecnicosTela> {
-  // As dependências agora são inicializadas a partir dos parâmetros do widget.
   late final ListarTecnicos _listarTecnicos;
   late final AutenticacaoServico _authServico;
 
@@ -30,26 +28,28 @@ class _TecnicosTelaState extends State<TecnicosTela> {
   final _buscaController = TextEditingController();
 
   String _perfilUsuario = "";
+  String? _idGestor; // ADICIONADO
 
   @override
   void initState() {
     super.initState();
-    // Se um serviço foi injetado, use-o. Senão, crie uma nova instância.
     _listarTecnicos =
         widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
     _authServico = widget.authServico ?? AutenticacaoServico();
 
-    _carregarTecnicos();
+    _carregarDadosIniciais(); // MÉTODO ALTERADO
     _buscaController.addListener(_filtrarTecnicos);
-    _carregarPerfilUsuario();
   }
 
-  Future<void> _carregarPerfilUsuario() async {
+  // MÉTODO NOVO (SUBSTITUI O ANTIGO _carregarPerfilUsuario)
+  Future<void> _carregarDadosIniciais() async {
     final dados = await _authServico.buscarDadosUsuarioLogado();
     if (dados != null && mounted) {
       setState(() {
         _perfilUsuario = dados['perfil'] ?? '';
+        _idGestor = dados['idGestor'];
       });
+      _carregarTecnicos(); // Chama o carregamento dos técnicos AQUI
     }
   }
 
@@ -68,8 +68,13 @@ class _TecnicosTelaState extends State<TecnicosTela> {
     });
   }
 
+  // MÉTODO ALTERADO
   void _carregarTecnicos() {
-    final future = _listarTecnicos.executar(incluirInativos: _mostrarInativos);
+    // Garante que só executa se o idGestor já foi carregado
+    if (_idGestor == null) return;
+
+    final future = _listarTecnicos.executar(
+        idGestor: _idGestor!, incluirInativos: _mostrarInativos);
     setState(() {
       _futureTecnicos = future;
     });

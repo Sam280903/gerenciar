@@ -8,6 +8,7 @@ import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'package:gerenciar/dominio/entidades/agendamento_detalhado.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -48,6 +49,10 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   List<AgendamentoDetalhado> _antigosFiltrados = [];
   List<AgendamentoDetalhado> _inativosFiltrados = [];
 
+  // ADICIONADO
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
   bool _carregando = true;
   bool _ordenarCrescente = true;
 
@@ -61,8 +66,19 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     _tecnicoRepo = widget.tecnicoRepo ?? TecnicoRepositorioAdaptativo();
 
     initializeDateFormatting('pt_BR', null);
-    _carregarAgendamentos();
+    _carregarDadosIniciais(); // MÉTODO ALTERADO
     _buscaController.addListener(_filtrarAgendamentos);
+  }
+
+  // NOVO MÉTODO
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+      _carregarAgendamentos();
+    }
   }
 
   @override
@@ -99,9 +115,13 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   }
 
   Future<void> _carregarAgendamentos() async {
+    if (_idGestor == null) return; // Não carrega se não souber o gestor
+
     setState(() => _carregando = true);
+
+    // ALTERADO: Passa o idGestor para o caso de uso
     final agendamentos =
-        await ListarAgendamentos(_agendamentoRepo).executar();
+        await ListarAgendamentos(_agendamentoRepo).executar(idGestor: _idGestor!);
     final hoje = DateUtils.dateOnly(DateTime.now());
     List<AgendamentoDetalhado> proximosTemp = [];
     List<AgendamentoDetalhado> concluidosTemp = [];

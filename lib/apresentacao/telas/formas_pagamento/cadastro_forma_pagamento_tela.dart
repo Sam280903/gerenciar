@@ -4,6 +4,7 @@ import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_rep
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_nome.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/cadastrar_forma_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'package:uuid/uuid.dart';
 
 class CadastroFormaPagamentoTela extends StatefulWidget {
@@ -21,7 +22,35 @@ class _CadastroFormaPagamentoTelaState
   final _descricaoController = TextEditingController();
   bool _carregando = false;
 
+  // ADICIONADO
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDadosIniciais(); // ADICIONADO
+  }
+
+  // NOVO MÉTODO
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+    }
+  }
+
   Future<void> _salvar() async {
+    if (_idGestor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Erro: Gestor não identificado. Tente novamente.'),
+        backgroundColor: Colors.redAccent,
+      ));
+      return;
+    }
+    
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
       final nome = _nomeController.text.trim();
@@ -30,7 +59,7 @@ class _CadastroFormaPagamentoTelaState
       try {
         final buscarPorNome = BuscarFormaPagamentoPorNome(repositorio);
         final existente = await buscarPorNome.executar(nome);
-        if (existente != null) {
+        if (existente != null && existente.idGestor == _idGestor) { // Verifica se já existe para o mesmo gestor
           throw Exception('Já existe uma forma de pagamento com este nome.');
         }
 
@@ -39,6 +68,7 @@ class _CadastroFormaPagamentoTelaState
           nome: nome,
           descricao: _descricaoController.text.trim(),
           ativo: true,
+          idGestor: _idGestor!, // ADICIONADO
         );
         final cadastrar = CadastrarFormaPagamento(repositorio);
         await cadastrar.executar(novaForma);

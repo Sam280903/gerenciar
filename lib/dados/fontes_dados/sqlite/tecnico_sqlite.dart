@@ -6,7 +6,6 @@ import '../../modelos/tecnico_model.dart';
 class TecnicoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
-  // Novos métodos para sincronização
   Future<List<TecnicoModel>> listarNaoSincronizados() async {
     final db = await _db;
     final resultado = await db.query(
@@ -37,7 +36,6 @@ class TecnicoSQLite {
 
   Future<void> atualizarTecnico(TecnicoModel tecnico) async {
     final db = await _db;
-    // Garante que a atualização marque o item para ser sincronizado
     final dados = tecnico.toMap()..['sincronizado'] = 0;
     await db.update('tecnicos', dados,
         where: 'id = ?', whereArgs: [tecnico.id]);
@@ -66,12 +64,22 @@ class TecnicoSQLite {
     return null;
   }
 
-  Future<List<TecnicoModel>> listarTodos({bool incluirInativos = false}) async {
+  // MÉTODO ALTERADO
+  Future<List<TecnicoModel>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
     final db = await _db;
+    String where = 'idGestor = ?';
+    List<dynamic> whereArgs = [idGestor];
+
+    if (!incluirInativos) {
+      where += ' AND ativo = ?';
+      whereArgs.add(1);
+    }
+    
     final resultado = await db.query(
       'tecnicos',
-      where: incluirInativos ? null : 'ativo = ?',
-      whereArgs: incluirInativos ? null : [1],
+      where: where,
+      whereArgs: whereArgs,
     );
     return resultado
         .map((linha) => TecnicoModel.fromMap(linha, linha['id'] as String))

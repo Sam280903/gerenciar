@@ -18,16 +18,15 @@ class SQLiteConexao {
 
     return openDatabase(
       caminhoBanco,
-      version: 2, // ** IMPORTANTE: Incremente a versão do banco **
+      version: 3, // ** IMPORTANTE: Incrementei a versão do banco **
       onCreate: _criarTabelas,
-      onUpgrade: _atualizarTabelas, // ** Adicione o onUpgrade **
+      onUpgrade: _atualizarTabelas,
     );
   }
 
   static Future<void> _atualizarTabelas(
       Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Adiciona a coluna 'sincronizado' se a versão anterior for menor que 2
       await db.execute(
           'ALTER TABLE tecnicos ADD COLUMN sincronizado INTEGER DEFAULT 0');
       await db.execute(
@@ -39,6 +38,14 @@ class SQLiteConexao {
       await db.execute(
           'ALTER TABLE agendamentos ADD COLUMN sincronizado INTEGER DEFAULT 0');
     }
+    // ADICIONADO Bloco para a versão 3
+    if (oldVersion < 3) {
+      await db.execute('ALTER TABLE tecnicos ADD COLUMN idGestor TEXT');
+      await db.execute('ALTER TABLE clientes ADD COLUMN idGestor TEXT');
+      await db.execute('ALTER TABLE formas_pagamento ADD COLUMN idGestor TEXT');
+      await db.execute('ALTER TABLE ordens_servico ADD COLUMN idGestor TEXT');
+      await db.execute('ALTER TABLE agendamentos ADD COLUMN idGestor TEXT');
+    }
   }
 
   static Future<void> _criarTabelas(Database db, int version) async {
@@ -49,7 +56,8 @@ class SQLiteConexao {
         email TEXT,
         telefone TEXT,
         ativo INTEGER,
-        sincronizado INTEGER DEFAULT 0
+        sincronizado INTEGER DEFAULT 0,
+        idGestor TEXT 
       );
     ''');
 
@@ -62,7 +70,8 @@ class SQLiteConexao {
         endereco TEXT,
         cpf TEXT,
         ativo INTEGER,
-        sincronizado INTEGER DEFAULT 0
+        sincronizado INTEGER DEFAULT 0,
+        idGestor TEXT
       );
     ''');
 
@@ -72,7 +81,8 @@ class SQLiteConexao {
         nome TEXT,
         descricao TEXT,
         ativo INTEGER,
-        sincronizado INTEGER DEFAULT 0
+        sincronizado INTEGER DEFAULT 0,
+        idGestor TEXT
       );
     ''');
 
@@ -90,7 +100,8 @@ class SQLiteConexao {
         status TEXT,
         justificativaReabertura TEXT,
         ativo INTEGER,
-        sincronizado INTEGER DEFAULT 0
+        sincronizado INTEGER DEFAULT 0,
+        idGestor TEXT
       );
     ''');
 
@@ -103,7 +114,8 @@ class SQLiteConexao {
         observacao TEXT,
         status TEXT,
         ativo INTEGER,
-        sincronizado INTEGER DEFAULT 0
+        sincronizado INTEGER DEFAULT 0,
+        idGestor TEXT
       );
     ''');
   }

@@ -35,15 +35,18 @@ class OrdemServicoRepositorioImpl implements OrdemServicoRepositorioInterface {
     return model?.toEntidade();
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<OrdemServico>> listarTodos() async {
-    final modelos = await _fonteFirebase.listarTodos();
+  Future<List<OrdemServico>> listarTodos({required String idGestor}) async {
+    final modelos = await _fonteFirebase.listarTodos(idGestor: idGestor);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<OrdemServico>> listarComFiltros(FiltrosRelatorio filtros) async {
-    final modelos = await _fonteFirebase.listarComFiltros(filtros);
+  Future<List<OrdemServico>> listarComFiltros(
+      FiltrosRelatorio filtros, String idGestor) async {
+    final modelos = await _fonteFirebase.listarComFiltros(filtros, idGestor);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

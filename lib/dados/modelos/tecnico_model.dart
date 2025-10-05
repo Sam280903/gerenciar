@@ -7,6 +7,7 @@ class TecnicoModel {
   final String email;
   final String telefone;
   final bool ativo;
+  final String idGestor; // ADICIONADO
 
   TecnicoModel({
     required this.id,
@@ -14,6 +15,7 @@ class TecnicoModel {
     required this.email,
     required this.telefone,
     required this.ativo,
+    required this.idGestor, // ADICIONADO
   });
 
   factory TecnicoModel.fromEntidade(Tecnico tecnico) {
@@ -23,6 +25,7 @@ class TecnicoModel {
       email: tecnico.email,
       telefone: tecnico.telefone,
       ativo: tecnico.ativo,
+      idGestor: tecnico.idGestor, // ADICIONADO
     );
   }
 
@@ -31,19 +34,20 @@ class TecnicoModel {
       id: id,
       nome: map['nome'] ?? '',
       email: map['email'] ?? '',
-      // CORREÇÃO DEFINITIVA DO ERRO:
       telefone: map['telefone']?.toString() ?? '',
       ativo: map['ativo'] is bool ? map['ativo'] : (map['ativo'] == 1),
+      idGestor: map['idGestor'] ?? '', // ADICIONADO
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id, // Importante para o SQLite
+      'id': id,
       'nome': nome,
       'email': email,
       'telefone': telefone,
       'ativo': ativo,
+      'idGestor': idGestor, // ADICIONADO
     };
   }
 
@@ -54,6 +58,7 @@ class TecnicoModel {
       email: email,
       telefone: telefone,
       ativo: ativo,
+      idGestor: idGestor, // ADICIONADO
     );
   }
 }

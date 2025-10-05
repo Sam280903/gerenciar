@@ -44,9 +44,11 @@ class FormaPagamentoFirebase {
     return null;
   }
 
+  // MÉTODO ALTERADO
   Future<List<FormaPagamentoModel>> listarTodos(
-      {bool incluirInativos = false}) async {
-    Query query = _colecao;
+      {required String idGestor, bool incluirInativos = false}) async {
+    Query query = _colecao.where('idGestor', isEqualTo: idGestor);
+
     if (!incluirInativos) {
       query = query.where('ativo', isEqualTo: true);
     }

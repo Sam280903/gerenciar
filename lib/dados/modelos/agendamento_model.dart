@@ -6,6 +6,7 @@ class AgendamentoModel {
   final String id;
   final String idTecnico;
   final String idCliente;
+  final String idGestor; // ADICIONADO
   final DateTime dataHora;
   final String? observacao;
   final String status;
@@ -15,6 +16,7 @@ class AgendamentoModel {
     required this.id,
     required this.idTecnico,
     required this.idCliente,
+    required this.idGestor, // ADICIONADO
     required this.dataHora,
     this.observacao,
     required this.status,
@@ -26,6 +28,7 @@ class AgendamentoModel {
       id: ag.id,
       idTecnico: ag.idTecnico,
       idCliente: ag.idCliente,
+      idGestor: ag.idGestor, // ADICIONADO
       dataHora: ag.dataHora,
       observacao: ag.observacao,
       status: ag.status,
@@ -35,25 +38,23 @@ class AgendamentoModel {
 
   factory AgendamentoModel.fromMap(Map<String, dynamic> map, String id) {
     DateTime parsedDate;
-    // --- CORREÇÃO DEFINITIVA APLICADA AQUI ---
-    // Verifica se o campo 'dataHora' não é nulo antes de tentar processá-lo.
     if (map['dataHora'] != null) {
       if (map['dataHora'] is Timestamp) {
         parsedDate = (map['dataHora'] as Timestamp).toDate();
       } else if (map['dataHora'] is String) {
         parsedDate = DateTime.tryParse(map['dataHora']) ?? DateTime.now();
       } else {
-        parsedDate = DateTime.now(); // Valor padrão em caso de tipo inesperado
+        parsedDate = DateTime.now();
       }
     } else {
-      parsedDate = DateTime.now(); // Valor padrão se o campo for nulo
+      parsedDate = DateTime.now();
     }
-    // --- FIM DA CORREÇÃO ---
 
     return AgendamentoModel(
       id: id,
       idTecnico: map['idTecnico'] ?? '',
       idCliente: map['idCliente'] ?? '',
+      idGestor: map['idGestor'] ?? '', // ADICIONADO
       dataHora: parsedDate,
       observacao: map['observacao'],
       status: map['status'] ?? 'Pendente',
@@ -65,6 +66,7 @@ class AgendamentoModel {
     return {
       'idTecnico': idTecnico,
       'idCliente': idCliente,
+      'idGestor': idGestor, // ADICIONADO
       'dataHora': Timestamp.fromDate(dataHora),
       'observacao': observacao,
       'status': status,
@@ -77,6 +79,7 @@ class AgendamentoModel {
       'id': id,
       'idTecnico': idTecnico,
       'idCliente': idCliente,
+      'idGestor': idGestor, // ADICIONADO
       'dataHora': dataHora.toIso8601String(),
       'observacao': observacao,
       'status': status,
@@ -89,6 +92,7 @@ class AgendamentoModel {
       id: id,
       idTecnico: idTecnico,
       idCliente: idCliente,
+      idGestor: idGestor, // ADICIONADO
       dataHora: dataHora,
       observacao: observacao,
       status: status,

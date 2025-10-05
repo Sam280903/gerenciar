@@ -15,12 +15,14 @@ void main() {
     casoDeUso = AtualizarTecnico(mockRepositorio);
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final tecnico = Tecnico(
     id: 'tec-1',
     nome: 'Flávio',
     email: 'f@teste.com',
     telefone: '123',
     ativo: true,
+    idGestor: 'gestor-1', // ADICIONADO
   );
 
   test('Deve chamar o método ATUALIZAR do repositório', () async {
@@ -30,4 +32,3 @@ void main() {
     verifyNoMoreInteractions(mockRepositorio);
   });
 }
-//

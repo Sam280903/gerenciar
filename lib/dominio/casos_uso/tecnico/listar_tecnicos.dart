@@ -5,7 +5,10 @@ import '../../interfaces/tecnico_repositorio_interface.dart';
 class ListarTecnicos {
   final TecnicoRepositorioInterface repositorio;
   ListarTecnicos(this.repositorio);
-  Future<List<Tecnico>> executar({bool incluirInativos = false}) async {
-    return await repositorio.listarTodos(incluirInativos: incluirInativos);
+
+  Future<List<Tecnico>> executar(
+      {required String idGestor, bool incluirInativos = false}) async {
+    return await repositorio.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
   }
 }

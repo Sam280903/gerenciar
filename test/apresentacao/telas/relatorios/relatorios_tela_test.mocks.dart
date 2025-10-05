@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
 
+import 'package:firebase_auth/firebase_auth.dart' as _i12;
 import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart'
     as _i9;
 import 'package:gerenciar/dominio/casos_uso/tecnico/listar_tecnicos.dart'
@@ -17,6 +18,7 @@ import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart'
     as _i3;
 import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart'
     as _i2;
+import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i11;
 import 'package:gerenciar/servicos/relatorio_servico.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
 
@@ -67,11 +69,16 @@ class MockRelatorioServico extends _i1.Mock implements _i4.RelatorioServico {
 
   @override
   _i5.Future<List<_i6.OrdemServicoDetalhada>> gerarRelatorioOrdensServico(
-          _i4.FiltrosRelatorio? filtros) =>
+    _i4.FiltrosRelatorio? filtros,
+    String? idGestor,
+  ) =>
       (super.noSuchMethod(
         Invocation.method(
           #gerarRelatorioOrdensServico,
-          [filtros],
+          [
+            filtros,
+            idGestor,
+          ],
         ),
         returnValue: _i5.Future<List<_i6.OrdemServicoDetalhada>>.value(
             <_i6.OrdemServicoDetalhada>[]),
@@ -96,12 +103,18 @@ class MockListarTecnicos extends _i1.Mock implements _i7.ListarTecnicos {
       ) as _i2.TecnicoRepositorioInterface);
 
   @override
-  _i5.Future<List<_i8.Tecnico>> executar({bool? incluirInativos = false}) =>
+  _i5.Future<List<_i8.Tecnico>> executar({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #executar,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue: _i5.Future<List<_i8.Tecnico>>.value(<_i8.Tecnico>[]),
       ) as _i5.Future<List<_i8.Tecnico>>);
@@ -125,13 +138,135 @@ class MockListarClientes extends _i1.Mock implements _i9.ListarClientes {
       ) as _i3.ClienteRepositorioInterface);
 
   @override
-  _i5.Future<List<_i10.Cliente>> executar({bool? incluirInativos = false}) =>
+  _i5.Future<List<_i10.Cliente>> executar({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #executar,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue: _i5.Future<List<_i10.Cliente>>.value(<_i10.Cliente>[]),
       ) as _i5.Future<List<_i10.Cliente>>);
+}
+
+/// A class which mocks [AutenticacaoServico].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAutenticacaoServico extends _i1.Mock
+    implements _i11.AutenticacaoServico {
+  MockAutenticacaoServico() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #enviarEmailRedefinicaoSenha,
+          [email],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i12.User?> login(
+    String? email,
+    String? senha,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #login,
+          [
+            email,
+            senha,
+          ],
+        ),
+        returnValue: _i5.Future<_i12.User?>.value(),
+      ) as _i5.Future<_i12.User?>);
+
+  @override
+  _i5.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
+        Invocation.method(
+          #primeiroGestorJaCadastrado,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
+  _i5.Future<_i12.User?> cadastrarPrimeiroGestor({
+    required String? nome,
+    required String? email,
+    required String? senha,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarPrimeiroGestor,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+          },
+        ),
+        returnValue: _i5.Future<_i12.User?>.value(),
+      ) as _i5.Future<_i12.User?>);
+
+  @override
+  _i5.Future<_i12.User?> cadastrarTecnico({
+    required String? nome,
+    required String? email,
+    required String? senha,
+    required String? telefone,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarTecnico,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+            #telefone: telefone,
+          },
+        ),
+        returnValue: _i5.Future<_i12.User?>.value(),
+      ) as _i5.Future<_i12.User?>);
+
+  @override
+  _i5.Future<void> salvarTokenDoDispositivo() => (super.noSuchMethod(
+        Invocation.method(
+          #salvarTokenDoDispositivo,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #buscarDadosUsuarioLogado,
+          [],
+        ),
+        returnValue: _i5.Future<Map<String, dynamic>?>.value(),
+      ) as _i5.Future<Map<String, dynamic>?>);
 }

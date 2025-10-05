@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'cadastro_cliente_tela.dart';
 import 'detalhes_cliente_tela.dart';
 
@@ -20,12 +21,27 @@ class _ClientesTelaState extends State<ClientesTela> {
   List<Cliente> _clientesFiltrados = [];
   final _buscaController = TextEditingController();
 
+  // ADICIONADO
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
   @override
   void initState() {
     super.initState();
     _listarClientes = ListarClientes(ClienteRepositorioAdaptativo());
-    _carregarClientes();
+    _carregarDadosIniciais(); // MÉTODO ALTERADO
     _buscaController.addListener(_filtrarClientes);
+  }
+
+  // NOVO MÉTODO
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+      _carregarClientes();
+    }
   }
 
   @override
@@ -44,10 +60,16 @@ class _ClientesTelaState extends State<ClientesTela> {
   }
 
   void _carregarClientes() {
-    final future = _listarClientes.executar(incluirInativos: _mostrarInativos);
+    if (_idGestor == null) return; // Não carrega se não souber o gestor
+
+    // ALTERADO: Passa o idGestor para o caso de uso
+    final future = _listarClientes.executar(
+        idGestor: _idGestor!, incluirInativos: _mostrarInativos);
+
     setState(() {
       _futureClientes = future;
     });
+
     future.then((lista) {
       if (mounted) {
         setState(() {

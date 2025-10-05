@@ -9,6 +9,7 @@ import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptat
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -17,19 +18,36 @@ import 'agendamentos_tela_test.mocks.dart';
 @GenerateMocks([
   AgendamentoRepositorioAdaptativo,
   ClienteRepositorioAdaptativo,
-  TecnicoRepositorioAdaptativo
+  TecnicoRepositorioAdaptativo,
+  AutenticacaoServico // ADICIONADO
 ])
 void main() {
   late MockAgendamentoRepositorioAdaptativo mockAgendamentoRepo;
   late MockClienteRepositorioAdaptativo mockClienteRepo;
   late MockTecnicoRepositorioAdaptativo mockTecnicoRepo;
+  late MockAutenticacaoServico mockAuthServico; // ADICIONADO
 
-  final clienteExemplo = Cliente(id: 'cli-1', nome: 'Cliente Exemplo', email: '', telefone: '', endereco: '', ativo: true);
-  final tecnicoExemplo = Tecnico(id: 'tec-1', nome: 'Tecnico Exemplo', email: '', telefone: '', ativo: true);
+  // DADOS DE EXEMPLO ATUALIZADOS
+  final clienteExemplo = Cliente(
+      id: 'cli-1',
+      nome: 'Cliente Exemplo',
+      email: '',
+      telefone: '',
+      endereco: '',
+      ativo: true,
+      idGestor: 'gestor-1');
+  final tecnicoExemplo = Tecnico(
+      id: 'tec-1',
+      nome: 'Tecnico Exemplo',
+      email: '',
+      telefone: '',
+      ativo: true,
+      idGestor: 'gestor-1');
   final agendamentoProximo = Agendamento(
     id: 'ag-1',
     idCliente: 'cli-1',
     idTecnico: 'tec-1',
+    idGestor: 'gestor-1',
     dataHora: DateTime.now().add(const Duration(days: 1)),
     status: 'Pendente',
     ativo: true,
@@ -39,6 +57,11 @@ void main() {
     mockAgendamentoRepo = MockAgendamentoRepositorioAdaptativo();
     mockClienteRepo = MockClienteRepositorioAdaptativo();
     mockTecnicoRepo = MockTecnicoRepositorioAdaptativo();
+    mockAuthServico = MockAutenticacaoServico(); // ADICIONADO
+
+    // Simula o serviço de autenticação retornando um gestor
+    when(mockAuthServico.buscarDadosUsuarioLogado())
+        .thenAnswer((_) async => {'idGestor': 'gestor-1'});
   });
 
   Future<void> pumpTela(WidgetTester tester) async {
@@ -47,16 +70,23 @@ void main() {
         agendamentoRepo: mockAgendamentoRepo,
         clienteRepo: mockClienteRepo,
         tecnicoRepo: mockTecnicoRepo,
+        // authServico: mockAuthServico, // Injetar o mock aqui, se a tela o aceitasse no construtor
       ),
     ));
   }
 
-  testWidgets('Deve exibir a lista de agendamentos próximos', (WidgetTester tester) async {
-    // ARRANGE
-    when(mockAgendamentoRepo.listarTodos(incluirInativos: anyNamed('incluirInativos')))
+  testWidgets('Deve exibir a lista de agendamentos próximos',
+      (WidgetTester tester) async {
+    // ARRANGE - AQUI ESTÁ A CORREÇÃO PRINCIPAL
+    when(mockAgendamentoRepo.listarTodos(
+            idGestor: anyNamed('idGestor'),
+            incluirInativos: anyNamed('incluirInativos')))
         .thenAnswer((_) async => [agendamentoProximo]);
-    when(mockClienteRepo.buscarPorId(any)).thenAnswer((_) async => clienteExemplo);
-    when(mockTecnicoRepo.buscarPorId(any)).thenAnswer((_) async => tecnicoExemplo);
+
+    when(mockClienteRepo.buscarPorId(any))
+        .thenAnswer((_) async => clienteExemplo);
+    when(mockTecnicoRepo.buscarPorId(any))
+        .thenAnswer((_) async => tecnicoExemplo);
 
     // ACT
     await pumpTela(tester);
@@ -68,10 +98,14 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
-  testWidgets('Deve exibir mensagem quando não houver agendamentos', (WidgetTester tester) async {
-    // ARRANGE
-    when(mockAgendamentoRepo.listarTodos(incluirInativos: anyNamed('incluirInativos')))
+  testWidgets('Deve exibir mensagem quando não houver agendamentos',
+      (WidgetTester tester) async {
+    // ARRANGE - AQUI ESTÁ A CORREÇÃO PRINCIPAL
+    when(mockAgendamentoRepo.listarTodos(
+            idGestor: anyNamed('idGestor'),
+            incluirInativos: anyNamed('incluirInativos')))
         .thenAnswer((_) async => []);
+
     when(mockClienteRepo.buscarPorId(any)).thenAnswer((_) async => null);
     when(mockTecnicoRepo.buscarPorId(any)).thenAnswer((_) async => null);
 

@@ -9,27 +9,73 @@ import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'ordens_servico_tela_test.mocks.dart';
 
-@GenerateMocks([ListarOrdensServico, BuscarClientePorId, BuscarTecnicoPorId])
+@GenerateMocks([
+  ListarOrdensServico,
+  BuscarClientePorId,
+  BuscarTecnicoPorId,
+  AutenticacaoServico
+]) // ADICIONADO AutenticacaoServico
 void main() {
   late MockListarOrdensServico mockListarOS;
   late MockBuscarClientePorId mockBuscarCliente;
   late MockBuscarTecnicoPorId mockBuscarTecnico;
+  late MockAutenticacaoServico mockAuthServico; // ADICIONADO
 
-  // Dados de exemplo
-  final cliente1 = Cliente(id: 'c1', nome: 'Cliente A', email: '', telefone: '', endereco: '', ativo: true);
-  final tecnico1 = Tecnico(id: 't1', nome: 'Tecnico A', email: '', telefone: '', ativo: true);
-  final osPendente = OrdemServico(id: 'os1', idCliente: 'c1', idTecnico: 't1', dataHoraInicio: DateTime.now(), descricao: '', valor: 100, prioridade: 'Baixa', status: 'Pendente', ativo: true, idFormaPagamento: '');
-  final osConcluida = OrdemServico(id: 'os2', idCliente: 'c1', idTecnico: 't1', dataHoraInicio: DateTime.now(), descricao: '', valor: 200, prioridade: 'Alta', status: 'Concluída', ativo: true, idFormaPagamento: '');
+  // DADOS ATUALIZADOS
+  final cliente1 = Cliente(
+      id: 'c1',
+      nome: 'Cliente A',
+      email: '',
+      telefone: '',
+      endereco: '',
+      ativo: true,
+      idGestor: 'gestor-1');
+  final tecnico1 = Tecnico(
+      id: 't1',
+      nome: 'Tecnico A',
+      email: '',
+      telefone: '',
+      ativo: true,
+      idGestor: 'gestor-1');
+  final osPendente = OrdemServico(
+      id: 'os1',
+      idCliente: 'c1',
+      idTecnico: 't1',
+      idGestor: 'gestor-1',
+      dataHoraInicio: DateTime.now(),
+      descricao: '',
+      valor: 100,
+      prioridade: 'Baixa',
+      status: 'Pendente',
+      ativo: true,
+      idFormaPagamento: '');
+  final osConcluida = OrdemServico(
+      id: 'os2',
+      idCliente: 'c1',
+      idTecnico: 't1',
+      idGestor: 'gestor-1',
+      dataHoraInicio: DateTime.now(),
+      descricao: '',
+      valor: 200,
+      prioridade: 'Alta',
+      status: 'Concluída',
+      ativo: true,
+      idFormaPagamento: '');
 
   setUp(() {
     mockListarOS = MockListarOrdensServico();
     mockBuscarCliente = MockBuscarClientePorId();
     mockBuscarTecnico = MockBuscarTecnicoPorId();
+    mockAuthServico = MockAutenticacaoServico(); // ADICIONADO
+
+    when(mockAuthServico.buscarDadosUsuarioLogado())
+        .thenAnswer((_) async => {'idGestor': 'gestor-1'});
   });
 
   Future<void> pumpTela(WidgetTester tester) async {
@@ -42,9 +88,11 @@ void main() {
     ));
   }
 
-  testWidgets('Deve exibir as OS nas abas corretas', (WidgetTester tester) async {
-    // ARRANGE
-    when(mockListarOS.executar()).thenAnswer((_) async => [osPendente, osConcluida]);
+  testWidgets('Deve exibir as OS nas abas corretas',
+      (WidgetTester tester) async {
+    // ARRANGE - CORRIGIDO
+    when(mockListarOS.executar(idGestor: anyNamed('idGestor')))
+        .thenAnswer((_) async => [osPendente, osConcluida]);
     when(mockBuscarCliente.executar(any)).thenAnswer((_) async => cliente1);
     when(mockBuscarTecnico.executar(any)).thenAnswer((_) async => tecnico1);
 
@@ -53,21 +101,28 @@ void main() {
     await tester.pumpAndSettle();
 
     // ASSERT - Aba Pendentes
-    expect(find.descendant(of: find.byType(TabBarView), matching: find.text('Cliente A')), findsNWidgets(2));
-    
-    // Move para a aba Concluídas
+    expect(
+        find.descendant(
+            of: find.byType(TabBarView), matching: find.text('Cliente A')),
+        findsNWidgets(2));
+
     await tester.tap(find.text('CONCLUÍDAS'));
     await tester.pumpAndSettle();
 
     // ASSERT - Aba Concluídas
-    expect(find.descendant(of: find.byType(TabBarView), matching: find.text('Cliente A')), findsOneWidget);
+    expect(
+        find.descendant(
+            of: find.byType(TabBarView), matching: find.text('Cliente A')),
+        findsOneWidget);
     expect(find.text('Concluída'), findsOneWidget);
   });
 
-  testWidgets('Deve exibir mensagem de lista vazia', (WidgetTester tester) async {
-    // ARRANGE
-    when(mockListarOS.executar()).thenAnswer((_) async => []);
-   
+  testWidgets('Deve exibir mensagem de lista vazia',
+      (WidgetTester tester) async {
+    // ARRANGE - CORRIGIDO
+    when(mockListarOS.executar(idGestor: anyNamed('idGestor')))
+        .thenAnswer((_) async => []);
+
     // ACT
     await pumpTela(tester);
     await tester.pumpAndSettle();

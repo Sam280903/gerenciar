@@ -8,11 +8,11 @@ import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/listar_tecnicos.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:gerenciar/servicos/relatorio_servico.dart';
 import 'package:intl/intl.dart';
 
 class RelatoriosTela extends StatefulWidget {
-  // Adicionando as dependências para injeção
   final RelatorioServico? relatorioServico;
   final ListarTecnicos? listarTecnicos;
   final ListarClientes? listarClientes;
@@ -38,20 +38,30 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
   final _dataInicialController = TextEditingController();
   final _dataFinalController = TextEditingController();
 
-  // Declarando as dependências
   late final RelatorioServico _relatorioServico;
   late final ListarTecnicos _listarTecnicos;
   late final ListarClientes _listarClientes;
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
 
   @override
   void initState() {
     super.initState();
-    // Inicializando as dependências a partir do widget ou criando novas instâncias
     _relatorioServico = widget.relatorioServico ?? RelatorioServico();
     _listarTecnicos =
         widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
     _listarClientes =
         widget.listarClientes ?? ListarClientes(ClienteRepositorioAdaptativo());
+    _carregarDadosIniciais();
+  }
+
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+    }
   }
 
   @override
@@ -83,6 +93,13 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
   }
 
   Future<void> _gerarRelatorio() async {
+    if (_idGestor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Não foi possível identificar o gestor.'),
+        backgroundColor: Colors.redAccent,
+      ));
+      return;
+    }
     setState(() => _carregando = true);
     FocusScope.of(context).unfocus();
 
@@ -95,8 +112,9 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
     );
 
     try {
-      final resultado =
-          await _relatorioServico.gerarRelatorioOrdensServico(filtros);
+      // AQUI ESTÁ A CORREÇÃO
+      final resultado = await _relatorioServico.gerarRelatorioOrdensServico(
+          filtros, _idGestor!);
 
       if (mounted) {
         Navigator.push(
@@ -113,7 +131,8 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao gerar relatório: ${e.toString().replaceFirst("Exception: ", "")}'),
+            content: Text(
+                'Erro ao gerar relatório: ${e.toString().replaceFirst("Exception: ", "")}'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -141,8 +160,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
-
-            // Filtros de Data
             Row(
               children: [
                 Expanded(
@@ -166,16 +183,16 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ],
             ),
             const SizedBox(height: 16),
-
-            // Filtro de Técnico
             InkWell(
               onTap: () async {
+                if (_idGestor == null) return;
                 final tecnico = await Navigator.push<Tecnico>(
                     context,
                     MaterialPageRoute(
                         builder: (_) => TelaBusca<Tecnico>(
                             titulo: 'Selecionar Técnico',
-                            futureItens: _listarTecnicos.executar(),
+                            futureItens:
+                                _listarTecnicos.executar(idGestor: _idGestor!),
                             getNomeItem: (t) => t.nome)));
                 if (tecnico != null) {
                   setState(() => _tecnicoSelecionado = tecnico);
@@ -188,16 +205,16 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Filtro de Cliente
             InkWell(
               onTap: () async {
+                if (_idGestor == null) return;
                 final cliente = await Navigator.push<Cliente>(
                     context,
                     MaterialPageRoute(
                         builder: (_) => TelaBusca<Cliente>(
                             titulo: 'Selecionar Cliente',
-                            futureItens: _listarClientes.executar(),
+                            futureItens:
+                                _listarClientes.executar(idGestor: _idGestor!),
                             getNomeItem: (c) => c.nome)));
                 if (cliente != null) {
                   setState(() => _clienteSelecionado = cliente);
@@ -210,8 +227,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Filtro de Status
             DropdownButtonFormField<String>(
               value: _statusSelecionado,
               hint: const Text('Todos'),
@@ -227,8 +242,6 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               },
             ),
             const SizedBox(height: 40),
-
-            // Botão
             ElevatedButton.icon(
               onPressed: _carregando ? null : _gerarRelatorio,
               icon: _carregando

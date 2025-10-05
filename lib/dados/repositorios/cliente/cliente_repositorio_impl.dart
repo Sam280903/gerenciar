@@ -24,7 +24,6 @@ class ClienteRepositorioImpl implements ClienteRepositorioInterface {
     await _fonteFirebase.inativarCliente(id);
   }
 
-  // CORREÇÃO: Implementação do método 'reativar'
   @override
   Future<void> reativar(String id) async {
     await _fonteFirebase.reativarCliente(id);
@@ -36,11 +35,12 @@ class ClienteRepositorioImpl implements ClienteRepositorioInterface {
     return model?.toEntidade();
   }
 
-  // CORREÇÃO: Assinatura do método 'listarTodos' corrigida
+  // MÉTODO ALTERADO
   @override
-  Future<List<Cliente>> listarTodos({bool incluirInativos = false}) async {
-    final modelos =
-        await _fonteFirebase.listarTodos(incluirInativos: incluirInativos);
+  Future<List<Cliente>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
+    final modelos = await _fonteFirebase.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

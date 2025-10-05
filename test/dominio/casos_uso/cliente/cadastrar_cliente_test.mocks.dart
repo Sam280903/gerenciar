@@ -84,12 +84,18 @@ class MockClienteRepositorioInterface extends _i1.Mock
       ) as _i3.Future<_i4.Cliente?>);
 
   @override
-  _i3.Future<List<_i4.Cliente>> listarTodos({bool? incluirInativos = false}) =>
+  _i3.Future<List<_i4.Cliente>> listarTodos({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue: _i3.Future<List<_i4.Cliente>>.value(<_i4.Cliente>[]),
       ) as _i3.Future<List<_i4.Cliente>>);

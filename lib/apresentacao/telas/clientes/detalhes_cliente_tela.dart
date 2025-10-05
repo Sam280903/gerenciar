@@ -24,7 +24,6 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
     _clienteAtual = widget.cliente;
   }
 
-  // --- CORREÇÃO DEFINITIVA DA URL AQUI ---
   Future<void> _abrirMapa(String endereco) async {
     if (endereco.isEmpty) {
       if (!mounted) return;
@@ -35,11 +34,9 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
       );
       return;
     }
-    // --- CORREÇÃO APLICADA AQUI ---
     final query = Uri.encodeComponent(endereco);
     final uri =
         Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
-    // --- FIM DA CORREÇÃO ---
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -53,7 +50,6 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
       }
     }
   }
-  // --- FIM DA CORREÇÃO ---
 
   Future<void> _toggleAtivo() async {
     final bool vaiInativar = _clienteAtual.ativo;

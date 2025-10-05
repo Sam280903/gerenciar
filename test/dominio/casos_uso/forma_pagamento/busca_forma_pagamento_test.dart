@@ -1,4 +1,4 @@
-// test/dominio/casos_uso/forma_pagamento/busca_forma_pagamento_test.dart//
+// test/dominio/casos_uso/forma_pagamento/busca_forma_pagamento_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_id.dart';
@@ -15,7 +15,9 @@ void main() {
     mockRepositorio = MockFormaPagamentoRepositorioInterface();
   });
 
-  final formaPagamento = FormaPagamento(id: 'fp-1', nome: 'PIX', ativo: true);
+  // AQUI ESTÁ A CORREÇÃO
+  final formaPagamento = FormaPagamento(
+      id: 'fp-1', nome: 'PIX', ativo: true, idGestor: 'gestor-1');
 
   group('Busca de Formas de Pagamento', () {
     test('Deve retornar uma forma de pagamento ao buscar por ID', () async {
@@ -37,10 +39,14 @@ void main() {
     test('Deve retornar uma LISTA de formas de pagamento', () async {
       final casoDeUso = ListarFormasPagamento(mockRepositorio);
       final lista = [formaPagamento];
+      // CORRIGIDO
       when(mockRepositorio.listarTodos(
+              idGestor: anyNamed('idGestor'),
               incluirInativos: anyNamed('incluirInativos')))
           .thenAnswer((_) async => lista);
-      final resultado = await casoDeUso.executar();
+
+      // CORRIGIDO
+      final resultado = await casoDeUso.executar(idGestor: 'gestor-1');
       expect(resultado, lista);
     });
   });

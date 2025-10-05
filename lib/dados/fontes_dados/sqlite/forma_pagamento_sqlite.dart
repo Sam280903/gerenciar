@@ -6,7 +6,6 @@ import '../../modelos/forma_pagamento_model.dart';
 class FormaPagamentoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
-  // Novos métodos para sincronização
   Future<List<FormaPagamentoModel>> listarNaoSincronizados() async {
     final db = await _db;
     final resultado = await db.query(
@@ -76,13 +75,22 @@ class FormaPagamentoSQLite {
     return null;
   }
 
+  // MÉTODO ALTERADO
   Future<List<FormaPagamentoModel>> listarTodos(
-      {bool incluirInativos = false}) async {
+      {required String idGestor, bool incluirInativos = false}) async {
     final db = await _db;
+    String where = 'idGestor = ?';
+    List<dynamic> whereArgs = [idGestor];
+
+    if (!incluirInativos) {
+      where += ' AND ativo = ?';
+      whereArgs.add(1);
+    }
+
     final resultado = await db.query(
       'formas_pagamento',
-      where: incluirInativos ? null : 'ativo = ?',
-      whereArgs: incluirInativos ? null : [1],
+      where: where,
+      whereArgs: whereArgs,
     );
     return resultado
         .map((row) => FormaPagamentoModel.fromMap(row, row['id'] as String))

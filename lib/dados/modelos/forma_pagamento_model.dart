@@ -6,12 +6,14 @@ class FormaPagamentoModel {
   final String nome;
   final String? descricao;
   final bool ativo;
+  final String idGestor; // ADICIONADO
 
   FormaPagamentoModel({
     required this.id,
     required this.nome,
     this.descricao,
     required this.ativo,
+    required this.idGestor, // ADICIONADO
   });
 
   factory FormaPagamentoModel.fromEntidade(FormaPagamento entidade) {
@@ -20,6 +22,7 @@ class FormaPagamentoModel {
       nome: entidade.nome,
       descricao: entidade.descricao,
       ativo: entidade.ativo,
+      idGestor: entidade.idGestor, // ADICIONADO
     );
   }
 
@@ -29,6 +32,7 @@ class FormaPagamentoModel {
       nome: map['nome'] ?? '',
       descricao: map['descricao'],
       ativo: map['ativo'] is bool ? map['ativo'] : (map['ativo'] == 1),
+      idGestor: map['idGestor'] ?? '', // ADICIONADO
     );
   }
 
@@ -38,6 +42,7 @@ class FormaPagamentoModel {
       'nome': nome,
       'descricao': descricao,
       'ativo': ativo,
+      'idGestor': idGestor, // ADICIONADO
     };
   }
 
@@ -47,6 +52,7 @@ class FormaPagamentoModel {
       nome: nome,
       descricao: descricao,
       ativo: ativo,
+      idGestor: idGestor, // ADICIONADO
     );
   }
 }

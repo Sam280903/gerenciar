@@ -119,6 +119,7 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
         email: _emailController.text.trim(),
         endereco: enderecoCompleto,
         ativo: widget.cliente.ativo,
+        idGestor: widget.cliente.idGestor, // ADICIONADO (ESSENCIAL)
       );
       final atualizarCliente = AtualizarCliente(ClienteRepositorioAdaptativo());
       try {

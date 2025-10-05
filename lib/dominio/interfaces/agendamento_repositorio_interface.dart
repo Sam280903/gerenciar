@@ -7,5 +7,7 @@ abstract class AgendamentoRepositorioInterface {
   Future<void> inativar(String id);
   Future<void> reativar(String id);
   Future<Agendamento?> buscarPorId(String id);
-  Future<List<Agendamento>> listarTodos({bool incluirInativos = false});
+  // MÉTODO ALTERADO
+  Future<List<Agendamento>> listarTodos(
+      {required String idGestor, bool incluirInativos = false});
 }

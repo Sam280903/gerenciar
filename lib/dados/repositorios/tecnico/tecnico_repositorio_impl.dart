@@ -25,7 +25,6 @@ class TecnicoRepositorioImpl implements TecnicoRepositorioInterface {
     await _fonteFirebase.inativarTecnico(id);
   }
 
-  // CORREÇÃO: Implementação do método 'reativar'
   @override
   Future<void> reativar(String id) async {
     await _fonteFirebase.reativarTecnico(id);
@@ -37,11 +36,12 @@ class TecnicoRepositorioImpl implements TecnicoRepositorioInterface {
     return model?.toEntidade();
   }
 
-  // CORREÇÃO: Assinatura do método 'listarTodos' corrigida
+  // MÉTODO ALTERADO
   @override
-  Future<List<Tecnico>> listarTodos({bool incluirInativos = false}) async {
-    final modelos =
-        await _fonteFirebase.listarTodos(incluirInativos: incluirInativos);
+  Future<List<Tecnico>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
+    final modelos = await _fonteFirebase.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

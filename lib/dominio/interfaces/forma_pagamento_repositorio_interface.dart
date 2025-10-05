@@ -8,5 +8,7 @@ abstract class FormaPagamentoRepositorioInterface {
   Future<void> reativar(String id);
   Future<FormaPagamento?> buscarPorId(String id);
   Future<FormaPagamento?> buscarPorNome(String nome);
-  Future<List<FormaPagamento>> listarTodos({bool incluirInativos = false});
+  // MÉTODO ALTERADO
+  Future<List<FormaPagamento>> listarTodos(
+      {required String idGestor, bool incluirInativos = false});
 }

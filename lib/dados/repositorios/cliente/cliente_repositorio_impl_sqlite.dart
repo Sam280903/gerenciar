@@ -24,7 +24,6 @@ class ClienteRepositorioImplSQLite implements ClienteRepositorioInterface {
     await _fonteSQLite.inativarCliente(id);
   }
 
-  // CORREÇÃO: Implementação do método 'reativar'
   @override
   Future<void> reativar(String id) async {
     await _fonteSQLite.reativarCliente(id);
@@ -36,11 +35,12 @@ class ClienteRepositorioImplSQLite implements ClienteRepositorioInterface {
     return model?.toEntidade();
   }
 
-  // CORREÇÃO: Assinatura do método 'listarTodos' corrigida
+  // MÉTODO ALTERADO
   @override
-  Future<List<Cliente>> listarTodos({bool incluirInativos = false}) async {
-    final modelos =
-        await _fonteSQLite.listarTodos(incluirInativos: incluirInativos);
+  Future<List<Cliente>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
+    final modelos = await _fonteSQLite.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

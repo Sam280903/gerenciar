@@ -5,8 +5,9 @@ abstract class TecnicoRepositorioInterface {
   Future<void> adicionar(Tecnico tecnico);
   Future<void> atualizar(Tecnico tecnico);
   Future<void> inativar(String id);
-  Future<void> reativar(String id); // Novo método
+  Future<void> reativar(String id);
   Future<Tecnico?> buscarPorId(String id);
-  // Parâmetro para incluir inativos na busca
-  Future<List<Tecnico>> listarTodos({bool incluirInativos = false});
+  // MÉTODO ALTERADO
+  Future<List<Tecnico>> listarTodos(
+      {required String idGestor, bool incluirInativos = false});
 }

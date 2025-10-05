@@ -21,32 +21,28 @@ void main() {
     casoDeUso = CadastrarTecnico(mockRepositorio);
   });
 
-  // Criação de um técnico de exemplo para os testes
+  // AQUI ESTÁ A CORREÇÃO
   final tecnicoExemplo = Tecnico(
     id: '1',
     nome: 'Flávio Amorim',
     email: 'flavio@teste.com',
     telefone: '64999999999',
     ativo: true,
+    idGestor: 'gestor-1', // ADICIONADO
   );
 
   test('Deve chamar o método adicionar do repositório ao cadastrar um técnico',
       () async {
     // 2. Ação (Act)
-    // Configura o mock para não fazer nada quando 'adicionar' for chamado.
-    // Usamos `thenAnswer` para simular uma ação assíncrona bem-sucedida.
     when(mockRepositorio.adicionar(any)).thenAnswer((_) async => {});
 
-    // Executa o caso de uso
     await casoDeUso.executar(tecnicoExemplo);
 
     // 3. Verificação (Assert)
-    // Verifica se o método 'adicionar' do mock foi chamado exatamente uma vez
-    // com o técnico que criamos.
     verify(mockRepositorio.adicionar(tecnicoExemplo));
     verifyNoMoreInteractions(
       mockRepositorio,
-    ); // Garante que mais nada foi chamado
+    );
   });
 
   test('Deve lançar uma exceção se o nome do técnico estiver vazio', () async {
@@ -57,10 +53,9 @@ void main() {
       email: 'email@valido.com',
       telefone: '12345',
       ativo: true,
+      idGestor: 'gestor-1', // ADICIONADO
     );
 
-    // Verifica se a execução do caso de uso com dados inválidos
-    // lança (throws) uma Exceção.//
     expect(
       () => casoDeUso.executar(tecnicoInvalido),
       throwsA(isA<Exception>()),

@@ -9,7 +9,6 @@ class AutenticacaoServico {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
-  // NOVO MÉTODO ADICIONADO
   Future<void> enviarEmailRedefinicaoSenha(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -29,10 +28,8 @@ class AutenticacaoServico {
         password: senha,
       );
       
-      // *** MUDANÇA ADICIONADA AQUI ***
       if (credenciais.user != null) {
-        // Agora, sempre que o login for bem-sucedido...
-        await salvarTokenDoDispositivo(); // ...o token do dispositivo é salvo no Firebase.
+        await salvarTokenDoDispositivo();
       }
       
       return credenciais.user;
@@ -76,13 +73,13 @@ class AutenticacaoServico {
     }
   }
 
+  // MÉTODO ALTERADO
   Future<User?> cadastrarPrimeiroGestor({
     required String nome,
     required String email,
     required String senha,
   }) async {
     try {
-      // 1. Cria o usuário no Firebase Authentication
       final credenciais = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: senha,
@@ -90,23 +87,25 @@ class AutenticacaoServico {
       final usuario = credenciais.user;
 
       if (usuario != null) {
-        // 2. Cria o documento na coleção 'usuarios'
+        // O idGestor de um gestor é o seu próprio ID de usuário
+        final idGestor = usuario.uid;
+
         await _firestore.collection('usuarios').doc(usuario.uid).set({
           'nome': nome,
           'email': email,
           'perfil': 'gestor',
           'ativo': true,
+          'idGestor': idGestor, // ADICIONADO
         });
 
-        // 3. Cria o documento correspondente na coleção 'gestores'
         await _firestore.collection('gestores').doc(usuario.uid).set({
           'nome': nome,
           'email': email,
-          'idUsuario': usuario.uid, // Vincula ao usuário
+          'idUsuario': usuario.uid,
           'ativo': true,
+          'idGestor': idGestor, // ADICIONADO
         });
 
-        // 4. Atualiza a configuração do sistema
         await _firestore.collection('configuracao').doc('sistema').set({
           'primeiroGestorCadastrado': true,
         });
@@ -123,7 +122,7 @@ class AutenticacaoServico {
     }
   }
 
-  //MÉTODO PARA CADASTRAR TÉCNICO ---
+  // MÉTODO ALTERADO
   Future<User?> cadastrarTecnico({
     required String nome,
     required String email,
@@ -131,7 +130,12 @@ class AutenticacaoServico {
     required String telefone,
   }) async {
     try {
-      // Cria um usuário temporário para o técnico
+      // Pega o ID do gestor que está logado no momento
+      final idGestor = _auth.currentUser?.uid;
+      if (idGestor == null) {
+        throw Exception("Nenhum gestor logado para cadastrar o técnico.");
+      }
+
       final credenciais = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: senha,
@@ -139,21 +143,21 @@ class AutenticacaoServico {
       final usuario = credenciais.user;
 
       if (usuario != null) {
-        // Adiciona na coleção 'usuarios'
         await _firestore.collection('usuarios').doc(usuario.uid).set({
           'nome': nome,
           'email': email,
           'perfil': 'tecnico',
           'ativo': true,
+          'idGestor': idGestor, // ADICIONADO
         });
 
-        // Adiciona na coleção 'tecnicos'
         await _firestore.collection('tecnicos').doc(usuario.uid).set({
           'id': usuario.uid,
           'nome': nome,
           'email': email,
           'telefone': telefone,
           'ativo': true,
+          'idGestor': idGestor, // ADICIONADO
         });
       }
       return usuario;

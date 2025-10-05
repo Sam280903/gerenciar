@@ -5,7 +5,6 @@ import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptat
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
-import 'package:gerenciar/dominio/casos_uso/agendamento/cadastrar_agendamento.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/cadastrar_ordem_servico.dart';
@@ -16,6 +15,7 @@ import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
 import 'package:gerenciar/apresentacao/widgets/_tela_busca.dart';
 import 'package:gerenciar/apresentacao/widgets/_widget_selecao.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -42,10 +42,25 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   bool _carregando = false;
   bool _isInit = true;
 
+  // ADICIONADO
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
   @override
   void initState() {
     super.initState();
     _dataController.text = DateFormat('dd/MM/yyyy').format(_dataSelecionada);
+    _carregarDadosIniciais(); // ADICIONADO
+  }
+
+  // NOVO MÉTODO
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+    }
   }
 
   @override
@@ -67,13 +82,14 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   }
 
   Future<void> _abrirBuscaCliente() async {
+    if (_idGestor == null) return;
     final cliente = await Navigator.push<Cliente>(
       context,
       MaterialPageRoute(
         builder: (_) => TelaBusca<Cliente>(
           titulo: 'Selecionar Cliente',
-          futureItens:
-              ListarClientes(ClienteRepositorioAdaptativo()).executar(),
+          futureItens: ListarClientes(ClienteRepositorioAdaptativo())
+              .executar(idGestor: _idGestor!),
           getNomeItem: (cliente) => cliente.nome,
         ),
       ),
@@ -84,13 +100,14 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   }
 
   Future<void> _abrirBuscaTecnico() async {
+    if (_idGestor == null) return;
     final tecnico = await Navigator.push<Tecnico>(
       context,
       MaterialPageRoute(
         builder: (_) => TelaBusca<Tecnico>(
           titulo: 'Selecionar Técnico',
-          futureItens:
-              ListarTecnicos(TecnicoRepositorioAdaptativo()).executar(),
+          futureItens: ListarTecnicos(TecnicoRepositorioAdaptativo())
+              .executar(idGestor: _idGestor!),
           getNomeItem: (tecnico) => tecnico.nome,
         ),
       ),
@@ -101,6 +118,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   }
 
   Future<void> _abrirBuscaFormaPagamento() async {
+    if (_idGestor == null) return;
     final forma = await Navigator.push<FormaPagamento>(
       context,
       MaterialPageRoute(
@@ -108,7 +126,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
           titulo: 'Selecionar Forma de Pagamento',
           futureItens:
               ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo())
-                  .executar(),
+                  .executar(idGestor: _idGestor!),
           getNomeItem: (forma) => forma.nome,
         ),
       ),
@@ -148,6 +166,14 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   }
 
   Future<void> _salvarOS() async {
+    if (_idGestor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Erro: Gestor não identificado. Tente novamente.'),
+        backgroundColor: Colors.redAccent,
+      ));
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
@@ -180,6 +206,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
         idCliente: _clienteSelecionado!.id,
         idTecnico: _tecnicoSelecionado!.id,
         idFormaPagamento: _formaPagamentoSelecionada!.id,
+        idGestor: _idGestor!,
         dataHoraInicio: dataHoraCompleta,
         descricao: _descricaoController.text,
         valor:

@@ -86,6 +86,7 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
           id: widget.agendamento.id,
           idCliente: widget.agendamento.idCliente,
           idTecnico: widget.agendamento.idTecnico,
+          idGestor: widget.agendamento.idGestor, // ADICIONADO (ESSENCIAL)
           dataHora: dataHoraAgendamento,
           observacao: _obsController.text.trim(),
           status: widget.agendamento.status,

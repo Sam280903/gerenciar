@@ -7,6 +7,7 @@ class OrdemServicoModel {
   final String idTecnico;
   final String idCliente;
   final String idFormaPagamento;
+  final String idGestor; // ADICIONADO
   final DateTime dataHoraInicio;
   final DateTime? dataHoraFim;
   final String descricao;
@@ -21,6 +22,7 @@ class OrdemServicoModel {
     required this.idTecnico,
     required this.idCliente,
     required this.idFormaPagamento,
+    required this.idGestor, // ADICIONADO
     required this.dataHoraInicio,
     this.dataHoraFim,
     required this.descricao,
@@ -37,6 +39,7 @@ class OrdemServicoModel {
       idTecnico: os.idTecnico,
       idCliente: os.idCliente,
       idFormaPagamento: os.idFormaPagamento,
+      idGestor: os.idGestor, // ADICIONADO
       dataHoraInicio: os.dataHoraInicio,
       dataHoraFim: os.dataHoraFim,
       descricao: os.descricao,
@@ -48,13 +51,13 @@ class OrdemServicoModel {
     );
   }
 
-  // Construtor para dados vindos do Firebase
   factory OrdemServicoModel.fromMap(Map<String, dynamic> map, String id) {
     return OrdemServicoModel(
       id: id,
       idTecnico: map['idTecnico'] ?? '',
       idCliente: map['idCliente'] ?? '',
       idFormaPagamento: map['idFormaPagamento'] ?? '',
+      idGestor: map['idGestor'] ?? '', // ADICIONADO
       dataHoraInicio: (map['dataHoraInicio'] as Timestamp).toDate(),
       dataHoraFim: map['dataHoraFim'] != null
           ? (map['dataHoraFim'] as Timestamp).toDate()
@@ -68,13 +71,13 @@ class OrdemServicoModel {
     );
   }
 
-  // NOVO CONSTRUTOR: Para dados vindos do SQLite
   factory OrdemServicoModel.fromDbMap(Map<String, dynamic> map) {
     return OrdemServicoModel(
       id: map['id'],
       idTecnico: map['idTecnico'],
       idCliente: map['idCliente'],
       idFormaPagamento: map['idFormaPagamento'],
+      idGestor: map['idGestor'], // ADICIONADO
       dataHoraInicio: DateTime.parse(map['dataHoraInicio']),
       dataHoraFim: map['dataHoraFim'] != null
           ? DateTime.parse(map['dataHoraFim'])
@@ -88,12 +91,12 @@ class OrdemServicoModel {
     );
   }
 
-  // Método para salvar no Firebase
   Map<String, dynamic> toMap() {
     return {
       'idTecnico': idTecnico,
       'idCliente': idCliente,
       'idFormaPagamento': idFormaPagamento,
+      'idGestor': idGestor, // ADICIONADO
       'dataHoraInicio': Timestamp.fromDate(dataHoraInicio),
       'dataHoraFim':
           dataHoraFim != null ? Timestamp.fromDate(dataHoraFim!) : null,
@@ -106,13 +109,13 @@ class OrdemServicoModel {
     };
   }
 
-  // NOVO MÉTODO: Para salvar no SQLite
   Map<String, dynamic> toMapForDb() {
     return {
       'id': id,
       'idTecnico': idTecnico,
       'idCliente': idCliente,
       'idFormaPagamento': idFormaPagamento,
+      'idGestor': idGestor, // ADICIONADO
       'dataHoraInicio': dataHoraInicio.toIso8601String(),
       'dataHoraFim': dataHoraFim?.toIso8601String(),
       'descricao': descricao,
@@ -130,6 +133,7 @@ class OrdemServicoModel {
       idTecnico: idTecnico,
       idCliente: idCliente,
       idFormaPagamento: idFormaPagamento,
+      idGestor: idGestor, // ADICIONADO
       dataHoraInicio: dataHoraInicio,
       dataHoraFim: dataHoraFim,
       descricao: descricao,

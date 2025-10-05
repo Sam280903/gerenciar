@@ -6,7 +6,6 @@ import '../../modelos/cliente_model.dart';
 class ClienteSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
-  // Novos métodos para sincronização
   Future<List<ClienteModel>> listarNaoSincronizados() async {
     final db = await _db;
     final resultado = await db.query(
@@ -33,7 +32,7 @@ class ClienteSQLite {
     final db = await _db;
     await db.insert(
       'clientes',
-      cliente.toMap(), // O toMap já deve incluir o campo 'sincronizado'
+      cliente.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -42,7 +41,7 @@ class ClienteSQLite {
     final db = await _db;
     await db.update(
       'clientes',
-       cliente.toMap(), // Atualiza marcando como não sincronizado
+       cliente.toMap(),
       where: 'id = ?',
       whereArgs: [cliente.id],
     );
@@ -52,7 +51,7 @@ class ClienteSQLite {
     final db = await _db;
     await db.update(
       'clientes',
-      {'ativo': 0, 'sincronizado': 0}, // Marca para sincronizar
+      {'ativo': 0, 'sincronizado': 0},
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -62,7 +61,7 @@ class ClienteSQLite {
     final db = await _db;
     await db.update(
       'clientes',
-      {'ativo': 1, 'sincronizado': 0}, // Marca para sincronizar
+      {'ativo': 1, 'sincronizado': 0},
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -84,12 +83,22 @@ class ClienteSQLite {
     return null;
   }
   
-  Future<List<ClienteModel>> listarTodos({bool incluirInativos = false}) async {
+  // MÉTODO ALTERADO
+  Future<List<ClienteModel>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
     final db = await _db;
+    String where = 'idGestor = ?';
+    List<dynamic> whereArgs = [idGestor];
+
+    if (!incluirInativos) {
+      where += ' AND ativo = ?';
+      whereArgs.add(1);
+    }
+
     final resultado = await db.query(
       'clientes',
-      where: incluirInativos ? null : 'ativo = ?',
-      whereArgs: incluirInativos ? null : [1],
+      where: where,
+      whereArgs: whereArgs,
     );
 
     return resultado

@@ -1,7 +1,7 @@
-// test/dominio/casos_uso/ordem_servico/gerenciamento_os_test.dart//
+// test/dominio/casos_uso/ordem_servico/gerenciamento_os_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:gerenciar/dominio/casos_uso/ordem_servico/cadastrar_ordem_servico.dart'; // ADICIONADO
+import 'package:gerenciar/dominio/casos_uso/ordem_servico/cadastrar_ordem_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/atualizar_ordem_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/inativar_ordem_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/reabrir_ordem_servico.dart';
@@ -16,11 +16,13 @@ void main() {
     mockRepositorio = MockOrdemServicoRepositorioInterface();
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final ordemServico = OrdemServico(
     id: 'os-1',
     idTecnico: 'tec-1',
     idCliente: 'cli-1',
     idFormaPagamento: 'fp-1',
+    idGestor: 'gestor-1', // ADICIONADO
     dataHoraInicio: DateTime.now(),
     descricao: 'Teste',
     valor: 100.0,
@@ -30,7 +32,6 @@ void main() {
   );
 
   group('Gerenciamento de Ordens de Serviço', () {
-    // TESTE ADICIONADO AQUI
     test('Deve chamar o método ADICIONAR do repositório', () async {
       final casoDeUso = CadastrarOrdemServico(mockRepositorio);
       when(mockRepositorio.adicionar(any)).thenAnswer((_) async => {});

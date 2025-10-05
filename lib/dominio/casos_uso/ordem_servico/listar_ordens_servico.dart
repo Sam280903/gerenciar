@@ -6,7 +6,7 @@ class ListarOrdensServico {
 
   ListarOrdensServico(this.repositorio);
 
-  Future<List<OrdemServico>> executar() async {
-    return await repositorio.listarTodos();
+  Future<List<OrdemServico>> executar({required String idGestor}) async {
+    return await repositorio.listarTodos(idGestor: idGestor);
   }
 }

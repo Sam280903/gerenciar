@@ -25,7 +25,6 @@ class TecnicoRepositorioImplSQLite implements TecnicoRepositorioInterface {
     await _fonteSQLite.inativarTecnico(id);
   }
 
-  // CORREÇÃO: Implementação do método 'reativar'
   @override
   Future<void> reativar(String id) async {
     await _fonteSQLite.reativarTecnico(id);
@@ -37,11 +36,12 @@ class TecnicoRepositorioImplSQLite implements TecnicoRepositorioInterface {
     return model?.toEntidade();
   }
 
-  // CORREÇÃO: Assinatura do método 'listarTodos' corrigida
+  // MÉTODO ALTERADO
   @override
-  Future<List<Tecnico>> listarTodos({bool incluirInativos = false}) async {
-    final modelos =
-        await _fonteSQLite.listarTodos(incluirInativos: incluirInativos);
+  Future<List<Tecnico>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
+    final modelos = await _fonteSQLite.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'cadastro_forma_pagamento_tela.dart';
 import 'detalhes_forma_pagamento_tela.dart';
 
@@ -24,14 +25,29 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   List<FormaPagamento> _formasFiltradas = [];
   final _buscaController = TextEditingController();
 
+  // ADICIONADO
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
   @override
   void initState() {
     super.initState();
     // Inicializa a dependência a partir do widget ou cria uma nova instância
     _listar = widget.listarFormasPagamento ??
         ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
-    _carregar();
+    _carregarDadosIniciais();
     _buscaController.addListener(_filtrarFormas);
+  }
+
+  // NOVO MÉTODO
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+      _carregar();
+    }
   }
 
   @override
@@ -50,7 +66,11 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   }
 
   void _carregar() {
-    final future = _listar.executar(incluirInativos: _mostrarInativos);
+    if (_idGestor == null) return; // Não carrega se não souber o gestor
+
+    // ALTERADO: Passa o idGestor para o caso de uso
+    final future = _listar.executar(
+        idGestor: _idGestor!, incluirInativos: _mostrarInativos);
     setState(() {
       _futureFormas = future;
     });

@@ -19,10 +19,12 @@ void main() {
     listar = ListarAgendamentos(mockRepositorio);
   });
 
+  // DADO DE EXEMPLO ATUALIZADO
   final agendamentoExemplo = Agendamento(
     id: 'ag-1',
     idTecnico: 'tec-1',
     idCliente: 'cli-1',
+    idGestor: 'gestor-1', // ADICIONADO
     dataHora: DateTime.now(),
     ativo: true,
   );
@@ -33,7 +35,7 @@ void main() {
       when(mockRepositorio.buscarPorId(any))
           .thenAnswer((_) async => agendamentoExemplo);
 
-      // Act//
+      // Act
       final resultado = await buscarPorId.executar('ag-1');
 
       // Assert
@@ -44,14 +46,16 @@ void main() {
     test('Deve retornar uma lista de agendamentos', () async {
       // Arrange
       final lista = [agendamentoExemplo];
-      when(mockRepositorio.listarTodos()).thenAnswer((_) async => lista);
+      // AQUI ESTÁ A CORREÇÃO
+      when(mockRepositorio.listarTodos(idGestor: anyNamed('idGestor')))
+          .thenAnswer((_) async => lista);
 
       // Act
-      final resultado = await listar.executar();
+      final resultado = await listar.executar(idGestor: 'gestor-1');
 
       // Assert
       expect(resultado, lista);
-      verify(mockRepositorio.listarTodos());
+      verify(mockRepositorio.listarTodos(idGestor: 'gestor-1'));
     });
   });
 }

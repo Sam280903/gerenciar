@@ -9,6 +9,7 @@ class ClienteModel {
   final String endereco;
   final String? cpf;
   final bool ativo;
+  final String idGestor; // ADICIONADO
 
   ClienteModel({
     required this.id,
@@ -18,6 +19,7 @@ class ClienteModel {
     required this.endereco,
     this.cpf,
     required this.ativo,
+    required this.idGestor, // ADICIONADO
   });
 
   factory ClienteModel.fromEntidade(Cliente cliente) {
@@ -29,6 +31,7 @@ class ClienteModel {
       endereco: cliente.endereco,
       cpf: cliente.cpf,
       ativo: cliente.ativo,
+      idGestor: cliente.idGestor, // ADICIONADO
     );
   }
 
@@ -41,18 +44,20 @@ class ClienteModel {
       endereco: map['endereco'] ?? '',
       cpf: map['cpf']?.toString() ?? '',
       ativo: map['ativo'] is bool ? map['ativo'] : (map['ativo'] == 1),
+      idGestor: map['idGestor'] ?? '', // ADICIONADO
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id, // Importante para o SQLite
+      'id': id,
       'nome': nome,
       'email': email,
       'telefone': telefone,
       'endereco': endereco,
       'cpf': cpf,
       'ativo': ativo,
+      'idGestor': idGestor, // ADICIONADO
     };
   }
 
@@ -65,6 +70,7 @@ class ClienteModel {
       endereco: endereco,
       cpf: cpf,
       ativo: ativo,
+      idGestor: idGestor, // ADICIONADO
     );
   }
 }

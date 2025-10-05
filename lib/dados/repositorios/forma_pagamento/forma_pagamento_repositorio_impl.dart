@@ -42,11 +42,12 @@ class FormaPagamentoRepositorioImpl
     return model?.toEntidade();
   }
 
+  // MÉTODO ALTERADO
   @override
   Future<List<FormaPagamento>> listarTodos(
-      {bool incluirInativos = false}) async {
-    final modelos =
-        await _fonteFirebase.listarTodos(incluirInativos: incluirInativos);
+      {required String idGestor, bool incluirInativos = false}) async {
+    final modelos = await _fonteFirebase.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

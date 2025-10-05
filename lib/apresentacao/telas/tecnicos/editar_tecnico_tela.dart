@@ -33,12 +33,14 @@ class _EditarTecnicoTelaState extends State<EditarTecnicoTela> {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
+      // AQUI ESTÁ A CORREÇÃO
       final tecnicoAtualizado = Tecnico(
         id: widget.tecnico.id,
         nome: _nomeController.text.trim(),
         email: _emailController.text.trim(),
         telefone: _telefoneController.text.trim(),
         ativo: widget.tecnico.ativo,
+        idGestor: widget.tecnico.idGestor, // ADICIONADO (ESSENCIAL)
       );
 
       final atualizarTecnico = AtualizarTecnico(TecnicoRepositorioAdaptativo());

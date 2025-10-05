@@ -35,6 +35,8 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
       setState(() => _carregando = true);
 
       try {
+        // Nenhuma alteração é necessária aqui. O serviço de autenticação
+        // já sabe qual gestor está logado e fará a associação.
         await _authServico.cadastrarTecnico(
           nome: _nomeController.text.trim(),
           email: _emailController.text.trim(),
@@ -79,6 +81,7 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
 
   @override
   Widget build(BuildContext context) {
+    // Nenhuma alteração visual é necessária neste arquivo.
     return Scaffold(
       appBar: AppBar(
         title: const Text("Novo Técnico"),

@@ -7,5 +7,7 @@ abstract class ClienteRepositorioInterface {
   Future<void> inativar(String id);
   Future<void> reativar(String id);
   Future<Cliente?> buscarPorId(String id);
-  Future<List<Cliente>> listarTodos({bool incluirInativos = false});
+  // MÉTODO ALTERADO
+  Future<List<Cliente>> listarTodos(
+      {required String idGestor, bool incluirInativos = false});
 }

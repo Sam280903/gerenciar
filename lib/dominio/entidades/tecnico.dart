@@ -5,6 +5,7 @@ class Tecnico {
   final String email;
   final String telefone;
   final bool ativo;
+  final String idGestor; // ADICIONADO
 
   Tecnico({
     required this.id,
@@ -12,5 +13,6 @@ class Tecnico {
     required this.email,
     required this.telefone,
     required this.ativo,
+    required this.idGestor, // ADICIONADO
   });
 }

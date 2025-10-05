@@ -37,11 +37,16 @@ class MockOrdemServicoRepositorioInterface extends _i1.Mock
 
   @override
   _i3.Future<List<_i4.OrdemServico>> listarComFiltros(
-          _i5.FiltrosRelatorio? filtros) =>
+    _i5.FiltrosRelatorio? filtros,
+    String? idGestor,
+  ) =>
       (super.noSuchMethod(
         Invocation.method(
           #listarComFiltros,
-          [filtros],
+          [
+            filtros,
+            idGestor,
+          ],
         ),
         returnValue:
             _i3.Future<List<_i4.OrdemServico>>.value(<_i4.OrdemServico>[]),
@@ -105,10 +110,12 @@ class MockOrdemServicoRepositorioInterface extends _i1.Mock
       ) as _i3.Future<_i4.OrdemServico?>);
 
   @override
-  _i3.Future<List<_i4.OrdemServico>> listarTodos() => (super.noSuchMethod(
+  _i3.Future<List<_i4.OrdemServico>> listarTodos({required String? idGestor}) =>
+      (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
+          {#idGestor: idGestor},
         ),
         returnValue:
             _i3.Future<List<_i4.OrdemServico>>.value(<_i4.OrdemServico>[]),

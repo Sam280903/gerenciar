@@ -66,11 +66,13 @@ class _EditarOSTelaState extends State<EditarOSTela> {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
+      // AQUI ESTÁ A CORREÇÃO
       final osAtualizada = OrdemServico(
         id: widget.ordemServico.id,
         idCliente: widget.ordemServico.idCliente,
         idTecnico: widget.ordemServico.idTecnico,
         idFormaPagamento: widget.ordemServico.idFormaPagamento,
+        idGestor: widget.ordemServico.idGestor, // ADICIONADO (ESSENCIAL)
         dataHoraInicio: _dataSelecionada,
         descricao: _descricaoController.text.trim(),
         valor:
@@ -143,7 +145,6 @@ class _EditarOSTelaState extends State<EditarOSTela> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      // ignore: deprecated_member_use
                       value: _prioridadeSelecionada,
                       decoration:
                           const InputDecoration(labelText: 'Prioridade'),
@@ -162,7 +163,6 @@ class _EditarOSTelaState extends State<EditarOSTela> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
                 value: _statusSelecionado,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: ['Pendente', 'Em Andamento', 'Concluída', 'Reaberta']

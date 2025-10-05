@@ -18,7 +18,6 @@ class ClienteFirebase {
     await _colecao.doc(id).update({'ativo': false});
   }
 
-  // MÉTODO FALTANTE ADICIONADO
   Future<void> reativarCliente(String id) async {
     await _colecao.doc(id).update({'ativo': true});
   }
@@ -31,10 +30,11 @@ class ClienteFirebase {
     return null;
   }
 
-  // MÉTODO ATUALIZADO COM O PARÂMETRO
-  Future<List<ClienteModel>> listarTodos({bool incluirInativos = false}) async {
-    Query query = _colecao;
-    // Se não for para incluir inativos, adiciona o filtro.
+  // MÉTODO ALTERADO
+  Future<List<ClienteModel>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
+    Query query = _colecao.where('idGestor', isEqualTo: idGestor);
+
     if (!incluirInativos) {
       query = query.where('ativo', isEqualTo: true);
     }

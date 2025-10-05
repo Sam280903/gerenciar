@@ -58,12 +58,18 @@ class MockListarTecnicos extends _i1.Mock implements _i3.ListarTecnicos {
       ) as _i2.TecnicoRepositorioInterface);
 
   @override
-  _i4.Future<List<_i5.Tecnico>> executar({bool? incluirInativos = false}) =>
+  _i4.Future<List<_i5.Tecnico>> executar({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #executar,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue: _i4.Future<List<_i5.Tecnico>>.value(<_i5.Tecnico>[]),
       ) as _i4.Future<List<_i5.Tecnico>>);

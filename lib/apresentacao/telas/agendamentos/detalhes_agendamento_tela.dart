@@ -55,6 +55,7 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
         id: _agendamentoAtual.id,
         idCliente: _agendamentoAtual.idCliente,
         idTecnico: _agendamentoAtual.idTecnico,
+        idGestor: _agendamentoAtual.idGestor, // ADICIONADO (ESSENCIAL)
         dataHora: _agendamentoAtual.dataHora,
         observacao: _agendamentoAtual.observacao,
         status: novoStatus,

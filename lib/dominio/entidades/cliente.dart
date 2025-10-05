@@ -7,6 +7,7 @@ class Cliente {
   final String endereco;
   final String? cpf;
   final bool ativo;
+  final String idGestor; // ADICIONADO
 
   Cliente({
     required this.id,
@@ -16,5 +17,6 @@ class Cliente {
     required this.endereco,
     this.cpf,
     required this.ativo,
+    required this.idGestor, // ADICIONADO
   });
 }

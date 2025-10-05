@@ -4,6 +4,7 @@ class OrdemServico {
   final String idTecnico;
   final String idCliente;
   final String idFormaPagamento;
+  final String idGestor; // ADICIONADO
   final DateTime dataHoraInicio;
   final DateTime? dataHoraFim;
   final String descricao;
@@ -18,6 +19,7 @@ class OrdemServico {
     required this.idTecnico,
     required this.idCliente,
     required this.idFormaPagamento,
+    required this.idGestor, // ADICIONADO
     required this.dataHoraInicio,
     this.dataHoraFim,
     required this.descricao,

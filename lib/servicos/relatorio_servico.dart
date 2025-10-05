@@ -8,14 +8,12 @@ import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
 import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface.dart';
 
-// Classe que define os parâmetros de filtro para o relatório.
 class FiltrosRelatorio {
   final DateTime? dataInicial;
   final DateTime? dataFinal;
   final String? idTecnico;
   final String? idCliente;
-  final List<String>?
-      status; // Lista para múltiplos status (pendente, concluído, etc.)
+  final List<String>? status;
 
   FiltrosRelatorio({
     this.dataInicial,
@@ -27,20 +25,21 @@ class FiltrosRelatorio {
 }
 
 class RelatorioServico {
-  // O serviço de relatório usa o repositório de ordens de serviço para buscar os dados.
   final OrdemServicoRepositorioInterface _ordemServicoRepositorio =
       OrdemServicoRepositorioAdaptativo();
   final _clienteRepo = ClienteRepositorioAdaptativo();
   final _tecnicoRepo = TecnicoRepositorioAdaptativo();
 
-  // Método principal que gera o relatório com base nos filtros.
+  // MÉTODO ALTERADO
   Future<List<OrdemServicoDetalhada>> gerarRelatorioOrdensServico(
-      FiltrosRelatorio filtros) async {
+      FiltrosRelatorio filtros, String idGestor) async {
     try {
-      final ordens = await _ordemServicoRepositorio.listarComFiltros(filtros);
+      final ordens =
+          await _ordemServicoRepositorio.listarComFiltros(filtros, idGestor);
       final List<OrdemServicoDetalhada> detalhadas = [];
 
       for (final os in ordens) {
+        // Não precisamos filtrar por gestor aqui, pois as OS já vieram filtradas
         final cliente =
             await BuscarClientePorId(_clienteRepo).executar(os.idCliente);
         final tecnico =
@@ -54,8 +53,6 @@ class RelatorioServico {
 
       return detalhadas;
     } catch (e) {
-      //print('Erro ao gerar relatório: $e');
-      // Lança a exceção para que a camada de apresentação possa tratá-la.
       throw Exception('Não foi possível gerar o relatório.');
     }
   }

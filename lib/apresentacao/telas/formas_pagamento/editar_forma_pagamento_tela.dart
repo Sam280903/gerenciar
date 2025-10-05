@@ -1,4 +1,4 @@
-// lib/apresentacao/telas/formas_pagamento/editar_forma_pagamento_tela.dart - CORRIGIDO
+// lib/apresentacao/telas/formas_pagamento/editar_forma_pagamento_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/atualizar_forma_pagamento.dart';
@@ -30,12 +30,16 @@ class _EditarFormaPagamentoTelaState extends State<EditarFormaPagamentoTela> {
   Future<void> _salvar() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
+
+      // AQUI ESTÁ A CORREÇÃO
       final formaAtualizada = FormaPagamento(
         id: widget.formaPagamento.id,
         nome: _nomeController.text.trim(),
         descricao: _descricaoController.text.trim(),
         ativo: widget.formaPagamento.ativo,
+        idGestor: widget.formaPagamento.idGestor, // ADICIONADO (ESSENCIAL)
       );
+
       final atualizar =
           AtualizarFormaPagamento(FormaPagamentoRepositorioAdaptativo());
       try {
@@ -61,7 +65,6 @@ class _EditarFormaPagamentoTelaState extends State<EditarFormaPagamentoTela> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // CORREÇÃO: Removido o 'const' daqui
       padding: EdgeInsets.fromLTRB(
           24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
       decoration: BoxDecoration(

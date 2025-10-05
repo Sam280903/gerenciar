@@ -15,8 +15,9 @@ void main() {
     mockRepositorio = MockFormaPagamentoRepositorioInterface();
   });
 
-  final formaPagamento =
-      FormaPagamento(id: 'fp-1', nome: 'Dinheiro', ativo: true);
+  // AQUI ESTÁ A CORREÇÃO
+  final formaPagamento = FormaPagamento(
+      id: 'fp-1', nome: 'Dinheiro', ativo: true, idGestor: 'gestor-1');
 
   group('Gerenciamento de Formas de Pagamento', () {
     test('Deve chamar o método ATUALIZAR do repositório', () async {
@@ -25,7 +26,7 @@ void main() {
       await casoDeUso.executar(formaPagamento);
       verify(mockRepositorio.atualizar(formaPagamento));
     });
-//
+
     test('Deve chamar o método INATIVAR do repositório', () async {
       final casoDeUso = InativarFormaPagamento(mockRepositorio);
       when(mockRepositorio.inativar(any)).thenAnswer((_) async => {});

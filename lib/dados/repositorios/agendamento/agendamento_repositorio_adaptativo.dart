@@ -56,9 +56,12 @@ class AgendamentoRepositorioAdaptativo
     return await repo.buscarPorId(id);
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<Agendamento>> listarTodos({bool incluirInativos = false}) async {
+  Future<List<Agendamento>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
     final repo = await _escolherRepositorio();
-    return await repo.listarTodos(incluirInativos: incluirInativos);
+    return await repo.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
   }
 }

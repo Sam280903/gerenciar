@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/cadastrar_cliente.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
@@ -36,6 +37,10 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   late final CadastrarCliente _cadastrarCliente;
   late final http.Client _httpClient;
 
+  // ADICIONADO
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
   bool _carregando = false;
   bool _buscandoCep = false;
   bool _isCadastroRapido = true;
@@ -46,6 +51,17 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
     _cadastrarCliente =
         widget.cadastrarCliente ?? CadastrarCliente(ClienteRepositorioAdaptativo());
     _httpClient = widget.httpClient ?? http.Client();
+    _carregarDadosIniciais(); // ADICIONADO
+  }
+
+  // NOVO MÉTODO
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+    }
   }
 
   Future<void> _buscarCep() async {
@@ -83,6 +99,14 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   }
 
   Future<void> _salvarCliente() async {
+    if (_idGestor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Erro: Gestor não identificado. Tente novamente.'),
+        backgroundColor: Colors.redAccent,
+      ));
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
@@ -106,6 +130,7 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
         endereco: enderecoCompleto,
         cpf: _cpfController.text.trim(),
         ativo: true,
+        idGestor: _idGestor!, // ADICIONADO
       );
 
       try {

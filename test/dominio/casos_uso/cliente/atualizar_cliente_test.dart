@@ -16,6 +16,7 @@ void main() {
     casoDeUso = AtualizarCliente(mockRepositorio);
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final clienteAtualizado = Cliente(
     id: 'cliente-123',
     nome: 'Maria Silva Santos', // Nome atualizado
@@ -24,6 +25,7 @@ void main() {
     endereco: 'Rua das Flores, 123, Centro',
     cpf: '123.456.789-00',
     ativo: true,
+    idGestor: 'gestor-1', // ADICIONADO
   );
 
   test('Deve chamar o método atualizar do repositório ao atualizar um cliente',

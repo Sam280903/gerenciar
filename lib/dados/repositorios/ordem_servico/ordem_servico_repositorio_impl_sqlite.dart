@@ -36,16 +36,20 @@ class OrdemServicoRepositorioImplSQLite
     return model?.toEntidade();
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<OrdemServico>> listarTodos() async {
-    final modelos = await _fonteSQLite.listarTodos();
+  Future<List<OrdemServico>> listarTodos({required String idGestor}) async {
+    final modelos = await _fonteSQLite.listarTodos(idGestor: idGestor);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<OrdemServico>> listarComFiltros(FiltrosRelatorio filtros) async {
-    // Implementação simplificada para offline: retorna todos e a tela filtra.
-    //print("Modo offline: retornando todas as OS para filtragem na UI.");
-    return listarTodos();
+  Future<List<OrdemServico>> listarComFiltros(
+      FiltrosRelatorio filtros, String idGestor) async {
+    // Para o modo offline, a implementação mais simples é buscar todos os dados
+    // do gestor e deixar a tela filtrar os detalhes (como datas e status).
+    print("Modo offline: retornando todas as OS do gestor para filtragem na UI.");
+    return listarTodos(idGestor: idGestor);
   }
 }

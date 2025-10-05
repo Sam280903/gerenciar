@@ -48,9 +48,12 @@ class TecnicoRepositorioAdaptativo implements TecnicoRepositorioInterface {
     return await repo.buscarPorId(id);
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<Tecnico>> listarTodos({bool incluirInativos = false}) async {
+  Future<List<Tecnico>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
     final repo = await _repositorio();
-    return await repo.listarTodos(incluirInativos: incluirInativos);
+    return await repo.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
   }
 }

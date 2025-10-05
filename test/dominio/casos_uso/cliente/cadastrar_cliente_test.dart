@@ -20,7 +20,7 @@ void main() {
     casoDeUso = CadastrarCliente(mockRepositorio);
   });
 
-  // Cliente de exemplo para os testes
+  // AQUI ESTÁ A CORREÇÃO
   final clienteExemplo = Cliente(
     id: 'cliente-123',
     nome: 'Maria Silva',
@@ -29,6 +29,7 @@ void main() {
     endereco: 'Rua das Flores, 123',
     cpf: '123.456.789-00',
     ativo: true,
+    idGestor: 'gestor-1', // ADICIONADO
   );
 
   test('Deve chamar o método adicionar do repositório ao cadastrar um cliente',

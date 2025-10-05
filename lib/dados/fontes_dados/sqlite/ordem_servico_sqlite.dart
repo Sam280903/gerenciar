@@ -6,7 +6,6 @@ import '../../modelos/ordem_servico_model.dart';
 class OrdemServicoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
-  // Novos métodos para sincronização
   Future<List<OrdemServicoModel>> listarNaoSincronizados() async {
     final db = await _db;
     final resultado = await db.query(
@@ -85,12 +84,13 @@ class OrdemServicoSQLite {
     return null;
   }
 
-  Future<List<OrdemServicoModel>> listarTodos() async {
+  // MÉTODO ALTERADO
+  Future<List<OrdemServicoModel>> listarTodos({required String idGestor}) async {
     final db = await _db;
     final resultado = await db.query(
       'ordens_servico',
-      where: 'ativo = ?',
-      whereArgs: [1],
+      where: 'ativo = ? AND idGestor = ?',
+      whereArgs: [1, idGestor],
     );
     return resultado
         .map((linha) => OrdemServicoModel.fromDbMap(linha))

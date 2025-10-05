@@ -11,11 +11,11 @@ import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
 import 'package:gerenciar/apresentacao/widgets/_tela_busca.dart';
 import 'package:gerenciar/apresentacao/widgets/_widget_selecao.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class CadastroAgendamentoTela extends StatefulWidget {
-  // Adicionando dependências para injeção
   final CadastrarAgendamento? cadastrarAgendamento;
   final ListarClientes? listarClientes;
   final ListarTecnicos? listarTecnicos;
@@ -48,6 +48,9 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   late final ListarClientes _listarClientes;
   late final ListarTecnicos _listarTecnicos;
 
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +62,16 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
         widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
 
     _dataController.text = DateFormat('dd/MM/yyyy').format(_dataSelecionada);
+    _carregarDadosIniciais();
+  }
+
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+    }
   }
 
   @override
@@ -107,12 +120,13 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   }
 
   Future<void> _abrirBuscaCliente() async {
+    if (_idGestor == null) return;
     final cliente = await Navigator.push<Cliente>(
       context,
       MaterialPageRoute(
         builder: (_) => TelaBusca<Cliente>(
           titulo: 'Selecionar Cliente',
-          futureItens: _listarClientes.executar(),
+          futureItens: _listarClientes.executar(idGestor: _idGestor!),
           getNomeItem: (c) => c.nome,
         ),
       ),
@@ -123,12 +137,13 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   }
 
   Future<void> _abrirBuscaTecnico() async {
+    if (_idGestor == null) return;
     final tecnico = await Navigator.push<Tecnico>(
       context,
       MaterialPageRoute(
         builder: (_) => TelaBusca<Tecnico>(
           titulo: 'Selecionar Técnico',
-          futureItens: _listarTecnicos.executar(),
+          futureItens: _listarTecnicos.executar(idGestor: _idGestor!),
           getNomeItem: (t) => t.nome,
         ),
       ),
@@ -139,6 +154,14 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   }
 
   Future<void> _salvarAgendamento() async {
+    if (_idGestor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Erro: Gestor não identificado. Tente novamente.'),
+        backgroundColor: Colors.redAccent,
+      ));
+      return;
+    }
+
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
@@ -155,6 +178,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           id: const Uuid().v4(),
           idCliente: _clienteSelecionado!.id,
           idTecnico: _tecnicoSelecionado!.id,
+          idGestor: _idGestor!, // <-- A LINHA ESSENCIAL ESTÁ AQUI
           dataHora: dataHoraAgendamento,
           observacao: _obsController.text.trim(),
           ativo: true,

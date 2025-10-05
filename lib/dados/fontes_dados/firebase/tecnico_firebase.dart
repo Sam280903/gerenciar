@@ -18,7 +18,6 @@ class TecnicoFirebase {
     await _colecao.doc(id).update({'ativo': false});
   }
 
-  // MÉTODO FALTANTE ADICIONADO
   Future<void> reativarTecnico(String id) async {
     await _colecao.doc(id).update({'ativo': true});
   }
@@ -31,10 +30,11 @@ class TecnicoFirebase {
     return null;
   }
 
-  // MÉTODO ATUALIZADO
-  Future<List<TecnicoModel>> listarTodos({bool incluirInativos = false}) async {
-    Query query = _colecao;
-    // Se não for para incluir inativos, adiciona o filtro.
+  // MÉTODO ALTERADO
+  Future<List<TecnicoModel>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
+    Query query = _colecao.where('idGestor', isEqualTo: idGestor);
+
     if (!incluirInativos) {
       query = query.where('ativo', isEqualTo: true);
     }

@@ -84,12 +84,18 @@ class MockTecnicoRepositorioInterface extends _i1.Mock
       ) as _i3.Future<_i4.Tecnico?>);
 
   @override
-  _i3.Future<List<_i4.Tecnico>> listarTodos({bool? incluirInativos = false}) =>
+  _i3.Future<List<_i4.Tecnico>> listarTodos({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue: _i3.Future<List<_i4.Tecnico>>.value(<_i4.Tecnico>[]),
       ) as _i3.Future<List<_i4.Tecnico>>);

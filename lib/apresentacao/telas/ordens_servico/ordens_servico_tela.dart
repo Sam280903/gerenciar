@@ -8,6 +8,7 @@ import 'package:gerenciar/dominio/casos_uso/ordem_servico/listar_ordens_servico.
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
 import 'package:intl/intl.dart';
 import 'cadastro_os_tela.dart';
 import 'detalhes_os_tela.dart';
@@ -45,6 +46,10 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   List<OrdemServicoDetalhada> _concluidasFiltrados = [];
   List<OrdemServicoDetalhada> _reabertasFiltrados = [];
 
+  // ADICIONADO
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String? _idGestor;
+
   bool _carregando = true;
   bool _ordenarCrescente = false;
 
@@ -61,8 +66,19 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     _buscarTecnico =
         widget.buscarTecnico ?? BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
 
-    _carregarOS();
+    _carregarDadosIniciais(); // MÉTODO ALTERADO
     _buscaController.addListener(_filtrarOS);
+  }
+
+  // NOVO MÉTODO
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() {
+        _idGestor = dadosUsuario['idGestor'];
+      });
+      _carregarOS();
+    }
   }
 
   @override
@@ -99,9 +115,12 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   }
 
   Future<void> _carregarOS() async {
+    if (_idGestor == null) return; // Não carrega se não souber o gestor
+
     setState(() => _carregando = true);
     
-    final ordensDeServico = await _listarOS.executar();
+    // ALTERADO: Passa o idGestor para o caso de uso
+    final ordensDeServico = await _listarOS.executar(idGestor: _idGestor!);
     List<OrdemServicoDetalhada> pendentesTemp = [];
     List<OrdemServicoDetalhada> emAndamentoTemp = [];
     List<OrdemServicoDetalhada> concluidasTemp = [];

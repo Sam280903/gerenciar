@@ -1,7 +1,7 @@
 // test/apresentacao/telas/login/login_tela_test.dart
 
 import 'package:flutter/material.dart';
-import 'package.flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:gerenciar/apresentacao/telas/login/login_tela.dart';
 
 void main() {

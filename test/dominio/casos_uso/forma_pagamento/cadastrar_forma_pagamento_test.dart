@@ -20,11 +20,13 @@ void main() {
     casoDeUso = CadastrarFormaPagamento(mockRepositorio);
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final formaPagamentoExemplo = FormaPagamento(
     id: 'fp-1',
     nome: 'PIX',
     descricao: 'Pagamento instantâneo',
     ativo: true,
+    idGestor: 'gestor-1', // ADICIONADO
   );
 
   test(

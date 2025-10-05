@@ -6,13 +6,11 @@ import '../../modelos/ordem_servico_model.dart';
 class OrdemServicoFirebase {
   final _colecao = FirebaseFirestore.instance.collection('ordens_servico');
 
-  // Novo método para listar com filtros
+  // MÉTODO ALTERADO
   Future<List<OrdemServicoModel>> listarComFiltros(
-      FiltrosRelatorio filtros) async {
-    // Começamos com a consulta base
-    Query query = _colecao;
+      FiltrosRelatorio filtros, String idGestor) async {
+    Query query = _colecao.where('idGestor', isEqualTo: idGestor);
 
-    // Aplicamos os filtros dinamicamente
     if (filtros.idTecnico != null && filtros.idTecnico!.isNotEmpty) {
       query = query.where('idTecnico', isEqualTo: filtros.idTecnico);
     }
@@ -27,7 +25,6 @@ class OrdemServicoFirebase {
           isGreaterThanOrEqualTo: Timestamp.fromDate(filtros.dataInicial!));
     }
     if (filtros.dataFinal != null) {
-      // Adiciona 23:59:59 para incluir o dia inteiro
       final dataFinalAjustada = filtros.dataFinal!
           .add(const Duration(hours: 23, minutes: 59, seconds: 59));
       query = query.where('dataHoraInicio',
@@ -43,18 +40,16 @@ class OrdemServicoFirebase {
     }).toList();
   }
 
-  //Método para reabrir
   Future<void> reabrir(
       {required String id, required String justificativa}) async {
     await _colecao.doc(id).update({
       'status': 'Reaberto',
-      'justificativaReabertura': justificativa, // Campo para auditoria
-      'dataReabertura': Timestamp.now(), // Campo para auditoria
+      'justificativaReabertura': justificativa,
+      'dataReabertura': Timestamp.now(),
     });
   }
 
   Future<void> adicionar(OrdemServicoModel os) async {
-    // O método set sobrescreve o documento inteiro. Para adicionar, é melhor usar .add ou .doc(id).set
     await _colecao.doc(os.id).set(os.toMap());
   }
 
@@ -77,8 +72,12 @@ class OrdemServicoFirebase {
     return null;
   }
 
-  Future<List<OrdemServicoModel>> listarTodos() async {
-    final snapshot = await _colecao.where('ativo', isEqualTo: true).get();
+  // MÉTODO ALTERADO
+  Future<List<OrdemServicoModel>> listarTodos({required String idGestor}) async {
+    final snapshot = await _colecao
+        .where('ativo', isEqualTo: true)
+        .where('idGestor', isEqualTo: idGestor)
+        .get();
     return snapshot.docs.map((doc) {
       return OrdemServicoModel.fromMap(
         doc.data(),

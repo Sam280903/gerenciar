@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i6;
 
+import 'package:firebase_auth/firebase_auth.dart' as _i13;
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart'
     as _i8;
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/listar_ordens_servico.dart'
@@ -20,6 +21,7 @@ import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface
     as _i2;
 import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart'
     as _i4;
+import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -89,10 +91,12 @@ class MockListarOrdensServico extends _i1.Mock
       ) as _i2.OrdemServicoRepositorioInterface);
 
   @override
-  _i6.Future<List<_i7.OrdemServico>> executar() => (super.noSuchMethod(
+  _i6.Future<List<_i7.OrdemServico>> executar({required String? idGestor}) =>
+      (super.noSuchMethod(
         Invocation.method(
           #executar,
           [],
+          {#idGestor: idGestor},
         ),
         returnValue:
             _i6.Future<List<_i7.OrdemServico>>.value(<_i7.OrdemServico>[]),
@@ -153,4 +157,120 @@ class MockBuscarTecnicoPorId extends _i1.Mock
         ),
         returnValue: _i6.Future<_i11.Tecnico?>.value(),
       ) as _i6.Future<_i11.Tecnico?>);
+}
+
+/// A class which mocks [AutenticacaoServico].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAutenticacaoServico extends _i1.Mock
+    implements _i12.AutenticacaoServico {
+  MockAutenticacaoServico() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i6.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #enviarEmailRedefinicaoSenha,
+          [email],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<_i13.User?> login(
+    String? email,
+    String? senha,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #login,
+          [
+            email,
+            senha,
+          ],
+        ),
+        returnValue: _i6.Future<_i13.User?>.value(),
+      ) as _i6.Future<_i13.User?>);
+
+  @override
+  _i6.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
+        Invocation.method(
+          #primeiroGestorJaCadastrado,
+          [],
+        ),
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
+
+  @override
+  _i6.Future<_i13.User?> cadastrarPrimeiroGestor({
+    required String? nome,
+    required String? email,
+    required String? senha,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarPrimeiroGestor,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+          },
+        ),
+        returnValue: _i6.Future<_i13.User?>.value(),
+      ) as _i6.Future<_i13.User?>);
+
+  @override
+  _i6.Future<_i13.User?> cadastrarTecnico({
+    required String? nome,
+    required String? email,
+    required String? senha,
+    required String? telefone,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarTecnico,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+            #telefone: telefone,
+          },
+        ),
+        returnValue: _i6.Future<_i13.User?>.value(),
+      ) as _i6.Future<_i13.User?>);
+
+  @override
+  _i6.Future<void> salvarTokenDoDispositivo() => (super.noSuchMethod(
+        Invocation.method(
+          #salvarTokenDoDispositivo,
+          [],
+        ),
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
+
+  @override
+  _i6.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #buscarDadosUsuarioLogado,
+          [],
+        ),
+        returnValue: _i6.Future<Map<String, dynamic>?>.value(),
+      ) as _i6.Future<Map<String, dynamic>?>);
 }

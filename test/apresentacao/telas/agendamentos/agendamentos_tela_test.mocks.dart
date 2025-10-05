@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
+import 'package:firebase_auth/firebase_auth.dart' as _i10;
 import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart'
     as _i2;
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart'
@@ -14,6 +15,7 @@ import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptat
 import 'package:gerenciar/dominio/entidades/agendamento.dart' as _i4;
 import 'package:gerenciar/dominio/entidades/cliente.dart' as _i6;
 import 'package:gerenciar/dominio/entidades/tecnico.dart' as _i8;
+import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i9;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -108,13 +110,18 @@ class MockAgendamentoRepositorioAdaptativo extends _i1.Mock
       ) as _i3.Future<_i4.Agendamento?>);
 
   @override
-  _i3.Future<List<_i4.Agendamento>> listarTodos(
-          {bool? incluirInativos = false}) =>
+  _i3.Future<List<_i4.Agendamento>> listarTodos({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue:
             _i3.Future<List<_i4.Agendamento>>.value(<_i4.Agendamento>[]),
@@ -180,12 +187,18 @@ class MockClienteRepositorioAdaptativo extends _i1.Mock
       ) as _i3.Future<_i6.Cliente?>);
 
   @override
-  _i3.Future<List<_i6.Cliente>> listarTodos({bool? incluirInativos = false}) =>
+  _i3.Future<List<_i6.Cliente>> listarTodos({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue: _i3.Future<List<_i6.Cliente>>.value(<_i6.Cliente>[]),
       ) as _i3.Future<List<_i6.Cliente>>);
@@ -250,13 +263,135 @@ class MockTecnicoRepositorioAdaptativo extends _i1.Mock
       ) as _i3.Future<_i8.Tecnico?>);
 
   @override
-  _i3.Future<List<_i8.Tecnico>> listarTodos({bool? incluirInativos = false}) =>
+  _i3.Future<List<_i8.Tecnico>> listarTodos({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
-          {#incluirInativos: incluirInativos},
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
         ),
         returnValue: _i3.Future<List<_i8.Tecnico>>.value(<_i8.Tecnico>[]),
       ) as _i3.Future<List<_i8.Tecnico>>);
+}
+
+/// A class which mocks [AutenticacaoServico].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAutenticacaoServico extends _i1.Mock
+    implements _i9.AutenticacaoServico {
+  MockAutenticacaoServico() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #enviarEmailRedefinicaoSenha,
+          [email],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<_i10.User?> login(
+    String? email,
+    String? senha,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #login,
+          [
+            email,
+            senha,
+          ],
+        ),
+        returnValue: _i3.Future<_i10.User?>.value(),
+      ) as _i3.Future<_i10.User?>);
+
+  @override
+  _i3.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
+        Invocation.method(
+          #primeiroGestorJaCadastrado,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<_i10.User?> cadastrarPrimeiroGestor({
+    required String? nome,
+    required String? email,
+    required String? senha,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarPrimeiroGestor,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+          },
+        ),
+        returnValue: _i3.Future<_i10.User?>.value(),
+      ) as _i3.Future<_i10.User?>);
+
+  @override
+  _i3.Future<_i10.User?> cadastrarTecnico({
+    required String? nome,
+    required String? email,
+    required String? senha,
+    required String? telefone,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarTecnico,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+            #telefone: telefone,
+          },
+        ),
+        returnValue: _i3.Future<_i10.User?>.value(),
+      ) as _i3.Future<_i10.User?>);
+
+  @override
+  _i3.Future<void> salvarTokenDoDispositivo() => (super.noSuchMethod(
+        Invocation.method(
+          #salvarTokenDoDispositivo,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #buscarDadosUsuarioLogado,
+          [],
+        ),
+        returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+      ) as _i3.Future<Map<String, dynamic>?>);
 }

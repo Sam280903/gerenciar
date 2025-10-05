@@ -6,7 +6,6 @@ import '../../modelos/agendamento_model.dart';
 class AgendamentoSQLite {
   Future<Database> get _db async => await SQLiteConexao.db;
 
-  // Novos métodos para sincronização
   Future<List<AgendamentoModel>> listarNaoSincronizados() async {
     final db = await _db;
     final resultado = await db.query(
@@ -92,13 +91,22 @@ class AgendamentoSQLite {
     return null;
   }
 
+  // MÉTODO ALTERADO
   Future<List<AgendamentoModel>> listarTodos(
-      {bool incluirInativos = false}) async {
+      {required String idGestor, bool incluirInativos = false}) async {
     final db = await _db;
+    String where = 'idGestor = ?';
+    List<dynamic> whereArgs = [idGestor];
+
+    if (!incluirInativos) {
+      where += ' AND ativo = ?';
+      whereArgs.add(1);
+    }
+
     final resultado = await db.query(
       'agendamentos',
-      where: incluirInativos ? null : 'ativo = ?',
-      whereArgs: incluirInativos ? null : [1],
+      where: where,
+      whereArgs: whereArgs,
     );
     return resultado.map((linha) {
       return AgendamentoModel.fromMap(

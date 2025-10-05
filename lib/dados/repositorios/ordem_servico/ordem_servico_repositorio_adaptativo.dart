@@ -13,22 +13,19 @@ class OrdemServicoRepositorioAdaptativo
   Future<bool> _temConexao() async {
     final List<ConnectivityResult> status =
         await Connectivity().checkConnectivity();
-    // Verifica se a lista de conexões NÃO contém o status 'none'.
-    return !status.contains(ConnectivityResult.none); // <-- CORREÇÃO AQUI
+    return !status.contains(ConnectivityResult.none);
   }
 
   Future<OrdemServicoRepositorioInterface> _escolherRepositorio() async {
     return await _temConexao() ? _repositorioOnline : _repositorioOffline;
   }
 
-  // MÉTODO QUE FALTAVA
   @override
   Future<void> reabrir(
       {required String id, required String justificativa}) async {
     final repo = await _escolherRepositorio();
     await repo.reabrir(id: id, justificativa: justificativa);
   }
-  // FIM DO MÉTODO QUE FALTAVA
 
   @override
   Future<void> adicionar(OrdemServico ordem) async {
@@ -54,15 +51,18 @@ class OrdemServicoRepositorioAdaptativo
     return await repo.buscarPorId(id);
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<OrdemServico>> listarTodos() async {
+  Future<List<OrdemServico>> listarTodos({required String idGestor}) async {
     final repo = await _escolherRepositorio();
-    return await repo.listarTodos();
+    return await repo.listarTodos(idGestor: idGestor);
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<OrdemServico>> listarComFiltros(FiltrosRelatorio filtros) async {
+  Future<List<OrdemServico>> listarComFiltros(
+      FiltrosRelatorio filtros, String idGestor) async {
     final repo = await _escolherRepositorio();
-    return repo.listarComFiltros(filtros);
+    return repo.listarComFiltros(filtros, idGestor);
   }
 }

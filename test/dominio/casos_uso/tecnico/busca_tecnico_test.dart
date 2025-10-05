@@ -18,14 +18,16 @@ void main() {
     listar = ListarTecnicos(mockRepositorio);
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final tecnicoExemplo = Tecnico(
     id: 'tec-1',
     nome: 'Flávio Amorim',
     email: 'flavio@teste.com',
     telefone: '64999999999',
     ativo: true,
+    idGestor: 'gestor-1', // ADICIONADO
   );
-//
+
   group('Busca de Técnicos', () {
     test('Deve retornar um técnico ao buscar por id', () async {
       when(mockRepositorio.buscarPorId(any))
@@ -37,12 +39,20 @@ void main() {
 
     test('Deve retornar uma lista de técnicos', () async {
       final lista = [tecnicoExemplo];
+      // CORRIGIDO
       when(mockRepositorio.listarTodos(
+              idGestor: anyNamed('idGestor'),
               incluirInativos: anyNamed('incluirInativos')))
           .thenAnswer((_) async => lista);
-      final resultado = await listar.executar();
+
+      // CORRIGIDO
+      final resultado = await listar.executar(idGestor: 'gestor-1');
+
       expect(resultado, lista);
-      verify(mockRepositorio.listarTodos(incluirInativos: false));
+
+      // CORRIGIDO
+      verify(mockRepositorio.listarTodos(
+          idGestor: 'gestor-1', incluirInativos: false));
     });
   });
 }

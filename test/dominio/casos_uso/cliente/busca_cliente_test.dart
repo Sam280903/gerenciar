@@ -18,6 +18,7 @@ void main() {
     listar = ListarClientes(mockRepositorio);
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final clienteExemplo = Cliente(
     id: 'cliente-123',
     nome: 'Maria Silva',
@@ -26,6 +27,7 @@ void main() {
     endereco: 'Rua das Flores, 123',
     cpf: '123.456.789-00',
     ativo: true,
+    idGestor: 'gestor-1', // ADICIONADO
   );
 
   group('Busca de Clientes', () {
@@ -39,12 +41,20 @@ void main() {
 
     test('Deve retornar uma lista de clientes', () async {
       final lista = [clienteExemplo];
+      // CORRIGIDO
       when(mockRepositorio.listarTodos(
+              idGestor: anyNamed('idGestor'),
               incluirInativos: anyNamed('incluirInativos')))
           .thenAnswer((_) async => lista);
-      final resultado = await listar.executar();
+
+      // CORRIGIDO
+      final resultado = await listar.executar(idGestor: 'gestor-1');
+
       expect(resultado, lista);
-      verify(mockRepositorio.listarTodos(incluirInativos: false));
+
+      // CORRIGIDO
+      verify(mockRepositorio.listarTodos(
+          idGestor: 'gestor-1', incluirInativos: false));
     });
   });
 }

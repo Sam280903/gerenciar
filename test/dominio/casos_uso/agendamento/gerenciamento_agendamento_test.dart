@@ -15,14 +15,16 @@ void main() {
     mockRepositorio = MockAgendamentoRepositorioInterface();
   });
 
+  // AQUI ESTÁ A CORREÇÃO
   final agendamento = Agendamento(
     id: 'ag-1',
     idTecnico: 'tec-1',
     idCliente: 'cli-1',
+    idGestor: 'gestor-1', // ADICIONADO
     dataHora: DateTime.now(),
     ativo: true,
   );
-//
+
   group('Gerenciamento de Agendamento', () {
     test('Deve chamar o método ATUALIZAR do repositório', () async {
       final casoDeUso = AtualizarAgendamento(mockRepositorio);

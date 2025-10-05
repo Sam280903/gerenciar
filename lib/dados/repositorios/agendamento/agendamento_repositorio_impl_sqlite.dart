@@ -40,9 +40,12 @@ class AgendamentoRepositorioImplSQLite
     return model?.toEntidade();
   }
 
+  // MÉTODO ALTERADO
   @override
-  Future<List<Agendamento>> listarTodos({bool incluirInativos = false}) async {
-    final modelos = await _sqlite.listarTodos(incluirInativos: incluirInativos);
+  Future<List<Agendamento>> listarTodos(
+      {required String idGestor, bool incluirInativos = false}) async {
+    final modelos = await _sqlite.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

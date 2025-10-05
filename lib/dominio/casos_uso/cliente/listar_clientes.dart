@@ -5,7 +5,11 @@ import '../../interfaces/cliente_repositorio_interface.dart';
 class ListarClientes {
   final ClienteRepositorioInterface repositorio;
   ListarClientes(this.repositorio);
-  Future<List<Cliente>> executar({bool incluirInativos = false}) async {
-    return await repositorio.listarTodos(incluirInativos: incluirInativos);
+
+  // A mudança principal está aqui: a função agora exige 'idGestor'
+  Future<List<Cliente>> executar(
+      {required String idGestor, bool incluirInativos = false}) async {
+    return await repositorio.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
   }
 }
