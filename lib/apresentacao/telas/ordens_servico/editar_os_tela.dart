@@ -7,14 +7,17 @@ import 'package:intl/intl.dart';
 
 class EditarOSTela extends StatefulWidget {
   final OrdemServico ordemServico;
+  // Permite injetar o caso de uso para facilitar os testes
+  final AtualizarOrdemServico? atualizarOS;
 
-  const EditarOSTela({super.key, required this.ordemServico});
+  const EditarOSTela({super.key, required this.ordemServico, this.atualizarOS});
 
   @override
   State<EditarOSTela> createState() => _EditarOSTelaState();
 }
 
 class _EditarOSTelaState extends State<EditarOSTela> {
+  // Declarações (sem duplicatas)
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _descricaoController;
   late final TextEditingController _valorController;
@@ -25,9 +28,19 @@ class _EditarOSTelaState extends State<EditarOSTela> {
   late DateTime _dataSelecionada;
   bool _carregando = false;
 
+  // Dependência que será injetada ou criada
+  late final AtualizarOrdemServico _atualizarOS;
+
   @override
   void initState() {
     super.initState();
+
+    // Se o caso de uso foi passado pelo construtor (no teste), usa ele.
+    // Senão, cria uma instância padrão para o app rodar normalmente.
+    _atualizarOS = widget.atualizarOS ??
+        AtualizarOrdemServico(OrdemServicoRepositorioAdaptativo());
+
+    // Inicialização dos controllers e variáveis de estado
     final os = widget.ordemServico;
     _descricaoController = TextEditingController(text: os.descricao);
     _valorController = TextEditingController(text: os.valor.toStringAsFixed(2));
@@ -66,13 +79,12 @@ class _EditarOSTelaState extends State<EditarOSTela> {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
-      // AQUI ESTÁ A CORREÇÃO
       final osAtualizada = OrdemServico(
         id: widget.ordemServico.id,
         idCliente: widget.ordemServico.idCliente,
         idTecnico: widget.ordemServico.idTecnico,
         idFormaPagamento: widget.ordemServico.idFormaPagamento,
-        idGestor: widget.ordemServico.idGestor, // ADICIONADO (ESSENCIAL)
+        idGestor: widget.ordemServico.idGestor,
         dataHoraInicio: _dataSelecionada,
         descricao: _descricaoController.text.trim(),
         valor:
@@ -83,11 +95,9 @@ class _EditarOSTelaState extends State<EditarOSTela> {
         dataHoraFim: _statusSelecionado == 'Concluída' ? DateTime.now() : null,
       );
 
-      final atualizarOS =
-          AtualizarOrdemServico(OrdemServicoRepositorioAdaptativo());
-
+      // Usa a instância correta do caso de uso
       try {
-        await atualizarOS.executar(osAtualizada);
+        await _atualizarOS.executar(osAtualizada);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('OS atualizada com sucesso!'),

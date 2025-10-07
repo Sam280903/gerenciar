@@ -8,19 +8,42 @@ import 'package:gerenciar/dominio/casos_uso/ordem_servico/listar_ordens_servico.
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
-import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:intl/intl.dart';
+
+// --- IMPORTS ADICIONADOS PARA INJEÇÃO DE DEPENDÊNCIA ---
+import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
+import 'package:gerenciar/dominio/casos_uso/tecnico/listar_tecnicos.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
+import 'package:gerenciar/dominio/casos_uso/ordem_servico/cadastrar_ordem_servico.dart';
+import 'package:gerenciar/dominio/interfaces/agendamento_repositorio_interface.dart';
+// --------------------------------------------------------
+
 import 'cadastro_os_tela.dart';
 import 'detalhes_os_tela.dart';
 
 class OrdensServicoTela extends StatefulWidget {
-  // Adicionando as dependências para injeção
   final ListarOrdensServico? listarOS;
   final BuscarClientePorId? buscarCliente;
   final BuscarTecnicoPorId? buscarTecnico;
 
+  // Dependências para a tela de cadastro que será chamada
+  final ListarClientes? listarClientes;
+  final ListarTecnicos? listarTecnicos;
+  final ListarFormasPagamento? listarFormasPagamento;
+  final CadastrarOrdemServico? cadastrarOS;
+  final AgendamentoRepositorioInterface? agendamentoRepo;
+
   const OrdensServicoTela(
-      {super.key, this.listarOS, this.buscarCliente, this.buscarTecnico});
+      {super.key,
+      this.listarOS,
+      this.buscarCliente,
+      this.buscarTecnico,
+      this.listarClientes,
+      this.listarTecnicos,
+      this.listarFormasPagamento,
+      this.cadastrarOS,
+      this.agendamentoRepo});
 
   @override
   State<OrdensServicoTela> createState() => _OrdensServicoTelaState();
@@ -31,7 +54,6 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   late TabController _tabController;
   final _buscaController = TextEditingController();
 
-  // Dependências que serão inicializadas
   late final ListarOrdensServico _listarOS;
   late final BuscarClientePorId _buscarCliente;
   late final BuscarTecnicoPorId _buscarTecnico;
@@ -46,7 +68,6 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   List<OrdemServicoDetalhada> _concluidasFiltrados = [];
   List<OrdemServicoDetalhada> _reabertasFiltrados = [];
 
-  // ADICIONADO
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
 
@@ -58,19 +79,17 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
 
-    // Inicializa as dependências a partir do widget ou cria novas instâncias
-    _listarOS =
-        widget.listarOS ?? ListarOrdensServico(OrdemServicoRepositorioAdaptativo());
-    _buscarCliente =
-        widget.buscarCliente ?? BuscarClientePorId(ClienteRepositorioAdaptativo());
-    _buscarTecnico =
-        widget.buscarTecnico ?? BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
+    _listarOS = widget.listarOS ??
+        ListarOrdensServico(OrdemServicoRepositorioAdaptativo());
+    _buscarCliente = widget.buscarCliente ??
+        BuscarClientePorId(ClienteRepositorioAdaptativo());
+    _buscarTecnico = widget.buscarTecnico ??
+        BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
 
-    _carregarDadosIniciais(); // MÉTODO ALTERADO
+    _carregarDadosIniciais();
     _buscaController.addListener(_filtrarOS);
   }
 
-  // NOVO MÉTODO
   Future<void> _carregarDadosIniciais() async {
     final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
     if (mounted && dadosUsuario != null) {
@@ -115,11 +134,10 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   }
 
   Future<void> _carregarOS() async {
-    if (_idGestor == null) return; // Não carrega se não souber o gestor
+    if (_idGestor == null) return;
 
     setState(() => _carregando = true);
-    
-    // ALTERADO: Passa o idGestor para o caso de uso
+
     final ordensDeServico = await _listarOS.executar(idGestor: _idGestor!);
     List<OrdemServicoDetalhada> pendentesTemp = [];
     List<OrdemServicoDetalhada> emAndamentoTemp = [];
@@ -177,7 +195,14 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   void _abrirFormularioCadastro() async {
     final resultado = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CadastroOSTela()),
+      MaterialPageRoute(
+          builder: (context) => CadastroOSTela(
+                listarClientes: widget.listarClientes,
+                listarTecnicos: widget.listarTecnicos,
+                listarFormasPagamento: widget.listarFormasPagamento,
+                cadastrarOS: widget.cadastrarOS,
+                agendamentoRepo: widget.agendamentoRepo,
+              )),
     );
     if (resultado == true) {
       _carregarOS();

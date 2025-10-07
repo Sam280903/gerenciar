@@ -12,7 +12,9 @@ import 'package:gerenciar/apresentacao/telas/agendamentos/agendamentos_tela.dart
 import 'package:gerenciar/apresentacao/telas/clientes/clientes_tela.dart';
 import 'package:gerenciar/apresentacao/telas/relatorios/relatorios_tela.dart';
 import 'package:gerenciar/apresentacao/telas/tutoriais/tutoriais_tela.dart';
+// --- IMPORT ADICIONADO AQUI ---
 import 'package:gerenciar/apresentacao/telas/formas_pagamento/formas_pagamento_tela.dart';
+// ---------------------------------
 import 'package:gerenciar/apresentacao/telas/suporte/suporte_tela.dart';
 import 'package:gerenciar/apresentacao/telas/redefinir_senha/redefinir_senha_tela.dart';
 import 'app/rotas.dart';
@@ -47,7 +49,6 @@ class GerenciarApp extends StatelessWidget {
       ),
       // Suas rotas nomeadas continuam funcionando normalmente
       routes: {
-        
         Rotas.verificador: (context) => const VerificadorInicialTela(),
         Rotas.login: (context) => const LoginTela(),
         Rotas.cadastroGestor: (context) => const CadastroGestorTela(),

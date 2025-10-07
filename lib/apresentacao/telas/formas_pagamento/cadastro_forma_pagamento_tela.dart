@@ -4,11 +4,13 @@ import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_rep
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_nome.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/cadastrar_forma_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
-import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:uuid/uuid.dart';
 
 class CadastroFormaPagamentoTela extends StatefulWidget {
-  const CadastroFormaPagamentoTela({super.key});
+  final CadastrarFormaPagamento? cadastrarFormaPagamento;
+
+  const CadastroFormaPagamentoTela({super.key, this.cadastrarFormaPagamento});
 
   @override
   State<CadastroFormaPagamentoTela> createState() =>
@@ -22,17 +24,19 @@ class _CadastroFormaPagamentoTelaState
   final _descricaoController = TextEditingController();
   bool _carregando = false;
 
-  // ADICIONADO
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
+
+  late final CadastrarFormaPagamento _cadastrarFormaPagamento;
 
   @override
   void initState() {
     super.initState();
-    _carregarDadosIniciais(); // ADICIONADO
+    _cadastrarFormaPagamento = widget.cadastrarFormaPagamento ??
+        CadastrarFormaPagamento(FormaPagamentoRepositorioAdaptativo());
+    _carregarDadosIniciais();
   }
 
-  // NOVO MÉTODO
   Future<void> _carregarDadosIniciais() async {
     final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
     if (mounted && dadosUsuario != null) {
@@ -50,7 +54,7 @@ class _CadastroFormaPagamentoTelaState
       ));
       return;
     }
-    
+
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
       final nome = _nomeController.text.trim();
@@ -59,7 +63,7 @@ class _CadastroFormaPagamentoTelaState
       try {
         final buscarPorNome = BuscarFormaPagamentoPorNome(repositorio);
         final existente = await buscarPorNome.executar(nome);
-        if (existente != null && existente.idGestor == _idGestor) { // Verifica se já existe para o mesmo gestor
+        if (existente != null && existente.idGestor == _idGestor) {
           throw Exception('Já existe uma forma de pagamento com este nome.');
         }
 
@@ -68,10 +72,11 @@ class _CadastroFormaPagamentoTelaState
           nome: nome,
           descricao: _descricaoController.text.trim(),
           ativo: true,
-          idGestor: _idGestor!, // ADICIONADO
+          idGestor: _idGestor!,
         );
-        final cadastrar = CadastrarFormaPagamento(repositorio);
-        await cadastrar.executar(novaForma);
+
+        await _cadastrarFormaPagamento.executar(novaForma);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Salvo com sucesso!'),

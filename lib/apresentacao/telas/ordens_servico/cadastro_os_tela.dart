@@ -15,12 +15,25 @@ import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
 import 'package:gerenciar/apresentacao/widgets/_tela_busca.dart';
 import 'package:gerenciar/apresentacao/widgets/_widget_selecao.dart';
-import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
+import 'package:gerenciar/dominio/interfaces/agendamento_repositorio_interface.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class CadastroOSTela extends StatefulWidget {
-  const CadastroOSTela({super.key});
+  final ListarClientes? listarClientes;
+  final ListarTecnicos? listarTecnicos;
+  final ListarFormasPagamento? listarFormasPagamento;
+  final CadastrarOrdemServico? cadastrarOS;
+  final AgendamentoRepositorioInterface? agendamentoRepo;
+
+  const CadastroOSTela(
+      {super.key,
+      this.listarClientes,
+      this.listarTecnicos,
+      this.listarFormasPagamento,
+      this.cadastrarOS,
+      this.agendamentoRepo});
 
   @override
   State<CadastroOSTela> createState() => _CadastroOSTelaState();
@@ -42,18 +55,33 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   bool _carregando = false;
   bool _isInit = true;
 
-  // ADICIONADO
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
+
+  late final ListarClientes _listarClientes;
+  late final ListarTecnicos _listarTecnicos;
+  late final ListarFormasPagamento _listarFormasPagamento;
+  late final CadastrarOrdemServico _cadastrarOS;
+  late final AgendamentoRepositorioInterface _agendamentoRepo;
 
   @override
   void initState() {
     super.initState();
+    _listarClientes =
+        widget.listarClientes ?? ListarClientes(ClienteRepositorioAdaptativo());
+    _listarTecnicos =
+        widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
+    _listarFormasPagamento = widget.listarFormasPagamento ??
+        ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
+    _cadastrarOS = widget.cadastrarOS ??
+        CadastrarOrdemServico(OrdemServicoRepositorioAdaptativo());
+    _agendamentoRepo =
+        widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
+
     _dataController.text = DateFormat('dd/MM/yyyy').format(_dataSelecionada);
-    _carregarDadosIniciais(); // ADICIONADO
+    _carregarDadosIniciais();
   }
 
-  // NOVO MÉTODO
   Future<void> _carregarDadosIniciais() async {
     final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
     if (mounted && dadosUsuario != null) {
@@ -88,8 +116,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
       MaterialPageRoute(
         builder: (_) => TelaBusca<Cliente>(
           titulo: 'Selecionar Cliente',
-          futureItens: ListarClientes(ClienteRepositorioAdaptativo())
-              .executar(idGestor: _idGestor!),
+          futureItens: _listarClientes.executar(idGestor: _idGestor!),
           getNomeItem: (cliente) => cliente.nome,
         ),
       ),
@@ -106,8 +133,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
       MaterialPageRoute(
         builder: (_) => TelaBusca<Tecnico>(
           titulo: 'Selecionar Técnico',
-          futureItens: ListarTecnicos(TecnicoRepositorioAdaptativo())
-              .executar(idGestor: _idGestor!),
+          futureItens: _listarTecnicos.executar(idGestor: _idGestor!),
           getNomeItem: (tecnico) => tecnico.nome,
         ),
       ),
@@ -124,9 +150,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
       MaterialPageRoute(
         builder: (_) => TelaBusca<FormaPagamento>(
           titulo: 'Selecionar Forma de Pagamento',
-          futureItens:
-              ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo())
-                  .executar(idGestor: _idGestor!),
+          futureItens: _listarFormasPagamento.executar(idGestor: _idGestor!),
           getNomeItem: (forma) => forma.nome,
         ),
       ),
@@ -165,6 +189,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
     }
   }
 
+  // --- CORREÇÃO PRINCIPAL AQUI ---
   Future<void> _salvarOS() async {
     if (_idGestor == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -186,8 +211,8 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
         _horaSelecionada.minute,
       );
 
-      final agendamentoRepo = AgendamentoRepositorioAdaptativo();
-      final ocupado = await agendamentoRepo.verificarDisponibilidade(
+      // USA a variável da classe (_agendamentoRepo), que foi injetada
+      final ocupado = await _agendamentoRepo.verificarDisponibilidade(
         _tecnicoSelecionado!.id,
         dataHoraCompleta,
       );
@@ -216,11 +241,9 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
         ativo: true,
       );
 
-      final cadastrarOS =
-          CadastrarOrdemServico(OrdemServicoRepositorioAdaptativo());
-
+      // USA a variável da classe (_cadastrarOS), que foi injetada
       try {
-        await cadastrarOS.executar(novaOS);
+        await _cadastrarOS.executar(novaOS);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('OS cadastrada com sucesso!'),
@@ -240,6 +263,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
       }
     }
   }
+  // --- FIM DA CORREÇÃO ---
 
   @override
   Widget build(BuildContext context) {

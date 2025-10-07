@@ -1,17 +1,20 @@
 // lib/apresentacao/telas/formas_pagamento/formas_pagamento_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/cadastrar_forma_pagamento.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
-import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'cadastro_forma_pagamento_tela.dart';
 import 'detalhes_forma_pagamento_tela.dart';
 
 class FormasPagamentoTela extends StatefulWidget {
-  // Adicionando o caso de uso como dependência injetável
   final ListarFormasPagamento? listarFormasPagamento;
+  final CadastrarFormaPagamento? cadastrarFormaPagamento;
 
-  const FormasPagamentoTela({super.key, this.listarFormasPagamento});
+  const FormasPagamentoTela(
+      {super.key, this.listarFormasPagamento, this.cadastrarFormaPagamento});
+
   @override
   State<FormasPagamentoTela> createState() => _FormasPagamentoTelaState();
 }
@@ -25,21 +28,18 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   List<FormaPagamento> _formasFiltradas = [];
   final _buscaController = TextEditingController();
 
-  // ADICIONADO
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
 
   @override
   void initState() {
     super.initState();
-    // Inicializa a dependência a partir do widget ou cria uma nova instância
     _listar = widget.listarFormasPagamento ??
         ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
     _carregarDadosIniciais();
     _buscaController.addListener(_filtrarFormas);
   }
 
-  // NOVO MÉTODO
   Future<void> _carregarDadosIniciais() async {
     final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
     if (mounted && dadosUsuario != null) {
@@ -66,9 +66,7 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   }
 
   void _carregar() {
-    if (_idGestor == null) return; // Não carrega se não souber o gestor
-
-    // ALTERADO: Passa o idGestor para o caso de uso
+    if (_idGestor == null) return;
     final future = _listar.executar(
         idGestor: _idGestor!, incluirInativos: _mostrarInativos);
     setState(() {
@@ -93,7 +91,9 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
       backgroundColor: Colors.transparent,
       builder: (_) => Padding(
         padding: MediaQuery.of(context).viewInsets,
-        child: const CadastroFormaPagamentoTela(),
+        child: CadastroFormaPagamentoTela(
+          cadastrarFormaPagamento: widget.cadastrarFormaPagamento,
+        ),
       ),
     );
     if (resultado == true) _carregar();

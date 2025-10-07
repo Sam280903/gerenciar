@@ -1,13 +1,19 @@
+// lib/apresentacao/telas/clientes/clientes_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
-import 'package:gerenciar/servicos/autenticacao_servico.dart'; // ADICIONADO
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
+import 'package:http/http.dart' as http; // Adicione este import
 import 'cadastro_cliente_tela.dart';
 import 'detalhes_cliente_tela.dart';
 
 class ClientesTela extends StatefulWidget {
-  const ClientesTela({super.key});
+  // Adicionamos as dependências que a tela e suas filhas usarão
+  final ListarClientes? listarClientes;
+  final http.Client? httpClient;
+
+  const ClientesTela({super.key, this.listarClientes, this.httpClient});
   @override
   State<ClientesTela> createState() => _ClientesTelaState();
 }
@@ -21,19 +27,20 @@ class _ClientesTelaState extends State<ClientesTela> {
   List<Cliente> _clientesFiltrados = [];
   final _buscaController = TextEditingController();
 
-  // ADICIONADO
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
 
   @override
   void initState() {
     super.initState();
-    _listarClientes = ListarClientes(ClienteRepositorioAdaptativo());
-    _carregarDadosIniciais(); // MÉTODO ALTERADO
+    // Usa a dependência injetada ou cria uma padrão
+    _listarClientes =
+        widget.listarClientes ?? ListarClientes(ClienteRepositorioAdaptativo());
+    _carregarDadosIniciais();
     _buscaController.addListener(_filtrarClientes);
   }
 
-  // NOVO MÉTODO
+  // Nenhuma mudança a partir daqui até _abrirFormularioCadastro...
   Future<void> _carregarDadosIniciais() async {
     final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
     if (mounted && dadosUsuario != null) {
@@ -60,9 +67,8 @@ class _ClientesTelaState extends State<ClientesTela> {
   }
 
   void _carregarClientes() {
-    if (_idGestor == null) return; // Não carrega se não souber o gestor
+    if (_idGestor == null) return;
 
-    // ALTERADO: Passa o idGestor para o caso de uso
     final future = _listarClientes.executar(
         idGestor: _idGestor!, incluirInativos: _mostrarInativos);
 
@@ -81,11 +87,18 @@ class _ClientesTelaState extends State<ClientesTela> {
     });
   }
 
+  // --- CORREÇÃO PRINCIPAL AQUI ---
   void _abrirFormularioCadastro() async {
-    final resultado = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const CadastroClienteTela()));
+    final resultado = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CadastroClienteTela(
+                  // Passamos as dependências para a próxima tela
+                  httpClient: widget.httpClient,
+                )));
     if (resultado == true) _carregarClientes();
   }
+  // --- FIM DA CORREÇÃO ---
 
   void _abrirDetalhes(Cliente cliente) async {
     final resultado = await Navigator.push(
@@ -97,6 +110,7 @@ class _ClientesTelaState extends State<ClientesTela> {
 
   @override
   Widget build(BuildContext context) {
+    // O método build permanece exatamente o mesmo
     return Scaffold(
       appBar: AppBar(
         title: const Text("Clientes"),

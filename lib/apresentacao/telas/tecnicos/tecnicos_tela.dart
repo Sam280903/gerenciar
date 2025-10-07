@@ -8,6 +8,7 @@ import 'cadastro_tecnico_tela.dart';
 import 'detalhes_tecnico_tela.dart';
 
 class TecnicosTela extends StatefulWidget {
+  // Dependências injetáveis para facilitar os testes
   final AutenticacaoServico? authServico;
   final ListarTecnicos? listarTecnicos;
 
@@ -28,20 +29,21 @@ class _TecnicosTelaState extends State<TecnicosTela> {
   final _buscaController = TextEditingController();
 
   String _perfilUsuario = "";
-  String? _idGestor; // ADICIONADO
+  String? _idGestor;
 
   @override
   void initState() {
     super.initState();
+    // Usa as dependências injetadas ou cria instâncias padrão
     _listarTecnicos =
         widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());
     _authServico = widget.authServico ?? AutenticacaoServico();
 
-    _carregarDadosIniciais(); // MÉTODO ALTERADO
+    _carregarDadosIniciais();
     _buscaController.addListener(_filtrarTecnicos);
   }
 
-  // MÉTODO NOVO (SUBSTITUI O ANTIGO _carregarPerfilUsuario)
+  // O restante do arquivo permanece o mesmo até o método _abrirFormularioCadastro
   Future<void> _carregarDadosIniciais() async {
     final dados = await _authServico.buscarDadosUsuarioLogado();
     if (dados != null && mounted) {
@@ -49,7 +51,7 @@ class _TecnicosTelaState extends State<TecnicosTela> {
         _perfilUsuario = dados['perfil'] ?? '';
         _idGestor = dados['idGestor'];
       });
-      _carregarTecnicos(); // Chama o carregamento dos técnicos AQUI
+      _carregarTecnicos();
     }
   }
 
@@ -68,9 +70,7 @@ class _TecnicosTelaState extends State<TecnicosTela> {
     });
   }
 
-  // MÉTODO ALTERADO
   void _carregarTecnicos() {
-    // Garante que só executa se o idGestor já foi carregado
     if (_idGestor == null) return;
 
     final future = _listarTecnicos.executar(
@@ -90,11 +90,18 @@ class _TecnicosTelaState extends State<TecnicosTela> {
     });
   }
 
+  // --- CORREÇÃO PRINCIPAL AQUI ---
   void _abrirFormularioCadastro() async {
-    final resultado = await Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const CadastroTecnicoTela()));
+    final resultado = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => CadastroTecnicoTela(
+                  // Injeta o serviço de autenticação na tela de cadastro
+                  authServico: _authServico,
+                )));
     if (resultado == true) _carregarTecnicos();
   }
+  // --- FIM DA CORREÇÃO ---
 
   void _abrirDetalhes(Tecnico tecnico) async {
     final resultado = await Navigator.push(
@@ -106,6 +113,7 @@ class _TecnicosTelaState extends State<TecnicosTela> {
 
   @override
   Widget build(BuildContext context) {
+    // O método build permanece o mesmo...
     return Scaffold(
       appBar: AppBar(
         title: const Text("Técnicos"),
