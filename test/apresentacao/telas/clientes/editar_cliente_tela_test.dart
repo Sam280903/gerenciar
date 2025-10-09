@@ -71,8 +71,8 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     // 2. Verifica se o método 'atualizar' foi chamado com o nome modificado
-    // verify(mockClienteRepositorio.atualizar(argThat(
-    //   isA<Cliente>().having((c) => c.nome, 'nome', 'Cliente Modificado'),
-    // ))).called(1);
+    verify(mockClienteRepositorio.atualizar(argThat(
+      isA<Cliente>().having((c) => c.nome, 'nome', 'Cliente Modificado'),
+    ))).called(1);
   });
 }

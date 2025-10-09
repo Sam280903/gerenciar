@@ -62,8 +62,8 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     // // Verifica se o caso de uso foi chamado com o status correto
-    // verify(mockAtualizarAgendamento.executar(argThat(
-    //   isA<Agendamento>().having((ag) => ag.status, 'status', 'Confirmado'),
-    // ))).called(1);
+    verify(mockAtualizarAgendamento.executar(argThat(
+      isA<Agendamento>().having((ag) => ag.status, 'status', 'Confirmado'),
+    ))).called(1);
   });
 }

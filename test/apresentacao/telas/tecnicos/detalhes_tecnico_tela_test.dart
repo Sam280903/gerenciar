@@ -60,6 +60,6 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'INATIVAR'));
     await tester.pumpAndSettle();
 
-    // verify(mockTecnicoRepositorio.inativar(tecnicoAtivo.id)).called(1);
+    verify(mockTecnicoRepositorio.inativar(tecnicoAtivo.id)).called(1);
   });
 }

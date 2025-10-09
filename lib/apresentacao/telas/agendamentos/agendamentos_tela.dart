@@ -21,10 +21,7 @@ class AgendamentosTela extends StatefulWidget {
   final TecnicoRepositorioAdaptativo? tecnicoRepo;
 
   const AgendamentosTela(
-      {super.key,
-      this.agendamentoRepo,
-      this.clienteRepo,
-      this.tecnicoRepo});
+      {super.key, this.agendamentoRepo, this.clienteRepo, this.tecnicoRepo});
 
   @override
   State<AgendamentosTela> createState() => _AgendamentosTelaState();
@@ -61,7 +58,8 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
 
-    _agendamentoRepo = widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
+    _agendamentoRepo =
+        widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
     _clienteRepo = widget.clienteRepo ?? ClienteRepositorioAdaptativo();
     _tecnicoRepo = widget.tecnicoRepo ?? TecnicoRepositorioAdaptativo();
 
@@ -120,8 +118,8 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     setState(() => _carregando = true);
 
     // ALTERADO: Passa o idGestor para o caso de uso
-    final agendamentos =
-        await ListarAgendamentos(_agendamentoRepo).executar(idGestor: _idGestor!);
+    final agendamentos = await ListarAgendamentos(_agendamentoRepo)
+        .executar(idGestor: _idGestor!);
     final hoje = DateUtils.dateOnly(DateTime.now());
     List<AgendamentoDetalhado> proximosTemp = [];
     List<AgendamentoDetalhado> concluidosTemp = [];
@@ -220,15 +218,17 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       }
       return;
     }
-    
+
     // Constrói a URL para o Google Maps Directions
     // O último endereço na lista cronológica será o destino final.
     // Todos os outros serão pontos de parada (waypoints).
-    final enderecos = agendamentosDoDia.map((item) => item.cliente!.endereco).toList();
+    final enderecos =
+        agendamentosDoDia.map((item) => item.cliente!.endereco).toList();
     final destino = Uri.encodeComponent(enderecos.removeLast());
     final waypoints = enderecos.map(Uri.encodeComponent).join('|');
 
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=$destino&waypoints=$waypoints&travelmode=driving';
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=$destino&waypoints=$waypoints';
     final uri = Uri.parse(url);
 
     if (await canLaunchUrl(uri)) {
@@ -339,8 +339,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     return RefreshIndicator(
       onRefresh: _carregarAgendamentos,
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(
-            8, 8, 8, 160),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 160),
         itemCount: lista.length,
         itemBuilder: (context, index) {
           final item = lista[index];

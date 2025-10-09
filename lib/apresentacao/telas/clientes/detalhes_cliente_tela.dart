@@ -4,6 +4,7 @@ import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptat
 import 'package:gerenciar/dominio/casos_uso/cliente/inativar_cliente.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/reativar_cliente.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'editar_cliente_tela.dart';
 
@@ -17,11 +18,23 @@ class DetalhesClienteTela extends StatefulWidget {
 class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
   bool _carregando = false;
   late Cliente _clienteAtual;
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String _perfilUsuario = "";
 
   @override
   void initState() {
     super.initState();
     _clienteAtual = widget.cliente;
+    _carregarPerfilUsuario();
+  }
+
+  Future<void> _carregarPerfilUsuario() async {
+    final dados = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dados != null) {
+      setState(() {
+        _perfilUsuario = dados['perfil'] ?? '';
+      });
+    }
   }
 
   Future<void> _abrirMapa(String endereco) async {
@@ -161,22 +174,25 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
   Widget _buildActionButtons() {
     return Row(
       children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _toggleAtivo,
-            icon: Icon(
-                _clienteAtual.ativo ? Icons.power_settings_new : Icons.refresh),
-            label: Text(_clienteAtual.ativo ? 'INATIVAR' : 'REATIVAR'),
-            style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    _clienteAtual.ativo ? Colors.redAccent : Colors.greenAccent,
-                side: BorderSide(
-                    color: _clienteAtual.ativo
-                        ? Colors.redAccent
-                        : Colors.greenAccent)),
+        if (_perfilUsuario == 'gestor')
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: _toggleAtivo,
+              icon: Icon(_clienteAtual.ativo
+                  ? Icons.power_settings_new
+                  : Icons.refresh),
+              label: Text(_clienteAtual.ativo ? 'INATIVAR' : 'REATIVAR'),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: _clienteAtual.ativo
+                      ? Colors.redAccent
+                      : Colors.greenAccent,
+                  side: BorderSide(
+                      color: _clienteAtual.ativo
+                          ? Colors.redAccent
+                          : Colors.greenAccent)),
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
+        if (_perfilUsuario == 'gestor') const SizedBox(width: 16),
         Expanded(
             child: ElevatedButton.icon(
                 onPressed: _abrirEdicao,

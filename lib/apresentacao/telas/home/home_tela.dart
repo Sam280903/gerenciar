@@ -126,12 +126,14 @@ class _HomeTelaState extends State<HomeTela>
                     Rotas.agendamentos, context),
                 _buildItem(Icons.people_alt_outlined, 'Clientes',
                     Rotas.clientes, context),
-                _buildItem(Icons.bar_chart_outlined, 'Relatórios',
-                    Rotas.relatorios, context),
+                if (_perfilUsuario == 'gestor')
+                  _buildItem(Icons.bar_chart_outlined, 'Relatórios',
+                      Rotas.relatorios, context),
                 _buildItem(Icons.menu_book_outlined, 'Tutoriais',
                     Rotas.tutoriais, context),
-                _buildItem(Icons.payment_outlined, 'Pagamentos',
-                    Rotas.formasPagamento, context),
+                if (_perfilUsuario == 'gestor')
+                  _buildItem(Icons.payment_outlined, 'Pagamentos',
+                      Rotas.formasPagamento, context),
                 _buildItem(Icons.support_agent_outlined, 'Suporte',
                     Rotas.suporte, context),
               ],

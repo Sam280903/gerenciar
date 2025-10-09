@@ -52,6 +52,6 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'INATIVAR'));
     await tester.pump();
 
-    // verify(mockFormaPagamentoRepositorio.inativar(formaPagamento.id)).called(1);
+    verify(mockFormaPagamentoRepositorio.inativar(formaPagamento.id)).called(1);
   });
 }

@@ -4,6 +4,7 @@ import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptat
 import 'package:gerenciar/dominio/casos_uso/tecnico/inativar_tecnico.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/reativar_tecnico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'editar_tecnico_tela.dart';
 
 class DetalhesTecnicoTela extends StatefulWidget {
@@ -16,11 +17,23 @@ class DetalhesTecnicoTela extends StatefulWidget {
 class _DetalhesTecnicoTelaState extends State<DetalhesTecnicoTela> {
   bool _carregando = false;
   late Tecnico _tecnicoAtual;
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String _perfilUsuario = "";
 
   @override
   void initState() {
     super.initState();
     _tecnicoAtual = widget.tecnico;
+    _carregarPerfilUsuario();
+  }
+
+  Future<void> _carregarPerfilUsuario() async {
+    final dados = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dados != null) {
+      setState(() {
+        _perfilUsuario = dados['perfil'] ?? '';
+      });
+    }
   }
 
   Future<void> _toggleAtivo() async {
@@ -127,22 +140,25 @@ class _DetalhesTecnicoTelaState extends State<DetalhesTecnicoTela> {
   Widget _buildActionButtons() {
     return Row(
       children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _toggleAtivo,
-            icon: Icon(
-                _tecnicoAtual.ativo ? Icons.power_settings_new : Icons.refresh),
-            label: Text(_tecnicoAtual.ativo ? 'INATIVAR' : 'REATIVAR'),
-            style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    _tecnicoAtual.ativo ? Colors.redAccent : Colors.greenAccent,
-                side: BorderSide(
-                    color: _tecnicoAtual.ativo
-                        ? Colors.redAccent
-                        : Colors.greenAccent)),
+        if (_perfilUsuario == 'gestor')
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: _toggleAtivo,
+              icon: Icon(_tecnicoAtual.ativo
+                  ? Icons.power_settings_new
+                  : Icons.refresh),
+              label: Text(_tecnicoAtual.ativo ? 'INATIVAR' : 'REATIVAR'),
+              style: OutlinedButton.styleFrom(
+                  foregroundColor: _tecnicoAtual.ativo
+                      ? Colors.redAccent
+                      : Colors.greenAccent,
+                  side: BorderSide(
+                      color: _tecnicoAtual.ativo
+                          ? Colors.redAccent
+                          : Colors.greenAccent)),
+            ),
           ),
-        ),
-        const SizedBox(width: 16),
+        if (_perfilUsuario == 'gestor') const SizedBox(width: 16),
         Expanded(
             child: ElevatedButton.icon(
                 onPressed: _abrirEdicao,

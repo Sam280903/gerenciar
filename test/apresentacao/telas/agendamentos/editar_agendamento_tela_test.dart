@@ -55,10 +55,10 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-    // // Verifica a chamada ao mock
-    // verify(mockAtualizarAgendamento.executar(argThat(
-    //   isA<Agendamento>()
-    //       .having((ag) => ag.observacao, 'observacao', 'Obs modificada'),
-    // ))).called(1);
+    // Verifica a chamada ao mock
+    verify(mockAtualizarAgendamento.executar(argThat(
+      isA<Agendamento>()
+          .having((ag) => ag.observacao, 'observacao', 'Obs modificada'),
+    ))).called(1);
   });
 }

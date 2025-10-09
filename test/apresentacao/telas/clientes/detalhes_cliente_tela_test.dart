@@ -80,7 +80,7 @@ void main() {
 
     // ASSERT
     // Verifica se o método inativar do repositório foi chamado com o ID correto
-    // verify(mockClienteRepositorio.inativar(clienteAtivo.id)).called(1);
+    verify(mockClienteRepositorio.inativar(clienteAtivo.id)).called(1);
   });
 
   testWidgets('Deve navegar para a tela de edição ao tocar em EDITAR',

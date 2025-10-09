@@ -55,8 +55,8 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-    // verify(mockTecnicoRepositorio.atualizar(argThat(
-    //   isA<Tecnico>().having((t) => t.nome, 'nome', 'Nome Modificado'),
-    // ))).called(1);
+    verify(mockTecnicoRepositorio.atualizar(argThat(
+      isA<Tecnico>().having((t) => t.nome, 'nome', 'Nome Modificado'),
+    ))).called(1);
   });
 }

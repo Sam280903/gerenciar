@@ -66,9 +66,8 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     // // Verifica a chamada ao mock
-    // verify(mockAtualizarFormaPagamento.executar(argThat(
-    //   isA<FormaPagamento>()
-    //       .having((fp) => fp.nome, 'nome', 'Nome Modificado'),
-    // ))).called(1);
+    verify(mockAtualizarFormaPagamento.executar(argThat(
+      isA<FormaPagamento>().having((fp) => fp.nome, 'nome', 'Nome Modificado'),
+    ))).called(1);
   });
 }

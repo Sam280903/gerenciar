@@ -1,13 +1,16 @@
 // lib/apresentacao/telas/ordens_servico/detalhes_os_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
+import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
+import 'package:gerenciar/dominio/casos_uso/ordem_servico/reabrir_ordem_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:gerenciar/servicos/pdf_servico.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,6 +27,9 @@ class DetalhesOSTela extends StatefulWidget {
 
 class _DetalhesOSTelaState extends State<DetalhesOSTela> {
   late Future<Map<String, dynamic>> _dadosFuture;
+  final AutenticacaoServico _authServico = AutenticacaoServico();
+  String _perfilUsuario = "";
+  bool _carregandoAcao = false;
 
   @override
   void initState() {
@@ -36,13 +42,89 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
         .executar(widget.ordemServico.idCliente);
     final tecnicoFuture = BuscarTecnicoPorId(TecnicoRepositorioAdaptativo())
         .executar(widget.ordemServico.idTecnico);
+    final dadosUsuarioFuture = _authServico.buscarDadosUsuarioLogado();
 
-    final resultados = await Future.wait([clienteFuture, tecnicoFuture]);
+    final resultados =
+        await Future.wait([clienteFuture, tecnicoFuture, dadosUsuarioFuture]);
+
+    if (mounted && resultados[2] != null) {
+      final dadosUsuario = resultados[2] as Map<String, dynamic>;
+      setState(() {
+        _perfilUsuario = dadosUsuario['perfil'] ?? '';
+      });
+    }
 
     return {
       'cliente': resultados[0] as Cliente?,
       'tecnico': resultados[1] as Tecnico?,
     };
+  }
+
+  Future<void> _reabrirOS() async {
+    final justificativaController = TextEditingController();
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reabrir Ordem de Serviço'),
+        content: TextField(
+          controller: justificativaController,
+          decoration: const InputDecoration(
+            labelText: 'Justificativa da Reabertura',
+            hintText: 'Ex: Retorno em garantia.',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (justificativaController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('A justificativa é obrigatória.'),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+                return;
+              }
+              Navigator.of(context).pop(true);
+            },
+            child: const Text('REABRIR'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      setState(() => _carregandoAcao = true);
+      try {
+        await ReabrirOrdemServico(OrdemServicoRepositorioAdaptativo()).executar(
+          id: widget.ordemServico.id,
+          justificativa: justificativaController.text.trim(),
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('OS reaberta com sucesso!'),
+            backgroundColor: Colors.green,
+          ));
+          Navigator.of(context).pop(true); // Retorna para recarregar a lista
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Erro ao reabrir OS: $e'),
+            backgroundColor: Colors.redAccent,
+          ));
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _carregandoAcao = false);
+        }
+      }
+    }
   }
 
   Future<void> _abrirMapa(String? endereco) async {
@@ -56,7 +138,8 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
       return;
     }
     final query = Uri.encodeComponent(endereco);
-    final uri = Uri.parse('https://maps.google.com/maps?q=$query');
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
 
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -188,7 +271,10 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
                     'R\$ ${widget.ordemServico.valor.toStringAsFixed(2)}',
                     Icons.monetization_on_outlined),
                 const SizedBox(height: 40),
-                _buildActionButtons(),
+                if (_carregandoAcao)
+                  const Center(child: CircularProgressIndicator())
+                else
+                  _buildActionButtons(),
               ],
             ),
           );
@@ -207,7 +293,7 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
           label: const Text('EDITAR'),
         ),
         const SizedBox(height: 12),
-        if (widget.ordemServico.status == 'Concluída')
+        if (widget.ordemServico.status == 'Concluída') ...[
           OutlinedButton.icon(
             onPressed: _exportarPDF,
             icon: const Icon(Icons.picture_as_pdf_outlined),
@@ -217,6 +303,19 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
               side: const BorderSide(color: Colors.blueAccent),
             ),
           ),
+          if (_perfilUsuario == 'gestor') ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _reabrirOS,
+              icon: const Icon(Icons.replay_outlined),
+              label: const Text('REABRIR OS'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.orangeAccent,
+                side: const BorderSide(color: Colors.orangeAccent),
+              ),
+            ),
+          ],
+        ],
       ],
     );
   }
