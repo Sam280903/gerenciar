@@ -85,17 +85,16 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   }
 
   void _abrirFormularioCadastro() async {
-    final resultado = await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Padding(
-        padding: MediaQuery.of(context).viewInsets,
-        child: CadastroFormaPagamentoTela(
+    // --- CORREÇÃO APLICADA AQUI ---
+    final resultado = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CadastroFormaPagamentoTela(
           cadastrarFormaPagamento: widget.cadastrarFormaPagamento,
         ),
       ),
     );
+    // --- FIM DA CORREÇÃO ---
     if (resultado == true) _carregar();
   }
 

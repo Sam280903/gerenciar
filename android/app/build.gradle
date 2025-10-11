@@ -24,18 +24,32 @@ if (flutterVersionName == null) {
 }
 
 android {
+    // --- INÍCIO DO BLOCO ADICIONADO ---
+    def keystoreProperties = new Properties()
+    def keystorePropertiesFile = rootProject.file('key.properties')
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.withReader('UTF-8') { reader ->
+            keystoreProperties.load(reader)
+        }
+    }
+    project.ext.set('storeFile', keystoreProperties['storeFile'])
+    project.ext.set('storePassword', keystoreProperties['storePassword'])
+    project.ext.set('keyAlias', keystoreProperties['keyAlias'])
+    project.ext.set('keyPassword', keystoreProperties['keyPassword'])
+    // --- FIM DO BLOCO ADICIONADO ---
+
     namespace = "com.flaviosamuel.gerenciar"
     compileSdk = 36
 
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '1.8'
     }
 
     sourceSets {
@@ -50,9 +64,31 @@ android {
         versionName = flutterVersionName
     }
 
+    // --- INÍCIO DO BLOCO ADICIONADO ---
+    signingConfigs {
+        release {
+            if (project.hasProperty('storeFile')) {
+                storeFile file(project.property('storeFile'))
+                storePassword project.property('storePassword')
+                keyAlias project.property('keyAlias')
+                keyPassword project.property('keyPassword')
+            }
+        }
+    }
+    // --- FIM DO BLOCO ADICIONADO ---
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            // --- LINHA ABAIXO FOI ALTERADA ---
+            signingConfig signingConfigs.release
+        }
+    }
+
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == "release") {
+            variant.outputs.all { output ->
+                outputFileName = "gerenciar.apk"
+            }
         }
     }
 }

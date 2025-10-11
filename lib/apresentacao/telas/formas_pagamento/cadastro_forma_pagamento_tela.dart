@@ -97,44 +97,41 @@ class _CadastroFormaPagamentoTelaState
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-          24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
+    // --- CORREÇÃO APLICADA AQUI ---
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Nova Forma de Pagamento'),
       ),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('Nova Forma de Pagamento',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: _nomeController,
-              decoration: const InputDecoration(labelText: 'Nome'),
-              validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _descricaoController,
-              decoration:
-                  const InputDecoration(labelText: 'Descrição (opcional)'),
-            ),
-            const SizedBox(height: 32),
-            _carregando
-                ? const Center(child: CircularProgressIndicator())
-                : ElevatedButton(
-                    onPressed: _salvar, child: const Text('SALVAR')),
-          ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: _nomeController,
+                decoration: const InputDecoration(labelText: 'Nome'),
+                validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descricaoController,
+                decoration:
+                    const InputDecoration(labelText: 'Descrição (opcional)'),
+              ),
+              const SizedBox(height: 32),
+              _carregando
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: _salvar, child: const Text('SALVAR')),
+            ],
+          ),
         ),
       ),
     );
+    // --- FIM DA CORREÇÃO ---
   }
 }
