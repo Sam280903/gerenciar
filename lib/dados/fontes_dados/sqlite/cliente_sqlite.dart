@@ -39,9 +39,10 @@ class ClienteSQLite {
 
   Future<void> atualizarCliente(ClienteModel cliente) async {
     final db = await _db;
+    final dados = cliente.toMap()..['sincronizado'] = 0;
     await db.update(
       'clientes',
-       cliente.toMap(),
+      dados,
       where: 'id = ?',
       whereArgs: [cliente.id],
     );
@@ -56,7 +57,7 @@ class ClienteSQLite {
       whereArgs: [id],
     );
   }
-  
+
   Future<void> reativarCliente(String id) async {
     final db = await _db;
     await db.update(
@@ -82,8 +83,7 @@ class ClienteSQLite {
     }
     return null;
   }
-  
-  // MÉTODO ALTERADO
+
   Future<List<ClienteModel>> listarTodos(
       {required String idGestor, bool incluirInativos = false}) async {
     final db = await _db;

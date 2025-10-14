@@ -6,6 +6,15 @@ class ClienteFirebase {
   final CollectionReference _colecao =
       FirebaseFirestore.instance.collection('clientes');
 
+//METODO ADICIONADO
+  Future<List<ClienteModel>> listarRecentes() async {
+    final snapshot = await _colecao.orderBy('nome').limit(20).get();
+    return snapshot.docs
+        .map((doc) =>
+            ClienteModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
+  }
+
   Future<void> adicionarCliente(ClienteModel cliente) async {
     await _colecao.doc(cliente.id).set(cliente.toMap());
   }
@@ -30,7 +39,6 @@ class ClienteFirebase {
     return null;
   }
 
-  // MÉTODO ALTERADO
   Future<List<ClienteModel>> listarTodos(
       {required String idGestor, bool incluirInativos = false}) async {
     Query query = _colecao.where('idGestor', isEqualTo: idGestor);

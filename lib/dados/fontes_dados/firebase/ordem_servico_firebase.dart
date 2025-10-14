@@ -6,7 +6,6 @@ import '../../modelos/ordem_servico_model.dart';
 class OrdemServicoFirebase {
   final _colecao = FirebaseFirestore.instance.collection('ordens_servico');
 
-  // MÉTODO ALTERADO
   Future<List<OrdemServicoModel>> listarComFiltros(
       FiltrosRelatorio filtros, String idGestor) async {
     Query query = _colecao.where('idGestor', isEqualTo: idGestor);
@@ -38,6 +37,17 @@ class OrdemServicoFirebase {
         doc.id,
       );
     }).toList();
+  }
+
+//METODO ADICIONADO
+  Future<List<OrdemServicoModel>> listarRecentes() async {
+    final snapshot = await _colecao
+        .orderBy('dataHoraInicio', descending: true)
+        .limit(20)
+        .get();
+    return snapshot.docs
+        .map((doc) => OrdemServicoModel.fromMap(doc.data(), doc.id))
+        .toList();
   }
 
   Future<void> reabrir(
@@ -72,8 +82,8 @@ class OrdemServicoFirebase {
     return null;
   }
 
-  // MÉTODO ALTERADO
-  Future<List<OrdemServicoModel>> listarTodos({required String idGestor}) async {
+  Future<List<OrdemServicoModel>> listarTodos(
+      {required String idGestor}) async {
     final snapshot = await _colecao
         .where('ativo', isEqualTo: true)
         .where('idGestor', isEqualTo: idGestor)

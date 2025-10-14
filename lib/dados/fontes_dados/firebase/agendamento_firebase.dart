@@ -14,6 +14,15 @@ class AgendamentoFirebase {
     return snapshot.docs.isNotEmpty;
   }
 
+//METODO ADICIONADO
+  Future<List<AgendamentoModel>> listarRecentes() async {
+    final snapshot =
+        await _colecao.orderBy('dataHora', descending: true).limit(20).get();
+    return snapshot.docs
+        .map((doc) => AgendamentoModel.fromMap(doc.data(), doc.id))
+        .toList();
+  }
+
   Future<void> adicionar(AgendamentoModel agendamento) async {
     await _colecao.doc(agendamento.id).set(agendamento.toMap());
   }
@@ -38,7 +47,6 @@ class AgendamentoFirebase {
     return null;
   }
 
-  // MÉTODO ALTERADO
   Future<List<AgendamentoModel>> listarTodos(
       {required String idGestor, bool incluirInativos = false}) async {
     Query query = _colecao.where('idGestor', isEqualTo: idGestor);

@@ -6,6 +6,15 @@ class FormaPagamentoFirebase {
   final CollectionReference _colecao =
       FirebaseFirestore.instance.collection('formas_pagamento');
 
+//METODO ADICIONADO
+  Future<List<FormaPagamentoModel>> listarRecentes() async {
+    final snapshot = await _colecao.orderBy('nome').limit(20).get();
+    return snapshot.docs
+        .map((doc) => FormaPagamentoModel.fromMap(
+            doc.data() as Map<String, dynamic>, doc.id))
+        .toList();
+  }
+
   Future<void> adicionar(FormaPagamentoModel forma) async {
     await _colecao.doc(forma.id).set(forma.toMap());
   }
@@ -44,7 +53,6 @@ class FormaPagamentoFirebase {
     return null;
   }
 
-  // MÉTODO ALTERADO
   Future<List<FormaPagamentoModel>> listarTodos(
       {required String idGestor, bool incluirInativos = false}) async {
     Query query = _colecao.where('idGestor', isEqualTo: idGestor);

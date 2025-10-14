@@ -16,6 +16,8 @@ import 'package:gerenciar/dados/fontes_dados/sqlite/agendamento_sqlite.dart';
 import 'package:gerenciar/dados/fontes_dados/sqlite/ordem_servico_sqlite.dart';
 import 'package:gerenciar/dados/fontes_dados/sqlite/forma_pagamento_sqlite.dart';
 
+import 'package:gerenciar/dados/fontes_dados/sqlite/sqlite_conexao.dart';
+
 class SincronizacaoServico {
   // Instâncias para Firebase
   final _clienteFirebase = ClienteFirebase();
@@ -31,21 +33,17 @@ class SincronizacaoServico {
   final _osSqlite = OrdemServicoSQLite();
   final _formaPagamentoSqlite = FormaPagamentoSQLite();
 
-  // Singleton para garantir uma única instância do serviço
-  static final SincronizacaoServico _instance = SincronizacaoServico._internal();
+  // Singleton
+  static final SincronizacaoServico _instance =
+      SincronizacaoServico._internal();
   factory SincronizacaoServico() => _instance;
   SincronizacaoServico._internal();
 
   Timer? _timer;
 
   void iniciarSincronizacaoPeriodica() {
-    // Cancela qualquer timer anterior para evitar múltiplos timers
     _timer?.cancel();
-    
-    // Executa a sincronização imediatamente na inicialização
-    sincronizarDados();
-
-    // E depois a cada 5 minutos
+    sincronizarDados(); // Sincroniza imediatamente
     _timer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       await sincronizarDados();
     });
@@ -62,15 +60,56 @@ class SincronizacaoServico {
 
   Future<void> sincronizarDados() async {
     if (await _temConexao()) {
-      print("--- INICIANDO SINCRONIZAÇÃO ---");
-      await _sincronizarClientes();
-      await _sincronizarTecnicos();
-      await _sincronizarAgendamentos();
-      await _sincronizarOrdensServico();
-      await _sincronizarFormasPagamento();
-      print("--- SINCRONIZAÇÃO CONCLUÍDA ---");
+      print("--- INICIANDO SINCRONIZAÇÃO COMPLETA ---");
+      await _sincronizarParaNuvem();
+      await _sincronizarDaNuvem();
+      print("--- SINCRONIZAÇÃO COMPLETA CONCLUÍDA ---");
     } else {
       print("Sem conexão para sincronizar.");
+    }
+  }
+
+  Future<void> _sincronizarParaNuvem() async {
+    print("--- Subindo dados locais para a nuvem... ---");
+    await _sincronizarClientes();
+    await _sincronizarTecnicos();
+    await _sincronizarAgendamentos();
+    await _sincronizarOrdensServico();
+    await _sincronizarFormasPagamento();
+  }
+
+  Future<void> _sincronizarDaNuvem() async {
+    print("--- Baixando dados recentes da nuvem... ---");
+    final db = await SQLiteConexao.db;
+    await db.delete('agendamentos');
+    await db.delete('clientes');
+    await db.delete('formas_pagamento');
+    await db.delete('ordens_servico');
+    await db.delete('tecnicos');
+
+    final agendamentos = await _agendamentoFirebase.listarRecentes();
+    for (final a in agendamentos) {
+      await _agendamentoSqlite.adicionar(a);
+    }
+
+    final clientes = await _clienteFirebase.listarRecentes();
+    for (final c in clientes) {
+      await _clienteSqlite.adicionarCliente(c);
+    }
+
+    final formasPagamento = await _formaPagamentoFirebase.listarRecentes();
+    for (final f in formasPagamento) {
+      await _formaPagamentoSqlite.adicionar(f);
+    }
+
+    final ordensServico = await _osFirebase.listarRecentes();
+    for (final os in ordensServico) {
+      await _osSqlite.adicionar(os);
+    }
+
+    final tecnicos = await _tecnicoFirebase.listarRecentes();
+    for (final t in tecnicos) {
+      await _tecnicoSqlite.adicionarTecnico(t);
     }
   }
 
@@ -80,7 +119,7 @@ class SincronizacaoServico {
     final itens = await _clienteSqlite.listarNaoSincronizados();
     for (final model in itens) {
       try {
-        await _clienteFirebase.adicionarCliente(model); // ou atualizar se já existir
+        await _clienteFirebase.adicionarCliente(model);
         await _clienteSqlite.marcarComoSincronizado(model.id);
         print('Cliente ${model.nome} sincronizado.');
       } catch (e) {

@@ -6,6 +6,14 @@ import 'package:gerenciar/dados/modelos/tecnico_model.dart';
 class TecnicoFirebase {
   final _colecao = FirebaseFirestore.instance.collection('tecnicos');
 
+//METODO ADICIONADO
+  Future<List<TecnicoModel>> listarRecentes() async {
+    final snapshot = await _colecao.orderBy('nome').limit(20).get();
+    return snapshot.docs
+        .map((doc) => TecnicoModel.fromMap(doc.data(), doc.id))
+        .toList();
+  }
+
   Future<void> adicionarTecnico(TecnicoModel tecnico) async {
     await _colecao.doc(tecnico.id).set(tecnico.toMap());
   }
