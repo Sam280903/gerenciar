@@ -50,6 +50,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
 
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
+  String _lembreteSelecionado = '15_minutos_antes'; // Valor padrão
 
   @override
   void initState() {
@@ -178,9 +179,10 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           id: const Uuid().v4(),
           idCliente: _clienteSelecionado!.id,
           idTecnico: _tecnicoSelecionado!.id,
-          idGestor: _idGestor!, // <-- A LINHA ESSENCIAL ESTÁ AQUI
+          idGestor: _idGestor!,
           dataHora: dataHoraAgendamento,
           observacao: _obsController.text.trim(),
+          lembreteNotificacao: _lembreteSelecionado, // CAMPO ADICIONADO
           ativo: true,
         );
 
@@ -256,6 +258,33 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _lembreteSelecionado,
+                decoration: const InputDecoration(
+                  labelText: 'Lembrar-me',
+                  prefixIcon: Icon(Icons.notifications_active_outlined),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                      value: 'na_hora', child: Text('Na hora do agendamento')),
+                  DropdownMenuItem(
+                      value: '15_minutos_antes',
+                      child: Text('15 minutos antes')),
+                  DropdownMenuItem(
+                      value: '30_minutos_antes',
+                      child: Text('30 minutos antes')),
+                  DropdownMenuItem(
+                      value: '1_hora_antes', child: Text('1 hora antes')),
+                  DropdownMenuItem(
+                      value: '1_dia_antes', child: Text('1 dia antes')),
+                ],
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() => _lembreteSelecionado = val);
+                  }
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(

@@ -13,6 +13,6 @@
   },
   "compileOnSave": true,
   "include": [
-    "index.js"
+    "src" // <-- A mudança principal está aqui. Aponta para a pasta 'src'.
   ]
 }
