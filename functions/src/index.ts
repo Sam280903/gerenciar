@@ -1,5 +1,5 @@
 // functions/src/index.ts
-
+// Forçando o deploy em 18/10/2025
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import {onSchedule} from "firebase-functions/v2/scheduler";
 import {logger} from "firebase-functions";
@@ -7,7 +7,9 @@ import {initializeApp} from "firebase-admin/app";
 import {getMessaging} from "firebase-admin/messaging";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 
-initializeApp();
+initializeApp({
+  projectId: "gerenciar-acdf5",
+});
 
 interface Agendamento {
   idTecnico: string;
@@ -148,12 +150,12 @@ export const enviarLembretesDeAgendamento = onSchedule(
     },
 );
 
-/**
+/*
  * Calcula o horário de envio do lembrete com base na data do agendamento.
  * @param {Timestamp} dataHora A data/hora original do agendamento.
  * @param {string} tipoLembrete A string que define a antecedência.
  * @return {Timestamp} A nova data/hora para o envio do lembrete.
- */
+*/
 function calcularHorarioLembrete(
     dataHora: Timestamp,
     tipoLembrete: string,

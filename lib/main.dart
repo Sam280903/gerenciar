@@ -20,11 +20,8 @@ void main() async {
   await Firebase.initializeApp();
   await initializeDateFormatting('pt_BR', null);
 
-  // --- CONFIGURAÇÃO DE NOTIFICAÇÃO ADICIONADA AQUI ---
-  // Define o handler para mensagens em background
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Pede permissão para o usuário (necessário para Android 13+ e iOS)
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   await messaging.requestPermission(
     alert: true,
@@ -36,15 +33,12 @@ void main() async {
     sound: true,
   );
 
-  // Garante que as notificações apareçam quando o app está em primeiro plano
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
     sound: true,
   );
-  // --- FIM DA CONFIGURAÇÃO DE NOTIFICAÇÃO ---
 
-  // Inicia a verificação de sincronização em segundo plano
   SincronizacaoServico().iniciarSincronizacaoPeriodica();
 
   runApp(const GerenciarApp());

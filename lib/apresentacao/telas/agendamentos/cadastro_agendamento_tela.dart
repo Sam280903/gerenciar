@@ -184,6 +184,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           observacao: _obsController.text.trim(),
           lembreteNotificacao: _lembreteSelecionado, // CAMPO ADICIONADO
           ativo: true,
+          notificacaoEnviada: false,
         );
 
         await _cadastrarAgendamento.executar(novoAgendamento);
