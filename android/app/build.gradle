@@ -2,7 +2,11 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
-    id "com.google.gms.google-services"
+    // REMOVA ESTA LINHA:
+    // id "com.google.gms.google-services"
+
+    // ADICIONE ESTA LINHA:
+    id "com.onesignal.android.onesignal-gradle-plugin"
 }
 
 def localProperties = new Properties()

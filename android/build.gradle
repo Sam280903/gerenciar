@@ -4,7 +4,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.gms:google-services:4.4.3' // Use uma versão recente
+        // REMOVA A LINHA ABAIXO:
+        // classpath 'com.google.gms:google-services:4.4.3' 
+
+        // ADICIONE A LINHA ABAIXO:
+        classpath 'com.onesignal:onesignal-gradle-plugin:5.1.2'
     }
 }
 

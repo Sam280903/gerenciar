@@ -2,12 +2,12 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart'; // REMOVIDO
 
 class AutenticacaoServico {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  // final FirebaseMessaging _fcm = FirebaseMessaging.instance; // REMOVIDO
 
   Future<void> enviarEmailRedefinicaoSenha(String email) async {
     try {
@@ -27,11 +27,11 @@ class AutenticacaoServico {
         email: email,
         password: senha,
       );
-      
-      if (credenciais.user != null) {
-        await salvarTokenDoDispositivo();
-      }
-      
+
+      // if (credenciais.user != null) {
+      //   await salvarTokenDoDispositivo(); // REMOVIDO
+      // }
+
       return credenciais.user;
     } on FirebaseAuthException catch (e) {
       throw Exception(_traduzirErro(e.code));
@@ -169,28 +169,10 @@ class AutenticacaoServico {
     }
   }
 
-  Future<void> salvarTokenDoDispositivo() async {
-    final usuario = _auth.currentUser;
-    if (usuario == null) return;
-
-    await _fcm.requestPermission();
-    final token = await _fcm.getToken();
-
-    if (token != null) {
-      final tokensRef = _firestore
-          .collection('usuarios')
-          .doc(usuario.uid)
-          .collection('tokens')
-          .doc(token);
-
-      await tokensRef.set({
-        'token': token,
-        'criadoEm': FieldValue.serverTimestamp(),
-      });
-      // ignore: avoid_print
-      print('Token salvo com sucesso: $token');
-    }
-  }
+  // MÉTODO REMOVIDO
+  // Future<void> salvarTokenDoDispositivo() async {
+  //   ...
+  // }
 
   Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() async {
     final usuario = _auth.currentUser;
