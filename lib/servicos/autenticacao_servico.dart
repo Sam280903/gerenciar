@@ -2,12 +2,11 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart'; // REMOVIDO
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class AutenticacaoServico {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  // final FirebaseMessaging _fcm = FirebaseMessaging.instance; // REMOVIDO
 
   Future<void> enviarEmailRedefinicaoSenha(String email) async {
     try {
@@ -28,9 +27,10 @@ class AutenticacaoServico {
         password: senha,
       );
 
-      // if (credenciais.user != null) {
-      //   await salvarTokenDoDispositivo(); // REMOVIDO
-      // }
+      if (credenciais.user != null) {
+        // Vincula o UID do Firebase ao OneSignal
+        OneSignal.login(credenciais.user!.uid);
+      }
 
       return credenciais.user;
     } on FirebaseAuthException catch (e) {
@@ -39,6 +39,7 @@ class AutenticacaoServico {
   }
 
   Future<void> logout() async {
+    await OneSignal.logout(); // Remove o vínculo do usuário com o aparelho
     await _auth.signOut();
   }
 

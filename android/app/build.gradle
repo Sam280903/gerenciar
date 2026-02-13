@@ -1,13 +1,12 @@
-plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin"
-    // REMOVA ESTA LINHA:
-    // id "com.google.gms.google-services"
 
-    // ADICIONE ESTA LINHA:
-    id "com.onesignal.android.onesignal-gradle-plugin"
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'dev.flutter.flutter-gradle-plugin'
 }
+
+
+apply plugin: 'com.google.gms.google-services' 
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
@@ -28,7 +27,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    // --- INÍCIO DO BLOCO ADICIONADO ---
+    // --- BLOCO KEYSTORE ---
     def keystoreProperties = new Properties()
     def keystorePropertiesFile = rootProject.file('key.properties')
     if (keystorePropertiesFile.exists()) {
@@ -40,10 +39,10 @@ android {
     project.ext.set('storePassword', keystoreProperties['storePassword'])
     project.ext.set('keyAlias', keystoreProperties['keyAlias'])
     project.ext.set('keyPassword', keystoreProperties['keyPassword'])
-    // --- FIM DO BLOCO ADICIONADO ---
 
     namespace = "com.flaviosamuel.gerenciar"
-    compileSdk = 36
+    
+    compileSdk = 36 
 
     ndkVersion = flutter.ndkVersion
 
@@ -63,12 +62,13 @@ android {
     defaultConfig {
         applicationId = "com.flaviosamuel.gerenciar"
         minSdkVersion flutter.minSdkVersion
+        
         targetSdkVersion 36
+        
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
 
-    // --- INÍCIO DO BLOCO ADICIONADO ---
     signingConfigs {
         release {
             if (project.hasProperty('storeFile')) {
@@ -79,11 +79,9 @@ android {
             }
         }
     }
-    // --- FIM DO BLOCO ADICIONADO ---
 
     buildTypes {
         release {
-            // --- LINHA ABAIXO FOI ALTERADA ---
             signingConfig signingConfigs.release
         }
     }
@@ -102,5 +100,5 @@ flutter {
 }
 
 dependencies {
-    // Suas dependências.
+    
 }
