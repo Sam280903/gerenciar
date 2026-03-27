@@ -46,7 +46,7 @@ void main() async {
   );
   */
 
-  SincronizacaoServico().iniciarSincronizacaoPeriodica();
+  SincronizacaoServico().iniciarSincronizacao();
 
   // --- INÍCIO DO BLOCO DO ONESIGNAL ---
 

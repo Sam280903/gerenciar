@@ -8,7 +8,7 @@ import axios from "axios";
 initializeApp();
 
 const ONESIGNAL_APP_ID = "a0e5e812-11d0-46f9-8019-4992adacdb83";
-const ONESIGNAL_REST_KEY = "os_v2_app_uds6qeqr2bdptaazjgjk3lg3qpy35wbmnawuehmeramwt5ml2aqfdane5utub3ksbytshvd6fp4kp42rkqczns2xkxzecrvfcn6reeq";
+const ONESIGNAL_REST_KEY = "os_v2_app_uds6qeqr2bdptaazjgjk3lg3qobwdseyfhjeg64rpag5saajwkyaefr2o4ossgqrsr7l4duwrdaav36xzz32tnzzaxoem3fgas62o2a";
 
 interface Agendamento {
   idTecnico: string;

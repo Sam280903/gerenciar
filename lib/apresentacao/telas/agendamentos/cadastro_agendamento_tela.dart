@@ -1,5 +1,6 @@
 // lib/apresentacao/telas/agendamentos/cadastro_agendamento_tela.dart
 import 'package:flutter/material.dart';
+import 'package:gerenciar/dados/fontes_dados/sqlite/agendamento_sqlite.dart';
 import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
@@ -14,17 +15,19 @@ import 'package:gerenciar/apresentacao/widgets/_widget_selecao.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CadastroAgendamentoTela extends StatefulWidget {
   final CadastrarAgendamento? cadastrarAgendamento;
   final ListarClientes? listarClientes;
   final ListarTecnicos? listarTecnicos;
 
-  const CadastroAgendamentoTela(
-      {super.key,
-      this.cadastrarAgendamento,
-      this.listarClientes,
-      this.listarTecnicos});
+  const CadastroAgendamentoTela({
+    super.key,
+    this.cadastrarAgendamento,
+    this.listarClientes,
+    this.listarTecnicos,
+  });
 
   @override
   State<CadastroAgendamentoTela> createState() =>
@@ -36,6 +39,8 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   final _dataController = TextEditingController();
   final _horaController = TextEditingController();
   final _obsController = TextEditingController();
+  final _enderecoController =
+      TextEditingController(); // Controlador para o endereço automático
 
   Cliente? _clienteSelecionado;
   Tecnico? _tecnicoSelecionado;
@@ -47,10 +52,11 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   late final CadastrarAgendamento _cadastrarAgendamento;
   late final ListarClientes _listarClientes;
   late final ListarTecnicos _listarTecnicos;
+  final AgendamentoSQLite _agendamentoSqlite = AgendamentoSQLite();
 
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
-  String _lembreteSelecionado = '15_minutos_antes'; // Valor padrão
+  String _lembreteSelecionado = '15_minutos_antes';
 
   @override
   void initState() {
@@ -89,7 +95,64 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
     _dataController.dispose();
     _horaController.dispose();
     _obsController.dispose();
+    _enderecoController.dispose();
     super.dispose();
+  }
+
+  // RF09: Função para abrir o Google Maps com o endereço do cliente
+  Future<void> _abrirMapa() async {
+    if (_enderecoController.text.isEmpty) return;
+
+    final query = Uri.encodeComponent(_enderecoController.text);
+    final url =
+        Uri.parse("https://www.google.com/maps/search/?api=1&query=$query");
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Não foi possível abrir o mapa.')));
+      }
+    }
+  }
+
+  Future<void> _abrirBuscaCliente() async {
+    if (_idGestor == null) return;
+    final cliente = await Navigator.push<Cliente>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TelaBusca<Cliente>(
+          titulo: 'Selecionar Cliente',
+          futureItens: _listarClientes.executar(idGestor: _idGestor!),
+          getNomeItem: (c) => c.nome,
+        ),
+      ),
+    );
+    if (cliente != null) {
+      setState(() {
+        _clienteSelecionado = cliente;
+        // RF06/RF09: Preenchimento automático do endereço
+        _enderecoController.text = cliente.endereco;
+      });
+    }
+  }
+
+  Future<void> _abrirBuscaTecnico() async {
+    if (_idGestor == null) return;
+    final tecnico = await Navigator.push<Tecnico>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TelaBusca<Tecnico>(
+          titulo: 'Selecionar Técnico',
+          futureItens: _listarTecnicos.executar(idGestor: _idGestor!),
+          getNomeItem: (t) => t.nome,
+        ),
+      ),
+    );
+    if (tecnico != null) {
+      setState(() => _tecnicoSelecionado = tecnico);
+    }
   }
 
   Future<void> _selecionarData() async {
@@ -120,48 +183,8 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
     }
   }
 
-  Future<void> _abrirBuscaCliente() async {
-    if (_idGestor == null) return;
-    final cliente = await Navigator.push<Cliente>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => TelaBusca<Cliente>(
-          titulo: 'Selecionar Cliente',
-          futureItens: _listarClientes.executar(idGestor: _idGestor!),
-          getNomeItem: (c) => c.nome,
-        ),
-      ),
-    );
-    if (cliente != null) {
-      setState(() => _clienteSelecionado = cliente);
-    }
-  }
-
-  Future<void> _abrirBuscaTecnico() async {
-    if (_idGestor == null) return;
-    final tecnico = await Navigator.push<Tecnico>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => TelaBusca<Tecnico>(
-          titulo: 'Selecionar Técnico',
-          futureItens: _listarTecnicos.executar(idGestor: _idGestor!),
-          getNomeItem: (t) => t.nome,
-        ),
-      ),
-    );
-    if (tecnico != null) {
-      setState(() => _tecnicoSelecionado = tecnico);
-    }
-  }
-
   Future<void> _salvarAgendamento() async {
-    if (_idGestor == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Erro: Gestor não identificado. Tente novamente.'),
-        backgroundColor: Colors.redAccent,
-      ));
-      return;
-    }
+    if (_idGestor == null) return;
 
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
@@ -175,6 +198,22 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           _horaSelecionada.minute,
         );
 
+        // RF02: Verificação de conflito de horário para o técnico selecionado
+        bool existeConflito = await _agendamentoSqlite.verificarConflito(
+            _tecnicoSelecionado!.id, dataHoraAgendamento);
+
+        if (existeConflito) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                  "Já existe atendimento agendado para este técnico neste horário"),
+              backgroundColor: Colors.red,
+            ));
+          }
+          setState(() => _carregando = false);
+          return;
+        }
+
         final novoAgendamento = Agendamento(
           id: const Uuid().v4(),
           idCliente: _clienteSelecionado!.id,
@@ -182,7 +221,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           idGestor: _idGestor!,
           dataHora: dataHoraAgendamento,
           observacao: _obsController.text.trim(),
-          lembreteNotificacao: _lembreteSelecionado, // CAMPO ADICIONADO
+          lembreteNotificacao: _lembreteSelecionado,
           ativo: true,
           notificacaoEnviada: false,
         );
@@ -229,6 +268,25 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
                 onTap: _abrirBuscaCliente,
                 validator: (v) =>
                     _clienteSelecionado == null ? 'Selecione um cliente' : null,
+              ),
+              const SizedBox(height: 16),
+              // Campo de Endereço preenchido automaticamente com ícone para o Mapa
+              TextFormField(
+                controller: _enderecoController,
+                decoration: InputDecoration(
+                  labelText: 'Endereço do Atendimento',
+                  prefixIcon: const Icon(Icons.location_on),
+                  suffixIcon: _enderecoController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.map_outlined,
+                              color: Colors.blue),
+                          onPressed: _abrirMapa,
+                          tooltip: 'Ver no Mapa',
+                        )
+                      : null,
+                ),
+                readOnly: true, // Endereço vem do cadastro do cliente
+                maxLines: 2,
               ),
               const SizedBox(height: 16),
               WidgetSelecao(
@@ -282,9 +340,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
                       value: '1_dia_antes', child: Text('1 dia antes')),
                 ],
                 onChanged: (val) {
-                  if (val != null) {
-                    setState(() => _lembreteSelecionado = val);
-                  }
+                  if (val != null) setState(() => _lembreteSelecionado = val);
                 },
               ),
               const SizedBox(height: 16),
@@ -301,9 +357,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.blue,
-                        ),
+                            strokeWidth: 2, color: Colors.white),
                       )
                     : const Text('SALVAR'),
               ),
