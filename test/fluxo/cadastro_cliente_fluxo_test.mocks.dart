@@ -226,16 +226,6 @@ class MockAutenticacaoServico extends _i1.Mock
       ) as _i5.Future<_i9.User?>);
 
   @override
-  _i5.Future<void> salvarTokenDoDispositivo() => (super.noSuchMethod(
-        Invocation.method(
-          #salvarTokenDoDispositivo,
-          [],
-        ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
-
-  @override
   _i5.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
       (super.noSuchMethod(
         Invocation.method(
