@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:gerenciar/app/rotas.dart';
+// ignore: unused_import
+import '../../../constantes/cores.dart';
 import '../../../servicos/autenticacao_servico.dart';
 
 class LoginTela extends StatefulWidget {
@@ -91,13 +93,14 @@ class _LoginTelaState extends State<LoginTela>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Image.asset('assets/imagens/logo_gerenciar.png',
-                        height: 120),
+                        height: 100),
                     const SizedBox(height: 48),
                     TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(
                         labelText: 'E-mail',
                         prefixIcon: Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (v) => v!.isEmpty ? 'Informe o e-mail' : null,
@@ -109,6 +112,7 @@ class _LoginTelaState extends State<LoginTela>
                       decoration: InputDecoration(
                         labelText: 'Senha',
                         prefixIcon: const Icon(Icons.lock_outline),
+                        border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
                           icon: Icon(_ocultarSenha
                               ? Icons.visibility_off_outlined
@@ -122,8 +126,10 @@ class _LoginTelaState extends State<LoginTela>
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: _carregando ? null : () =>
-                            Navigator.pushNamed(context, Rotas.redefinirSenha),
+                        onPressed: _carregando
+                            ? null
+                            : () => Navigator.pushNamed(
+                                context, Rotas.redefinirSenha),
                         child: const Text('Esqueci a senha'),
                       ),
                     ),
@@ -134,37 +140,41 @@ class _LoginTelaState extends State<LoginTela>
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
-                          color: Colors.redAccent.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.redAccent)
-                        ),
+                            color: Colors.redAccent.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.redAccent)),
                         child: Row(
                           children: [
-                            const Icon(Icons.error_outline, color: Colors.redAccent),
+                            const Icon(Icons.error_outline,
+                                color: Colors.redAccent),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 _mensagemErro!,
                                 style: const TextStyle(
-                                    color: Colors.white, fontSize: 14),
+                                    color: Colors.redAccent, fontSize: 14),
                               ),
                             ),
                           ],
                         ),
                       ),
                     // Botão com Indicador de Carregamento Interno
-                    ElevatedButton(
-                      onPressed: _carregando ? null : _fazerLogin,
-                      child: _carregando
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.blue,
-                              ),
-                            )
-                          : const Text('ENTRAR'),
+                    SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _carregando ? null : _fazerLogin,
+                        child: _carregando
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('ENTRAR',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16)),
+                      ),
                     ),
                   ],
                 ),

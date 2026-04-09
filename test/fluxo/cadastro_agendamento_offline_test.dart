@@ -3,6 +3,7 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'package:gerenciar/dominio/interfaces/agendamento_repositorio_interface.dart';
+// ignore: unused_import
 import 'package:gerenciar/servicos/sincronizacao_servico.dart';
 
 import 'cadastro_agendamento_offline_test.mocks.dart';
@@ -11,12 +12,10 @@ import 'cadastro_agendamento_offline_test.mocks.dart';
 void main() {
   late MockAgendamentoRepositorioInterface mockRemoteRepo;
   late MockAgendamentoRepositorioInterface mockLocalRepo;
-  late SincronizacaoServico sincronizacaoServico;
 
   setUp(() {
     mockRemoteRepo = MockAgendamentoRepositorioInterface();
     mockLocalRepo = MockAgendamentoRepositorioInterface();
-    sincronizacaoServico = SincronizacaoServico();
   });
 
   final agendamentoFake = Agendamento(

@@ -49,6 +49,8 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   // ADICIONADO
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
+  String? _perfilUsuario;
+  String? _idUsuarioLogado;
 
   bool _carregando = true;
   bool _ordenarCrescente = true;
@@ -74,6 +76,8 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     if (mounted && dadosUsuario != null) {
       setState(() {
         _idGestor = dadosUsuario['idGestor'];
+        _perfilUsuario = dadosUsuario['perfil'];
+        _idUsuarioLogado = _authServico.usuarioAtual?.uid;
       });
       _carregarAgendamentos();
     }
@@ -129,6 +133,12 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       if (ag.idCliente.isEmpty || ag.idTecnico.isEmpty) {
         continue;
       }
+      
+      // Se for técnico, filtra apenas agendamentos dele
+      if (_perfilUsuario == 'tecnico' && ag.idTecnico != _idUsuarioLogado) {
+        continue;
+      }
+
       final cliente =
           await BuscarClientePorId(_clienteRepo).executar(ag.idCliente);
       final tecnico =

@@ -70,6 +70,8 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
 
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
+  String? _perfilUsuario;
+  String? _idUsuarioLogado;
 
   bool _carregando = true;
   bool _ordenarCrescente = false;
@@ -95,6 +97,8 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     if (mounted && dadosUsuario != null) {
       setState(() {
         _idGestor = dadosUsuario['idGestor'];
+        _perfilUsuario = dadosUsuario['perfil'];
+        _idUsuarioLogado = _authServico.usuarioAtual?.uid;
       });
       _carregarOS();
     }
@@ -144,6 +148,11 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     List<OrdemServicoDetalhada> concluidasTemp = [];
     List<OrdemServicoDetalhada> reabertasTemp = [];
     for (final os in ordensDeServico) {
+      // Se for técnico, exibe apenas as OSs atribuídas a ele
+      if (_perfilUsuario == 'tecnico' && os.idTecnico != _idUsuarioLogado) {
+        continue;
+      }
+      
       final cliente = await _buscarCliente.executar(os.idCliente);
       final tecnico = await _buscarTecnico.executar(os.idTecnico);
       final itemDetalhado = OrdemServicoDetalhada(

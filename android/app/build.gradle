@@ -35,10 +35,12 @@ android {
             keystoreProperties.load(reader)
         }
     }
-    project.ext.set('storeFile', keystoreProperties['storeFile'])
-    project.ext.set('storePassword', keystoreProperties['storePassword'])
-    project.ext.set('keyAlias', keystoreProperties['keyAlias'])
-    project.ext.set('keyPassword', keystoreProperties['keyPassword'])
+    if (keystorePropertiesFile.exists() && keystoreProperties.containsKey('storeFile')) {
+        project.ext.set('storeFile', keystoreProperties['storeFile'])
+        project.ext.set('storePassword', keystoreProperties['storePassword'])
+        project.ext.set('keyAlias', keystoreProperties['keyAlias'])
+        project.ext.set('keyPassword', keystoreProperties['keyPassword'])
+    }
 
     namespace = "com.flaviosamuel.gerenciar"
     

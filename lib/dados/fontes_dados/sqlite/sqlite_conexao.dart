@@ -18,7 +18,7 @@ class SQLiteConexao {
 
     return openDatabase(
       caminhoBanco,
-      version: 3, // ** IMPORTANTE: Incrementei a versão do banco **
+      version: 4, // ** IMPORTANTE: Incrementei a versão do banco para 4 **
       onCreate: _criarTabelas,
       onUpgrade: _atualizarTabelas,
     );
@@ -45,6 +45,11 @@ class SQLiteConexao {
       await db.execute('ALTER TABLE formas_pagamento ADD COLUMN idGestor TEXT');
       await db.execute('ALTER TABLE ordens_servico ADD COLUMN idGestor TEXT');
       await db.execute('ALTER TABLE agendamentos ADD COLUMN idGestor TEXT');
+    }
+    // ADICIONADO Bloco para a versão 4
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE agendamentos ADD COLUMN lembreteNotificacao TEXT');
+      await db.execute('ALTER TABLE agendamentos ADD COLUMN notificacaoEnviada INTEGER DEFAULT 0');
     }
   }
 
@@ -115,7 +120,9 @@ class SQLiteConexao {
         status TEXT,
         ativo INTEGER,
         sincronizado INTEGER DEFAULT 0,
-        idGestor TEXT
+        idGestor TEXT,
+        lembreteNotificacao TEXT,
+        notificacaoEnviada INTEGER DEFAULT 0
       );
     ''');
   }

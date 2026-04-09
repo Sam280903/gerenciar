@@ -12,11 +12,9 @@ class AutenticacaoServico {
     try {
       await _auth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        throw Exception('Nenhum usuário encontrado para este e-mail.');
-      } else {
-        throw Exception('Ocorreu um erro. Tente novamente.');
-      }
+      throw Exception(_traduzirErro(e.code));
+    } catch (e) {
+      throw Exception('Algo deu errado. Verifique sua conexão e tente novamente.');
     }
   }
 
@@ -48,14 +46,29 @@ class AutenticacaoServico {
   String _traduzirErro(String code) {
     switch (code) {
       case 'user-not-found':
+        return 'Não encontramos uma conta com este e-mail. Tem certeza de que digitou corretamente?';
       case 'INVALID_LOGIN_CREDENTIALS':
-        return 'Usuário ou senha incorretos.';
+      case 'invalid-credential':
+        return 'E-mail ou senha estão incorretos. Verifique seus dados e tente de novo.';
       case 'wrong-password':
-        return 'Senha incorreta.';
+        return 'A senha informada não confere. Tente novamente ou use a opção "Esqueci a senha".';
       case 'invalid-email':
-        return 'E-mail inválido.';
+        return 'O endereço de e-mail parece estar incorreto. Verifique se há algum erro de digitação.';
+      case 'email-already-in-use':
+        return 'Este e-mail já está sendo usado por outra conta.';
+      case 'weak-password':
+        return 'A senha que você escolheu é muito simples. Use uma mais segura com letras e números.';
+      case 'network-request-failed':
+        return 'Ops! Parece que você está sem internet. Verifique sua conexão e tente novamente.';
+      case 'too-many-requests':
+        return 'Muitas tentativas sem sucesso. Por segurança, aguarde alguns minutos e tente novamente.';
+      case 'user-disabled':
+        return 'O acesso a esta conta foi bloqueado. Por favor, entre em contato com um administrador.';
+      case 'operation-not-allowed':
+        return 'Esta operação não está autorizada no momento.';
       default:
-        return 'Erro ao fazer login. [$code]';
+        // Caso ocorra algo imprevisto, entregamos uma mensagem amigável sem códigos técnicos.
+        return 'Ocorreu um erro inesperado e não foi possível concluir a ação. Tente novamente mais tarde.';
     }
   }
 
@@ -113,13 +126,9 @@ class AutenticacaoServico {
       }
       return usuario;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        throw Exception('Este e-mail já está em uso.');
-      }
-      if (e.code == 'weak-password') {
-        throw Exception('A senha fornecida é muito fraca.');
-      }
-      throw Exception('Erro ao cadastrar: ${e.message}');
+      throw Exception(_traduzirErro(e.code));
+    } catch (e) {
+      throw Exception('Ops! Não foi possível realizar o cadastro no momento. Tente novamente mais tarde.');
     }
   }
 
@@ -163,10 +172,9 @@ class AutenticacaoServico {
       }
       return usuario;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        throw Exception('Este e-mail já está em uso por outro usuário.');
-      }
-      throw Exception('Erro ao cadastrar técnico: ${e.message}');
+      throw Exception(_traduzirErro(e.code));
+    } catch (e) {
+      throw Exception('Poxa vida! Não conseguimos finalizar o cadastro do técnico agora. Tente de novo em breve.');
     }
   }
 

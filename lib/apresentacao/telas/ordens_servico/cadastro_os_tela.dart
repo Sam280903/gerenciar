@@ -234,8 +234,9 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
         idGestor: _idGestor!,
         dataHoraInicio: dataHoraCompleta,
         descricao: _descricaoController.text,
-        valor:
-            double.tryParse(_valorController.text.replaceAll(',', '.')) ?? 0.0,
+        valor: double.tryParse(_valorController.text.contains(',')
+                ? _valorController.text.replaceAll('.', '').replaceAll(',', '.')
+                : _valorController.text) ?? 0.0,
         prioridade: _prioridadeSelecionada,
         status: 'Pendente',
         ativo: true,

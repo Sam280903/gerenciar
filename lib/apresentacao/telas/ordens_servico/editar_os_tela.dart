@@ -87,8 +87,9 @@ class _EditarOSTelaState extends State<EditarOSTela> {
         idGestor: widget.ordemServico.idGestor,
         dataHoraInicio: _dataSelecionada,
         descricao: _descricaoController.text.trim(),
-        valor:
-            double.tryParse(_valorController.text.replaceAll(',', '.')) ?? 0.0,
+        valor: double.tryParse(_valorController.text.contains(',')
+                ? _valorController.text.replaceAll('.', '').replaceAll(',', '.')
+                : _valorController.text) ?? 0.0,
         prioridade: _prioridadeSelecionada,
         status: _statusSelecionado,
         ativo: widget.ordemServico.ativo,
