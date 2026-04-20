@@ -62,7 +62,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.flaviosamuel.gerenciar"
+        applicationId = "gerenciar.tfc.gerenciar"
         minSdkVersion flutter.minSdkVersion
         
         targetSdkVersion 36
