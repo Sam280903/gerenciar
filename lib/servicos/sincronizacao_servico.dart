@@ -1,6 +1,7 @@
 // lib/servicos/sincronizacao_servico.dart
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 
 // Fontes de dados Firebase
 import 'package:gerenciar/dados/fontes_dados/firebase/cliente_firebase.dart';
@@ -49,12 +50,15 @@ class SincronizacaoServico {
 
     // 2. Escuta mudanças de conectividade (Sincronização imediata ao voltar online)
     _connectivitySubscription?.cancel();
+    Timer? debounce;
     _connectivitySubscription =
         Connectivity().onConnectivityChanged.listen((results) {
-      // Verifica se qualquer uma das redes (wifi, móvel) está ativa
       if (!results.contains(ConnectivityResult.none)) {
-        print("--- CONEXÃO RESTABELECIDA: Sincronizando agora ---");
-        sincronizarDados();
+        debounce?.cancel();
+        debounce = Timer(const Duration(seconds: 3), () {
+          if (kDebugMode) debugPrint("--- CONEXÃO RESTABELECIDA: Sincronizando agora ---");
+          sincronizarDados();
+        });
       }
     });
 
@@ -73,18 +77,17 @@ class SincronizacaoServico {
 
   Future<void> sincronizarDados() async {
     if (await _temConexao()) {
-      print("--- INICIANDO SINCRONIZAÇÃO COMPLETA ---");
-      // Importante: Primeiro subimos o que é novo, depois baixamos a nuvem
+      if (kDebugMode) debugPrint("--- INICIANDO SINCRONIZAÇÃO COMPLETA ---");
       await _sincronizarParaNuvem();
       await _sincronizarDaNuvem();
-      print("--- SINCRONIZAÇÃO COMPLETA CONCLUÍDA ---");
+      if (kDebugMode) debugPrint("--- SINCRONIZAÇÃO COMPLETA CONCLUÍDA ---");
     } else {
-      print("Dispositivo offline. Operando apenas com banco local.");
+      if (kDebugMode) debugPrint("Dispositivo offline. Operando apenas com banco local.");
     }
   }
 
   Future<void> _sincronizarParaNuvem() async {
-    print("--- Subindo dados locais pendentes... ---");
+    if (kDebugMode) debugPrint("--- Subindo dados locais pendentes... ---");
     await _uploadClientes();
     await _uploadTecnicos();
     await _uploadAgendamentos();
@@ -93,7 +96,7 @@ class SincronizacaoServico {
   }
 
   Future<void> _sincronizarDaNuvem() async {
-    print("--- Atualizando banco local com dados da nuvem... ---");
+    if (kDebugMode) debugPrint("--- Atualizando banco local com dados da nuvem... ---");
 
     // Em vez de delete total, buscamos o que há de novo para fazer o "Upsert"
     // Isso evita apagar dados locais que o usuário acabou de criar offline
@@ -125,7 +128,7 @@ class SincronizacaoServico {
         await _tecnicoSqlite.adicionarTecnico(t);
       }
     } catch (e) {
-      print("Erro ao baixar dados da nuvem: $e");
+      if (kDebugMode) debugPrint("Erro ao baixar dados da nuvem: $e");
     }
   }
 
@@ -137,9 +140,9 @@ class SincronizacaoServico {
       try {
         await _clienteFirebase.adicionarCliente(model);
         await _clienteSqlite.marcarComoSincronizado(model.id);
-        print('Cliente ${model.nome} sincronizado.');
+        if (kDebugMode) debugPrint('Cliente ${model.nome} sincronizado.');
       } catch (e) {
-        print('Erro no upload do cliente ${model.id}: $e');
+        if (kDebugMode) debugPrint('Erro no upload do cliente ${model.id}: $e');
       }
     }
   }
@@ -150,9 +153,9 @@ class SincronizacaoServico {
       try {
         await _tecnicoFirebase.adicionarTecnico(model);
         await _tecnicoSqlite.marcarComoSincronizado(model.id);
-        print('Técnico ${model.nome} sincronizado.');
+        if (kDebugMode) debugPrint('Técnico ${model.nome} sincronizado.');
       } catch (e) {
-        print('Erro no upload do técnico ${model.id}: $e');
+        if (kDebugMode) debugPrint('Erro no upload do técnico ${model.id}: $e');
       }
     }
   }
@@ -163,9 +166,9 @@ class SincronizacaoServico {
       try {
         await _agendamentoFirebase.adicionar(model);
         await _agendamentoSqlite.marcarComoSincronizado(model.id);
-        print('Agendamento ${model.id} sincronizado.');
+        if (kDebugMode) debugPrint('Agendamento ${model.id} sincronizado.');
       } catch (e) {
-        print('Erro no upload do agendamento ${model.id}: $e');
+        if (kDebugMode) debugPrint('Erro no upload do agendamento ${model.id}: $e');
       }
     }
   }
@@ -176,9 +179,9 @@ class SincronizacaoServico {
       try {
         await _osFirebase.adicionar(model);
         await _osSqlite.marcarComoSincronizado(model.id);
-        print('OS ${model.id} sincronizada.');
+        if (kDebugMode) debugPrint('OS ${model.id} sincronizada.');
       } catch (e) {
-        print('Erro no upload da OS ${model.id}: $e');
+        if (kDebugMode) debugPrint('Erro no upload da OS ${model.id}: $e');
       }
     }
   }
@@ -189,9 +192,9 @@ class SincronizacaoServico {
       try {
         await _formaPagamentoFirebase.adicionar(model);
         await _formaPagamentoSqlite.marcarComoSincronizado(model.id);
-        print('Forma de Pagamento ${model.nome} sincronizada.');
+        if (kDebugMode) debugPrint('Forma de Pagamento ${model.nome} sincronizada.');
       } catch (e) {
-        print('Erro no upload da forma de pagamento ${model.id}: $e');
+        if (kDebugMode) debugPrint('Erro no upload da forma de pagamento ${model.id}: $e');
       }
     }
   }

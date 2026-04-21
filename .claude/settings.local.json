@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(keytool -genkey -v -keystore c:/tfc/android/gerenciar.jks -keyalg RSA -keysize 2048 -validity 10000 -alias gerenciar)",
+      "Bash(flutter build *)",
+      "Bash(flutter test *)"
+    ]
+  }
+}

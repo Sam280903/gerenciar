@@ -64,9 +64,9 @@ android {
     defaultConfig {
         applicationId = "gerenciar.tfc.gerenciar"
         minSdkVersion flutter.minSdkVersion
-        
+
         targetSdkVersion 36
-        
+
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
@@ -84,6 +84,9 @@ android {
 
     buildTypes {
         release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }

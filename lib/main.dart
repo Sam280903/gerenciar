@@ -1,4 +1,5 @@
 // lib/main.dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 // IMPORT REMOVIDO:
@@ -59,8 +60,7 @@ void main() async {
 
   // Opcional: Adiciona um "ouvinte" para quando o usuário clicar na notificação
   OneSignal.Notifications.addClickListener((event) {
-    print('Notificação clicada: ${event.notification.title}');
-    // Aqui você pode adicionar lógica para navegar para uma tela específica
+    if (kDebugMode) debugPrint('Notificação clicada: ${event.notification.title}');
   });
 
   // --- FIM DO BLOCO DO ONESIGNAL ---
