@@ -5,12 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/atualizar_cliente.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class EditarClienteTela extends StatefulWidget {
   final Cliente cliente;
-  const EditarClienteTela({super.key, required this.cliente});
+  final ClienteRepositorioInterface? clienteRepo;
+  const EditarClienteTela({super.key, required this.cliente, this.clienteRepo});
   @override
   State<EditarClienteTela> createState() => _EditarClienteTelaState();
 }
@@ -32,10 +34,12 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
 
   bool _carregando = false;
   bool _buscandoCep = false;
+  late final AtualizarCliente _atualizarCliente;
 
   @override
   void initState() {
     super.initState();
+    _atualizarCliente = AtualizarCliente(widget.clienteRepo ?? ClienteRepositorioAdaptativo());
     _nomeController = TextEditingController(text: widget.cliente.nome);
     _cpfController = TextEditingController(text: widget.cliente.cpf);
     _telefoneController = TextEditingController(text: widget.cliente.telefone);
@@ -121,7 +125,7 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
         ativo: widget.cliente.ativo,
         idGestor: widget.cliente.idGestor, // ADICIONADO (ESSENCIAL)
       );
-      final atualizarCliente = AtualizarCliente(ClienteRepositorioAdaptativo());
+      final atualizarCliente = _atualizarCliente;
       try {
         await atualizarCliente.executar(clienteAtualizado);
         if (mounted) {

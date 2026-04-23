@@ -41,7 +41,7 @@ void main() {
     expect(find.text('Agendamentos'), findsOneWidget);
 
     // ACT: Digita no campo de busca uma palavra que só existe na categoria "Cadastros"
-    await tester.enterText(find.byType(TextField), 'Cliente');
+    await tester.enterText(find.byType(TextField), 'CPF');
     await tester.pumpAndSettle();
 
     // ASSERT: Verifica se apenas a categoria relevante é exibida

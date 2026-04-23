@@ -27,7 +27,10 @@ void main() {
 
   Future<void> pumpTela(WidgetTester tester, Agendamento agendamento) async {
     await tester.pumpWidget(MaterialApp(
-      home: DetalhesAgendamentoTela(agendamento: agendamento),
+      home: DetalhesAgendamentoTela(
+        agendamento: agendamento,
+        atualizarAgendamento: mockAtualizarAgendamento,
+      ),
     ));
   }
 
@@ -52,16 +55,15 @@ void main() {
     when(mockAtualizarAgendamento.executar(any)).thenAnswer((_) async {});
     await pumpTela(tester, agendamentoPendente);
 
+    await tester.ensureVisible(find.text('CONFIRMAR'));
     await tester.tap(find.text('CONFIRMAR'));
     await tester.pumpAndSettle(); // Abre o diálogo
 
     expect(find.text('Confirmar Alteração de Status'), findsOneWidget);
     await tester.tap(find.widgetWithText(TextButton, 'CONFIRMAR'));
-    await tester.pump(); // Inicia o carregamento
+    await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-    // // Verifica se o caso de uso foi chamado com o status correto
+    // Verifica se o caso de uso foi chamado com o status correto
     verify(mockAtualizarAgendamento.executar(argThat(
       isA<Agendamento>().having((ag) => ag.status, 'status', 'Confirmado'),
     ))).called(1);

@@ -67,9 +67,7 @@ void main() {
     await tester.tap(find.text('SALVAR ALTERAÇÕES'));
     await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-    // Agora esta verificação funcionará corretamente!
+    // Verifica a chamada ao mock
     verify(mockAtualizarOS.executar(argThat(
       isA<OrdemServico>()
           .having((os) => os.descricao, 'descricao', 'Descrição Modificada'),

@@ -48,7 +48,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: FormasPagamentoTela(
         listarFormasPagamento: mockListarFormasPagamento,
-        // O authServico não é injetado pelo construtor, mas o mock precisa existir
+        authServico: mockAuthServico,
       ),
     ));
   }
@@ -113,7 +113,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // ASSERT
-    expect(find.text('Dinheiro'), findsOneWidget);
+    expect(find.text('Dinheiro'), findsNWidgets(2));
     expect(find.text('Cartão de Crédito'), findsNothing);
   });
 }

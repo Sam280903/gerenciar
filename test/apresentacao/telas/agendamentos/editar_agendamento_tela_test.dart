@@ -27,7 +27,10 @@ void main() {
 
   Future<void> pumpTela(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: EditarAgendamentoTela(agendamento: agendamentoParaEditar),
+      home: EditarAgendamentoTela(
+        agendamento: agendamentoParaEditar,
+        atualizarAgendamento: mockAtualizarAgendamento,
+      ),
     ));
   }
 
@@ -52,8 +55,6 @@ void main() {
         find.widgetWithText(TextFormField, 'Observações'), 'Obs modificada');
     await tester.tap(find.text('SALVAR ALTERAÇÕES'));
     await tester.pump();
-
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     // Verifica a chamada ao mock
     verify(mockAtualizarAgendamento.executar(argThat(

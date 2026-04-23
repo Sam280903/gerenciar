@@ -3,16 +3,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gerenciar/apresentacao/telas/formas_pagamento/detalhes_forma_pagamento_tela.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/inativar_forma_pagamento.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/reativar_forma_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
-import 'package:gerenciar/dominio/interfaces/forma_pagamento_repositorio_interface.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'detalhes_forma_pagamento_tela_test.mocks.dart';
 
-@GenerateMocks([FormaPagamentoRepositorioInterface])
+@GenerateMocks([InativarFormaPagamento, ReativarFormaPagamento])
 void main() {
-  late MockFormaPagamentoRepositorioInterface mockFormaPagamentoRepositorio;
+  late MockInativarFormaPagamento mockInativar;
+  late MockReativarFormaPagamento mockReativar;
 
   final formaPagamento = FormaPagamento(
     id: 'fp-1',
@@ -24,12 +26,17 @@ void main() {
 
   Future<void> pumpTela(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: DetalhesFormaPagamentoTela(formaPagamento: formaPagamento),
+      home: DetalhesFormaPagamentoTela(
+        formaPagamento: formaPagamento,
+        inativarFormaPagamento: mockInativar,
+        reativarFormaPagamento: mockReativar,
+      ),
     ));
   }
 
   setUp(() {
-    mockFormaPagamentoRepositorio = MockFormaPagamentoRepositorioInterface();
+    mockInativar = MockInativarFormaPagamento();
+    mockReativar = MockReativarFormaPagamento();
   });
 
   testWidgets('Deve exibir os detalhes da forma de pagamento',
@@ -42,7 +49,7 @@ void main() {
 
   testWidgets('Deve chamar o método de inativar ao confirmar',
       (WidgetTester tester) async {
-    when(mockFormaPagamentoRepositorio.inativar(any)).thenAnswer((_) async {});
+    when(mockInativar.executar(any)).thenAnswer((_) async {});
     await pumpTela(tester);
 
     await tester.tap(find.text('INATIVAR'));
@@ -52,6 +59,6 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'INATIVAR'));
     await tester.pump();
 
-    verify(mockFormaPagamentoRepositorio.inativar(formaPagamento.id)).called(1);
+    verify(mockInativar.executar(formaPagamento.id)).called(1);
   });
 }

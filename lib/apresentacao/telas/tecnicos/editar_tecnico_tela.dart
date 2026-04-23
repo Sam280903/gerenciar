@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/atualizar_tecnico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart';
 
 class EditarTecnicoTela extends StatefulWidget {
   final Tecnico tecnico;
+  final TecnicoRepositorioInterface? tecnicoRepo;
 
-  const EditarTecnicoTela({super.key, required this.tecnico});
+  const EditarTecnicoTela({super.key, required this.tecnico, this.tecnicoRepo});
 
   @override
   State<EditarTecnicoTela> createState() => _EditarTecnicoTelaState();
@@ -20,10 +22,12 @@ class _EditarTecnicoTelaState extends State<EditarTecnicoTela> {
   late final TextEditingController _emailController;
   late final TextEditingController _telefoneController;
   bool _carregando = false;
+  late final AtualizarTecnico _atualizarTecnico;
 
   @override
   void initState() {
     super.initState();
+    _atualizarTecnico = AtualizarTecnico(widget.tecnicoRepo ?? TecnicoRepositorioAdaptativo());
     _nomeController = TextEditingController(text: widget.tecnico.nome);
     _emailController = TextEditingController(text: widget.tecnico.email);
     _telefoneController = TextEditingController(text: widget.tecnico.telefone);
@@ -33,17 +37,16 @@ class _EditarTecnicoTelaState extends State<EditarTecnicoTela> {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
-      // AQUI ESTÁ A CORREÇÃO
       final tecnicoAtualizado = Tecnico(
         id: widget.tecnico.id,
         nome: _nomeController.text.trim(),
         email: _emailController.text.trim(),
         telefone: _telefoneController.text.trim(),
         ativo: widget.tecnico.ativo,
-        idGestor: widget.tecnico.idGestor, // ADICIONADO (ESSENCIAL)
+        idGestor: widget.tecnico.idGestor,
       );
 
-      final atualizarTecnico = AtualizarTecnico(TecnicoRepositorioAdaptativo());
+      final atualizarTecnico = _atualizarTecnico;
 
       try {
         await atualizarTecnico.executar(tecnicoAtualizado);

@@ -4,25 +4,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gerenciar/apresentacao/telas/home/home_tela.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
+import 'package:gerenciar/servicos/sincronizacao_servico.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'home_tela_test.mocks.dart';
 
-@GenerateMocks([AutenticacaoServico])
+@GenerateMocks([AutenticacaoServico, SincronizacaoServico])
 void main() {
   late MockAutenticacaoServico mockAuthServico;
+  late MockSincronizacaoServico mockSincronizacaoServico;
 
   setUp(() {
     mockAuthServico = MockAutenticacaoServico();
+    mockSincronizacaoServico = MockSincronizacaoServico();
+    when(mockSincronizacaoServico.sincronizarDados())
+        .thenAnswer((_) async {});
   });
 
   Future<void> pumpTela(WidgetTester tester) async {
-    // Para testar a Home, precisamos definir as rotas que ela pode acessar
-    // para evitar erros de navegação.
     await tester.pumpWidget(MaterialApp(
       routes: {
-        '/': (_) => HomeTela(authServico: mockAuthServico),
+        '/': (_) => HomeTela(
+              authServico: mockAuthServico,
+              sincronizacaoServico: mockSincronizacaoServico,
+            ),
         '/ordens-servico': (_) => const Scaffold(body: Text('Ordens')),
         '/tecnicos': (_) => const Scaffold(body: Text('Técnicos')),
         '/agendamentos': (_) => const Scaffold(body: Text('Agendamentos')),

@@ -7,7 +7,9 @@ import '../../../constantes/cores.dart';
 import '../../../servicos/autenticacao_servico.dart';
 
 class LoginTela extends StatefulWidget {
-  const LoginTela({super.key});
+  final AutenticacaoServico? authServico;
+
+  const LoginTela({super.key, this.authServico});
 
   @override
   State<LoginTela> createState() => _LoginTelaState();
@@ -18,7 +20,7 @@ class _LoginTelaState extends State<LoginTela>
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
 
   bool _ocultarSenha = true;
   bool _carregando = false;
@@ -30,6 +32,7 @@ class _LoginTelaState extends State<LoginTela>
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,

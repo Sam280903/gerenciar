@@ -59,9 +59,9 @@ void main() {
     mockTecnicoRepo = MockTecnicoRepositorioAdaptativo();
     mockAuthServico = MockAutenticacaoServico(); // ADICIONADO
 
-    // Simula o serviço de autenticação retornando um gestor
     when(mockAuthServico.buscarDadosUsuarioLogado())
         .thenAnswer((_) async => {'idGestor': 'gestor-1'});
+    when(mockAuthServico.usuarioAtual).thenReturn(null);
   });
 
   Future<void> pumpTela(WidgetTester tester) async {
@@ -70,7 +70,7 @@ void main() {
         agendamentoRepo: mockAgendamentoRepo,
         clienteRepo: mockClienteRepo,
         tecnicoRepo: mockTecnicoRepo,
-        // authServico: mockAuthServico, // Injetar o mock aqui, se a tela o aceitasse no construtor
+        authServico: mockAuthServico,
       ),
     ));
   }

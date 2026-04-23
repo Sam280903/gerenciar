@@ -6,7 +6,8 @@ import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
 
 class EditarFormaPagamentoTela extends StatefulWidget {
   final FormaPagamento formaPagamento;
-  const EditarFormaPagamentoTela({super.key, required this.formaPagamento});
+  final AtualizarFormaPagamento? atualizarFormaPagamento;
+  const EditarFormaPagamentoTela({super.key, required this.formaPagamento, this.atualizarFormaPagamento});
 
   @override
   State<EditarFormaPagamentoTela> createState() =>
@@ -18,10 +19,12 @@ class _EditarFormaPagamentoTelaState extends State<EditarFormaPagamentoTela> {
   late final TextEditingController _nomeController;
   late final TextEditingController _descricaoController;
   bool _carregando = false;
+  late final AtualizarFormaPagamento _atualizar;
 
   @override
   void initState() {
     super.initState();
+    _atualizar = widget.atualizarFormaPagamento ?? AtualizarFormaPagamento(FormaPagamentoRepositorioAdaptativo());
     _nomeController = TextEditingController(text: widget.formaPagamento.nome);
     _descricaoController =
         TextEditingController(text: widget.formaPagamento.descricao);
@@ -31,17 +34,15 @@ class _EditarFormaPagamentoTelaState extends State<EditarFormaPagamentoTela> {
     if (_formKey.currentState!.validate()) {
       setState(() => _carregando = true);
 
-      // AQUI ESTÁ A CORREÇÃO
       final formaAtualizada = FormaPagamento(
         id: widget.formaPagamento.id,
         nome: _nomeController.text.trim(),
         descricao: _descricaoController.text.trim(),
         ativo: widget.formaPagamento.ativo,
-        idGestor: widget.formaPagamento.idGestor, // ADICIONADO (ESSENCIAL)
+        idGestor: widget.formaPagamento.idGestor,
       );
 
-      final atualizar =
-          AtualizarFormaPagamento(FormaPagamentoRepositorioAdaptativo());
+      final atualizar = _atualizar;
       try {
         await atualizar.executar(formaAtualizada);
         if (mounted) {

@@ -5,9 +5,11 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 
+import 'package:firebase_auth/firebase_auth.dart' as _i6;
 import 'package:gerenciar/dominio/entidades/cliente.dart' as _i4;
 import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart'
     as _i2;
+import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -99,4 +101,110 @@ class MockClienteRepositorioInterface extends _i1.Mock
         ),
         returnValue: _i3.Future<List<_i4.Cliente>>.value(<_i4.Cliente>[]),
       ) as _i3.Future<List<_i4.Cliente>>);
+}
+
+/// A class which mocks [AutenticacaoServico].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAutenticacaoServico extends _i1.Mock
+    implements _i5.AutenticacaoServico {
+  MockAutenticacaoServico() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #enviarEmailRedefinicaoSenha,
+          [email],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<_i6.User?> login(
+    String? email,
+    String? senha,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #login,
+          [
+            email,
+            senha,
+          ],
+        ),
+        returnValue: _i3.Future<_i6.User?>.value(),
+      ) as _i3.Future<_i6.User?>);
+
+  @override
+  _i3.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
+        Invocation.method(
+          #primeiroGestorJaCadastrado,
+          [],
+        ),
+        returnValue: _i3.Future<bool>.value(false),
+      ) as _i3.Future<bool>);
+
+  @override
+  _i3.Future<_i6.User?> cadastrarPrimeiroGestor({
+    required String? nome,
+    required String? email,
+    required String? senha,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarPrimeiroGestor,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+          },
+        ),
+        returnValue: _i3.Future<_i6.User?>.value(),
+      ) as _i3.Future<_i6.User?>);
+
+  @override
+  _i3.Future<_i6.User?> cadastrarTecnico({
+    required String? nome,
+    required String? email,
+    required String? senha,
+    required String? telefone,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarTecnico,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+            #telefone: telefone,
+          },
+        ),
+        returnValue: _i3.Future<_i6.User?>.value(),
+      ) as _i3.Future<_i6.User?>);
+
+  @override
+  _i3.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #buscarDadosUsuarioLogado,
+          [],
+        ),
+        returnValue: _i3.Future<Map<String, dynamic>?>.value(),
+      ) as _i3.Future<Map<String, dynamic>?>);
 }

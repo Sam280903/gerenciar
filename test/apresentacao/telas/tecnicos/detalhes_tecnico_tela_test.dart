@@ -6,14 +6,16 @@ import 'package:gerenciar/apresentacao/telas/tecnicos/detalhes_tecnico_tela.dart
 import 'package:gerenciar/apresentacao/telas/tecnicos/editar_tecnico_tela.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
 import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'detalhes_tecnico_tela_test.mocks.dart';
 
-@GenerateMocks([TecnicoRepositorioInterface])
+@GenerateMocks([TecnicoRepositorioInterface, AutenticacaoServico])
 void main() {
   late MockTecnicoRepositorioInterface mockTecnicoRepositorio;
+  late MockAutenticacaoServico mockAuthServico;
 
   final tecnicoAtivo = Tecnico(
     id: 'tec-1',
@@ -26,7 +28,11 @@ void main() {
 
   Future<void> pumpTela(WidgetTester tester, Tecnico tecnico) async {
     await tester.pumpWidget(MaterialApp(
-      home: DetalhesTecnicoTela(tecnico: tecnico),
+      home: DetalhesTecnicoTela(
+        tecnico: tecnico,
+        authServico: mockAuthServico,
+        tecnicoRepo: mockTecnicoRepositorio,
+      ),
       routes: {
         '/editar-tecnico': (_) => EditarTecnicoTela(tecnico: tecnico),
       },
@@ -35,11 +41,15 @@ void main() {
 
   setUp(() {
     mockTecnicoRepositorio = MockTecnicoRepositorioInterface();
+    mockAuthServico = MockAutenticacaoServico();
+    when(mockAuthServico.buscarDadosUsuarioLogado())
+        .thenAnswer((_) async => {'perfil': 'gestor'});
   });
 
   testWidgets('Deve exibir todos os dados do técnico na tela',
       (WidgetTester tester) async {
     await pumpTela(tester, tecnicoAtivo);
+    await tester.pumpAndSettle();
 
     expect(find.text('Técnico de Teste'), findsOneWidget);
     expect(find.text('tecnico@teste.com'), findsOneWidget);
@@ -52,7 +62,9 @@ void main() {
     when(mockTecnicoRepositorio.inativar(any)).thenAnswer((_) async => {});
 
     await pumpTela(tester, tecnicoAtivo);
+    await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.widgetWithText(OutlinedButton, 'INATIVAR'));
     await tester.tap(find.widgetWithText(OutlinedButton, 'INATIVAR'));
     await tester.pumpAndSettle();
 

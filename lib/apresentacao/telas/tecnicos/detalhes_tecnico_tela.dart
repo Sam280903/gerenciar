@@ -4,12 +4,15 @@ import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptat
 import 'package:gerenciar/dominio/casos_uso/tecnico/inativar_tecnico.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/reativar_tecnico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'editar_tecnico_tela.dart';
 
 class DetalhesTecnicoTela extends StatefulWidget {
   final Tecnico tecnico;
-  const DetalhesTecnicoTela({super.key, required this.tecnico});
+  final AutenticacaoServico? authServico;
+  final TecnicoRepositorioInterface? tecnicoRepo;
+  const DetalhesTecnicoTela({super.key, required this.tecnico, this.authServico, this.tecnicoRepo});
   @override
   State<DetalhesTecnicoTela> createState() => _DetalhesTecnicoTelaState();
 }
@@ -17,12 +20,13 @@ class DetalhesTecnicoTela extends StatefulWidget {
 class _DetalhesTecnicoTelaState extends State<DetalhesTecnicoTela> {
   bool _carregando = false;
   late Tecnico _tecnicoAtual;
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String _perfilUsuario = "";
 
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _tecnicoAtual = widget.tecnico;
     _carregarPerfilUsuario();
   }
@@ -65,12 +69,11 @@ class _DetalhesTecnicoTelaState extends State<DetalhesTecnicoTela> {
     if (confirmar == true) {
       setState(() => _carregando = true);
       try {
+        final repo = widget.tecnicoRepo ?? TecnicoRepositorioAdaptativo();
         if (vaiInativar) {
-          await InativarTecnico(TecnicoRepositorioAdaptativo())
-              .executar(_tecnicoAtual.id);
+          await InativarTecnico(repo).executar(_tecnicoAtual.id);
         } else {
-          await ReativarTecnico(TecnicoRepositorioAdaptativo())
-              .executar(_tecnicoAtual.id);
+          await ReativarTecnico(repo).executar(_tecnicoAtual.id);
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(

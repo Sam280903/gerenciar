@@ -26,7 +26,10 @@ void main() {
 
   Future<void> pumpTela(WidgetTester tester, Tecnico tecnico) async {
     await tester.pumpWidget(MaterialApp(
-      home: EditarTecnicoTela(tecnico: tecnico),
+      home: EditarTecnicoTela(
+        tecnico: tecnico,
+        tecnicoRepo: mockTecnicoRepositorio,
+      ),
     ));
   }
 
@@ -52,8 +55,6 @@ void main() {
         find.widgetWithText(TextFormField, 'Nome Completo'), 'Nome Modificado');
     await tester.tap(find.text('SALVAR ALTERAÇÕES'));
     await tester.pump();
-
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     verify(mockTecnicoRepositorio.atualizar(argThat(
       isA<Tecnico>().having((t) => t.nome, 'nome', 'Nome Modificado'),

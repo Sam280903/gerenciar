@@ -3,9 +3,12 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
-import 'package:gerenciar/dominio/entidades/forma_pagamento.dart' as _i4;
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/inativar_forma_pagamento.dart'
+    as _i3;
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/reativar_forma_pagamento.dart'
+    as _i5;
 import 'package:gerenciar/dominio/interfaces/forma_pagamento_repositorio_interface.dart'
     as _i2;
 import 'package:mockito/mockito.dart' as _i1;
@@ -25,90 +28,71 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-/// A class which mocks [FormaPagamentoRepositorioInterface].
+class _FakeFormaPagamentoRepositorioInterface_0 extends _i1.SmartFake
+    implements _i2.FormaPagamentoRepositorioInterface {
+  _FakeFormaPagamentoRepositorioInterface_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
+/// A class which mocks [InativarFormaPagamento].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockFormaPagamentoRepositorioInterface extends _i1.Mock
-    implements _i2.FormaPagamentoRepositorioInterface {
-  MockFormaPagamentoRepositorioInterface() {
+class MockInativarFormaPagamento extends _i1.Mock
+    implements _i3.InativarFormaPagamento {
+  MockInativarFormaPagamento() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<void> adicionar(_i4.FormaPagamento? forma) => (super.noSuchMethod(
-        Invocation.method(
-          #adicionar,
-          [forma],
+  _i2.FormaPagamentoRepositorioInterface get repositorio => (super.noSuchMethod(
+        Invocation.getter(#repositorio),
+        returnValue: _FakeFormaPagamentoRepositorioInterface_0(
+          this,
+          Invocation.getter(#repositorio),
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+      ) as _i2.FormaPagamentoRepositorioInterface);
 
   @override
-  _i3.Future<void> atualizar(_i4.FormaPagamento? forma) => (super.noSuchMethod(
+  _i4.Future<void> executar(String? id) => (super.noSuchMethod(
         Invocation.method(
-          #atualizar,
-          [forma],
-        ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-
-  @override
-  _i3.Future<void> inativar(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #inativar,
+          #executar,
           [id],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+}
+
+/// A class which mocks [ReativarFormaPagamento].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockReativarFormaPagamento extends _i1.Mock
+    implements _i5.ReativarFormaPagamento {
+  MockReativarFormaPagamento() {
+    _i1.throwOnMissingStub(this);
+  }
 
   @override
-  _i3.Future<void> reativar(String? id) => (super.noSuchMethod(
+  _i2.FormaPagamentoRepositorioInterface get repositorio => (super.noSuchMethod(
+        Invocation.getter(#repositorio),
+        returnValue: _FakeFormaPagamentoRepositorioInterface_0(
+          this,
+          Invocation.getter(#repositorio),
+        ),
+      ) as _i2.FormaPagamentoRepositorioInterface);
+
+  @override
+  _i4.Future<void> executar(String? id) => (super.noSuchMethod(
         Invocation.method(
-          #reativar,
+          #executar,
           [id],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
-
-  @override
-  _i3.Future<_i4.FormaPagamento?> buscarPorId(String? id) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #buscarPorId,
-          [id],
-        ),
-        returnValue: _i3.Future<_i4.FormaPagamento?>.value(),
-      ) as _i3.Future<_i4.FormaPagamento?>);
-
-  @override
-  _i3.Future<_i4.FormaPagamento?> buscarPorNome(String? nome) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #buscarPorNome,
-          [nome],
-        ),
-        returnValue: _i3.Future<_i4.FormaPagamento?>.value(),
-      ) as _i3.Future<_i4.FormaPagamento?>);
-
-  @override
-  _i3.Future<List<_i4.FormaPagamento>> listarTodos({
-    required String? idGestor,
-    bool? incluirInativos = false,
-  }) =>
-      (super.noSuchMethod(
-        Invocation.method(
-          #listarTodos,
-          [],
-          {
-            #idGestor: idGestor,
-            #incluirInativos: incluirInativos,
-          },
-        ),
-        returnValue:
-            _i3.Future<List<_i4.FormaPagamento>>.value(<_i4.FormaPagamento>[]),
-      ) as _i3.Future<List<_i4.FormaPagamento>>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 }

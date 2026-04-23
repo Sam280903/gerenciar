@@ -6,17 +6,17 @@ import 'package:gerenciar/apresentacao/telas/clientes/detalhes_cliente_tela.dart
 import 'package:gerenciar/apresentacao/telas/clientes/editar_cliente_tela.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'detalhes_cliente_tela_test.mocks.dart';
 
-// A anotação para gerar o mock do repositório
-@GenerateMocks([ClienteRepositorioInterface])
+@GenerateMocks([ClienteRepositorioInterface, AutenticacaoServico])
 void main() {
   late MockClienteRepositorioInterface mockClienteRepositorio;
+  late MockAutenticacaoServico mockAuthServico;
 
-  // Cliente de exemplo que será usado nos testes
   final clienteAtivo = Cliente(
     id: 'cliente-1',
     nome: 'Cliente Teste Ativo',
@@ -28,25 +28,34 @@ void main() {
     idGestor: 'gestor-1',
   );
 
-  // Função para "inflar" a tela de detalhes com o cliente de exemplo
   Future<void> pumpTela(WidgetTester tester, Cliente cliente) async {
     await tester.pumpWidget(MaterialApp(
-      home: DetalhesClienteTela(cliente: cliente),
-      // Adicionamos uma rota para a tela de edição para evitar erros de navegação
+      home: DetalhesClienteTela(
+        cliente: cliente,
+        authServico: mockAuthServico,
+        clienteRepo: mockClienteRepositorio,
+      ),
       routes: {
-        '/editar-cliente': (_) => EditarClienteTela(cliente: cliente),
+        '/editar-cliente': (_) => EditarClienteTela(
+              cliente: cliente,
+              clienteRepo: mockClienteRepositorio,
+            ),
       },
     ));
   }
 
   setUp(() {
     mockClienteRepositorio = MockClienteRepositorioInterface();
+    mockAuthServico = MockAutenticacaoServico();
+    when(mockAuthServico.buscarDadosUsuarioLogado())
+        .thenAnswer((_) async => {'perfil': 'gestor'});
   });
 
   testWidgets('Deve exibir todos os dados do cliente na tela de detalhes',
       (WidgetTester tester) async {
     // ARRANGE & ACT
     await pumpTela(tester, clienteAtivo);
+    await tester.pumpAndSettle();
 
     // ASSERT
     expect(find.text('Cliente Teste Ativo'), findsOneWidget);
@@ -64,9 +73,11 @@ void main() {
     when(mockClienteRepositorio.inativar(any)).thenAnswer((_) async => {});
 
     await pumpTela(tester, clienteAtivo);
+    await tester.pumpAndSettle();
 
     // ACT
     // 1. Toca no botão 'INATIVAR'
+    await tester.ensureVisible(find.widgetWithText(OutlinedButton, 'INATIVAR'));
     await tester.tap(find.widgetWithText(OutlinedButton, 'INATIVAR'));
     await tester.pumpAndSettle(); // Aguarda o diálogo aparecer
 
@@ -87,8 +98,10 @@ void main() {
       (WidgetTester tester) async {
     // ARRANGE
     await pumpTela(tester, clienteAtivo);
+    await tester.pumpAndSettle();
 
     // ACT
+    await tester.ensureVisible(find.widgetWithText(ElevatedButton, 'EDITAR'));
     await tester.tap(find.widgetWithText(ElevatedButton, 'EDITAR'));
     await tester.pumpAndSettle(); // Aguarda a navegação
 

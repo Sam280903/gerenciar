@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i5;
 
+import 'package:firebase_auth/firebase_auth.dart' as _i10;
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart'
     as _i4;
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart'
@@ -15,6 +16,7 @@ import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart'
     as _i2;
 import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart'
     as _i3;
+import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i9;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -108,4 +110,110 @@ class MockBuscarTecnicoPorId extends _i1.Mock
         ),
         returnValue: _i5.Future<_i8.Tecnico?>.value(),
       ) as _i5.Future<_i8.Tecnico?>);
+}
+
+/// A class which mocks [AutenticacaoServico].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAutenticacaoServico extends _i1.Mock
+    implements _i9.AutenticacaoServico {
+  MockAutenticacaoServico() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #enviarEmailRedefinicaoSenha,
+          [email],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i10.User?> login(
+    String? email,
+    String? senha,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #login,
+          [
+            email,
+            senha,
+          ],
+        ),
+        returnValue: _i5.Future<_i10.User?>.value(),
+      ) as _i5.Future<_i10.User?>);
+
+  @override
+  _i5.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
+        Invocation.method(
+          #primeiroGestorJaCadastrado,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
+  _i5.Future<_i10.User?> cadastrarPrimeiroGestor({
+    required String? nome,
+    required String? email,
+    required String? senha,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarPrimeiroGestor,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+          },
+        ),
+        returnValue: _i5.Future<_i10.User?>.value(),
+      ) as _i5.Future<_i10.User?>);
+
+  @override
+  _i5.Future<_i10.User?> cadastrarTecnico({
+    required String? nome,
+    required String? email,
+    required String? senha,
+    required String? telefone,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarTecnico,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+            #telefone: telefone,
+          },
+        ),
+        returnValue: _i5.Future<_i10.User?>.value(),
+      ) as _i5.Future<_i10.User?>);
+
+  @override
+  _i5.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #buscarDadosUsuarioLogado,
+          [],
+        ),
+        returnValue: _i5.Future<Map<String, dynamic>?>.value(),
+      ) as _i5.Future<Map<String, dynamic>?>);
 }

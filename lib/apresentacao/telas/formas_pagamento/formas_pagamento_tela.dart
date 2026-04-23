@@ -11,9 +11,10 @@ import 'detalhes_forma_pagamento_tela.dart';
 class FormasPagamentoTela extends StatefulWidget {
   final ListarFormasPagamento? listarFormasPagamento;
   final CadastrarFormaPagamento? cadastrarFormaPagamento;
+  final AutenticacaoServico? authServico;
 
   const FormasPagamentoTela(
-      {super.key, this.listarFormasPagamento, this.cadastrarFormaPagamento});
+      {super.key, this.listarFormasPagamento, this.cadastrarFormaPagamento, this.authServico});
 
   @override
   State<FormasPagamentoTela> createState() => _FormasPagamentoTelaState();
@@ -28,12 +29,13 @@ class _FormasPagamentoTelaState extends State<FormasPagamentoTela> {
   List<FormaPagamento> _formasFiltradas = [];
   final _buscaController = TextEditingController();
 
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String? _idGestor;
 
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _listar = widget.listarFormasPagamento ??
         ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
     _carregarDadosIniciais();

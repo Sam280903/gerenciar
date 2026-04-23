@@ -4,13 +4,16 @@ import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptat
 import 'package:gerenciar/dominio/casos_uso/cliente/inativar_cliente.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/reativar_cliente.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'editar_cliente_tela.dart';
 
 class DetalhesClienteTela extends StatefulWidget {
   final Cliente cliente;
-  const DetalhesClienteTela({super.key, required this.cliente});
+  final AutenticacaoServico? authServico;
+  final ClienteRepositorioInterface? clienteRepo;
+  const DetalhesClienteTela({super.key, required this.cliente, this.authServico, this.clienteRepo});
   @override
   State<DetalhesClienteTela> createState() => _DetalhesClienteTelaState();
 }
@@ -18,12 +21,13 @@ class DetalhesClienteTela extends StatefulWidget {
 class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
   bool _carregando = false;
   late Cliente _clienteAtual;
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String _perfilUsuario = "";
 
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _clienteAtual = widget.cliente;
     _carregarPerfilUsuario();
   }
@@ -92,12 +96,11 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
     if (confirmar == true) {
       setState(() => _carregando = true);
       try {
+        final repo = widget.clienteRepo ?? ClienteRepositorioAdaptativo();
         if (vaiInativar) {
-          await InativarCliente(ClienteRepositorioAdaptativo())
-              .executar(_clienteAtual.id);
+          await InativarCliente(repo).executar(_clienteAtual.id);
         } else {
-          await ReativarCliente(ClienteRepositorioAdaptativo())
-              .executar(_clienteAtual.id);
+          await ReativarCliente(repo).executar(_clienteAtual.id);
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -121,7 +124,7 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
     final resultado = await Navigator.push<bool>(
         context,
         MaterialPageRoute(
-            builder: (context) => EditarClienteTela(cliente: _clienteAtual)));
+            builder: (context) => EditarClienteTela(cliente: _clienteAtual, clienteRepo: widget.clienteRepo)));
     if (resultado == true && mounted) {
       Navigator.of(context).pop(true);
     }

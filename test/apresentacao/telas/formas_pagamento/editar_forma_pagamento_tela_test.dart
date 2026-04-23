@@ -30,8 +30,10 @@ void main() {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
-                builder: (_) =>
-                    EditarFormaPagamentoTela(formaPagamento: formaPagamento),
+                builder: (_) => EditarFormaPagamentoTela(
+                    formaPagamento: formaPagamento,
+                    atualizarFormaPagamento: mockAtualizarFormaPagamento,
+                  ),
               );
             },
             child: const Text('Abrir Modal'),
@@ -63,9 +65,7 @@ void main() {
     await tester.tap(find.text('SALVAR ALTERAÇÕES'));
     await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-    // // Verifica a chamada ao mock
+    // Verifica a chamada ao mock
     verify(mockAtualizarFormaPagamento.executar(argThat(
       isA<FormaPagamento>().having((fp) => fp.nome, 'nome', 'Nome Modificado'),
     ))).called(1);

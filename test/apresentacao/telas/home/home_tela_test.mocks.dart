@@ -7,6 +7,7 @@ import 'dart:async' as _i3;
 
 import 'package:firebase_auth/firebase_auth.dart' as _i4;
 import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i2;
+import 'package:gerenciar/servicos/sincronizacao_servico.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -128,4 +129,42 @@ class MockAutenticacaoServico extends _i1.Mock
         ),
         returnValue: _i3.Future<Map<String, dynamic>?>.value(),
       ) as _i3.Future<Map<String, dynamic>?>);
+}
+
+/// A class which mocks [SincronizacaoServico].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSincronizacaoServico extends _i1.Mock
+    implements _i5.SincronizacaoServico {
+  MockSincronizacaoServico() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  void iniciarSincronizacao() => super.noSuchMethod(
+        Invocation.method(
+          #iniciarSincronizacao,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void pararSincronizacao() => super.noSuchMethod(
+        Invocation.method(
+          #pararSincronizacao,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  _i3.Future<void> sincronizarDados() => (super.noSuchMethod(
+        Invocation.method(
+          #sincronizarDados,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
 }

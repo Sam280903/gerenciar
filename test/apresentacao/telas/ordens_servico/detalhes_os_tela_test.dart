@@ -8,17 +8,17 @@ import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-// Importa o arquivo de mocks que será gerado
 import 'detalhes_os_tela_test.mocks.dart';
 
-// Mocks para os casos de uso que a tela depende para buscar dados
-@GenerateMocks([BuscarClientePorId, BuscarTecnicoPorId])
+@GenerateMocks([BuscarClientePorId, BuscarTecnicoPorId, AutenticacaoServico])
 void main() {
   late MockBuscarClientePorId mockBuscarCliente;
   late MockBuscarTecnicoPorId mockBuscarTecnico;
+  late MockAutenticacaoServico mockAuthServico;
 
   final osExemplo = OrdemServico(
     id: 'os-123456789',
@@ -53,13 +53,21 @@ void main() {
 
   Future<void> pumpTela(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: DetalhesOSTela(ordemServico: osExemplo),
+      home: DetalhesOSTela(
+        ordemServico: osExemplo,
+        authServico: mockAuthServico,
+        buscarCliente: mockBuscarCliente,
+        buscarTecnico: mockBuscarTecnico,
+      ),
     ));
   }
 
   setUp(() {
     mockBuscarCliente = MockBuscarClientePorId();
     mockBuscarTecnico = MockBuscarTecnicoPorId();
+    mockAuthServico = MockAutenticacaoServico();
+    when(mockAuthServico.buscarDadosUsuarioLogado())
+        .thenAnswer((_) async => {'perfil': 'gestor'});
   });
 
   testWidgets('Deve exibir CircularProgressIndicator e depois os dados da OS',
@@ -79,7 +87,7 @@ void main() {
     expect(find.text('Cliente da OS'), findsOneWidget);
     expect(find.text('Técnico da OS'), findsOneWidget);
     expect(find.text('Ar condicionado não está gelando.'), findsOneWidget);
-    expect(find.text('R\$ 250,00'), findsOneWidget);
+    expect(find.text('R\$ 250.00'), findsOneWidget);
     expect(find.text('Pendente'), findsOneWidget);
   });
 }

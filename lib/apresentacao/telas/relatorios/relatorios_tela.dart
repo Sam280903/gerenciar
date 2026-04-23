@@ -16,12 +16,14 @@ class RelatoriosTela extends StatefulWidget {
   final RelatorioServico? relatorioServico;
   final ListarTecnicos? listarTecnicos;
   final ListarClientes? listarClientes;
+  final AutenticacaoServico? authServico;
 
   const RelatoriosTela(
       {super.key,
       this.relatorioServico,
       this.listarTecnicos,
-      this.listarClientes});
+      this.listarClientes,
+      this.authServico});
 
   @override
   State<RelatoriosTela> createState() => _RelatoriosTelaState();
@@ -41,12 +43,13 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
   late final RelatorioServico _relatorioServico;
   late final ListarTecnicos _listarTecnicos;
   late final ListarClientes _listarClientes;
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String? _idGestor;
 
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _relatorioServico = widget.relatorioServico ?? RelatorioServico();
     _listarTecnicos =
         widget.listarTecnicos ?? ListarTecnicos(TecnicoRepositorioAdaptativo());

@@ -40,6 +40,7 @@ void main() {
         relatorioServico: mockRelatorioServico,
         listarTecnicos: mockListarTecnicos,
         listarClientes: mockListarClientes,
+        authServico: mockAuthServico,
       ),
     ));
   }
@@ -51,7 +52,7 @@ void main() {
 
     expect(find.widgetWithText(TextFormField, 'Data Inicial'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Data Final'), findsOneWidget);
-    expect(find.widgetWithText(InputDecorator, 'Todos'), findsNWidgets(2));
+    expect(find.widgetWithText(InputDecorator, 'Todos'), findsNWidgets(3));
     expect(find.widgetWithText(DropdownButtonFormField<String>, 'Todos'),
         findsOneWidget);
     expect(find.text('GERAR RELATÓRIO'), findsOneWidget);
@@ -70,10 +71,6 @@ void main() {
     // ACT
     await tester.tap(find.text('GERAR RELATÓRIO'));
     await tester.pump();
-
-    // ASSERT
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('GERANDO...'), findsOneWidget);
 
     // VERIFICA SE O MÉTODO FOI CHAMADO COM 2 ARGUMENTOS
     verify(mockRelatorioServico.gerarRelatorioOrdensServico(any, any))

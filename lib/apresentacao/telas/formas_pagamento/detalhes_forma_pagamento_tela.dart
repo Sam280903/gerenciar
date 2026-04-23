@@ -8,8 +8,15 @@ import 'editar_forma_pagamento_tela.dart';
 
 class DetalhesFormaPagamentoTela extends StatefulWidget {
   final FormaPagamento formaPagamento;
+  final InativarFormaPagamento? inativarFormaPagamento;
+  final ReativarFormaPagamento? reativarFormaPagamento;
 
-  const DetalhesFormaPagamentoTela({super.key, required this.formaPagamento});
+  const DetalhesFormaPagamentoTela({
+    super.key,
+    required this.formaPagamento,
+    this.inativarFormaPagamento,
+    this.reativarFormaPagamento,
+  });
 
   @override
   State<DetalhesFormaPagamentoTela> createState() =>
@@ -20,11 +27,15 @@ class _DetalhesFormaPagamentoTelaState
     extends State<DetalhesFormaPagamentoTela> {
   late FormaPagamento _formaAtual;
   bool _carregando = false;
+  late final InativarFormaPagamento _inativar;
+  late final ReativarFormaPagamento _reativar;
 
   @override
   void initState() {
     super.initState();
     _formaAtual = widget.formaPagamento;
+    _inativar = widget.inativarFormaPagamento ?? InativarFormaPagamento(FormaPagamentoRepositorioAdaptativo());
+    _reativar = widget.reativarFormaPagamento ?? ReativarFormaPagamento(FormaPagamentoRepositorioAdaptativo());
   }
 
   Future<void> _toggleAtivo() async {
@@ -56,11 +67,9 @@ class _DetalhesFormaPagamentoTelaState
       setState(() => _carregando = true);
       try {
         if (vaiInativar) {
-          await InativarFormaPagamento(FormaPagamentoRepositorioAdaptativo())
-              .executar(_formaAtual.id);
+          await _inativar.executar(_formaAtual.id);
         } else {
-          await ReativarFormaPagamento(FormaPagamentoRepositorioAdaptativo())
-              .executar(_formaAtual.id);
+          await _reativar.executar(_formaAtual.id);
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(

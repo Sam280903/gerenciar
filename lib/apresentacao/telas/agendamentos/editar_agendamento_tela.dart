@@ -6,7 +6,8 @@ import 'package:intl/intl.dart';
 
 class EditarAgendamentoTela extends StatefulWidget {
   final Agendamento agendamento;
-  const EditarAgendamentoTela({super.key, required this.agendamento});
+  final AtualizarAgendamento? atualizarAgendamento;
+  const EditarAgendamentoTela({super.key, required this.agendamento, this.atualizarAgendamento});
 
   @override
   State<EditarAgendamentoTela> createState() => _EditarAgendamentoTelaState();
@@ -93,7 +94,7 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
           ativo: widget.agendamento.ativo,
         );
 
-        await AtualizarAgendamento(AgendamentoRepositorioAdaptativo())
+        await (widget.atualizarAgendamento ?? AtualizarAgendamento(AgendamentoRepositorioAdaptativo()))
             .executar(agendamentoAtualizado);
 
         if (mounted) {

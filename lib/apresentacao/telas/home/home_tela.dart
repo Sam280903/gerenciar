@@ -7,10 +7,10 @@ import '../../../app/rotas.dart';
 import 'dart:ui'; // Para o efeito de vidro
 
 class HomeTela extends StatefulWidget {
-  // Adicionando o serviço como um parâmetro opcional
   final AutenticacaoServico? authServico;
+  final SincronizacaoServico? sincronizacaoServico;
 
-  const HomeTela({super.key, this.authServico});
+  const HomeTela({super.key, this.authServico, this.sincronizacaoServico});
 
   @override
   State<HomeTela> createState() => _HomeTelaState();
@@ -33,9 +33,7 @@ class _HomeTelaState extends State<HomeTela>
     _authServico = widget.authServico ?? AutenticacaoServico();
 
     _carregarDadosUsuario();
-
-    // 2. ESTA LINHA FOI ADICIONADA para iniciar a sincronização
-    SincronizacaoServico().sincronizarDados();
+    (widget.sincronizacaoServico ?? SincronizacaoServico()).sincronizarDados();
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800),

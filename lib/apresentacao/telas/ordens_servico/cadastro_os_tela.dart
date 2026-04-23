@@ -26,6 +26,7 @@ class CadastroOSTela extends StatefulWidget {
   final ListarFormasPagamento? listarFormasPagamento;
   final CadastrarOrdemServico? cadastrarOS;
   final AgendamentoRepositorioInterface? agendamentoRepo;
+  final AutenticacaoServico? authServico;
 
   const CadastroOSTela(
       {super.key,
@@ -33,7 +34,8 @@ class CadastroOSTela extends StatefulWidget {
       this.listarTecnicos,
       this.listarFormasPagamento,
       this.cadastrarOS,
-      this.agendamentoRepo});
+      this.agendamentoRepo,
+      this.authServico});
 
   @override
   State<CadastroOSTela> createState() => _CadastroOSTelaState();
@@ -55,7 +57,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   bool _carregando = false;
   bool _isInit = true;
 
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String? _idGestor;
 
   late final ListarClientes _listarClientes;
@@ -67,6 +69,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _listarClientes =
         widget.listarClientes ?? ListarClientes(ClienteRepositorioAdaptativo());
     _listarTecnicos =

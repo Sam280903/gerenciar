@@ -34,6 +34,8 @@ class OrdensServicoTela extends StatefulWidget {
   final CadastrarOrdemServico? cadastrarOS;
   final AgendamentoRepositorioInterface? agendamentoRepo;
 
+  final AutenticacaoServico? authServico;
+
   const OrdensServicoTela(
       {super.key,
       this.listarOS,
@@ -43,7 +45,8 @@ class OrdensServicoTela extends StatefulWidget {
       this.listarTecnicos,
       this.listarFormasPagamento,
       this.cadastrarOS,
-      this.agendamentoRepo});
+      this.agendamentoRepo,
+      this.authServico});
 
   @override
   State<OrdensServicoTela> createState() => _OrdensServicoTelaState();
@@ -68,7 +71,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   List<OrdemServicoDetalhada> _concluidasFiltrados = [];
   List<OrdemServicoDetalhada> _reabertasFiltrados = [];
 
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String? _idGestor;
   String? _perfilUsuario;
   String? _idUsuarioLogado;
@@ -87,6 +90,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         BuscarClientePorId(ClienteRepositorioAdaptativo());
     _buscarTecnico = widget.buscarTecnico ??
         BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
+    _authServico = widget.authServico ?? AutenticacaoServico();
 
     _carregarDadosIniciais();
     _buscaController.addListener(_filtrarOS);
@@ -143,24 +147,41 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     setState(() => _carregando = true);
 
     final ordensDeServico = await _listarOS.executar(idGestor: _idGestor!);
+
+    // Cache de futures por ID — evita buscar o mesmo cliente/técnico mais de uma vez
+    final cacheClientes = <String, Future<dynamic>>{};
+    final cacheTecnicos = <String, Future<dynamic>>{};
+
+    Future<dynamic> buscarCliente(String id) =>
+        cacheClientes.putIfAbsent(id, () => _buscarCliente.executar(id));
+    Future<dynamic> buscarTecnico(String id) =>
+        cacheTecnicos.putIfAbsent(id, () => _buscarTecnico.executar(id));
+
+    final osFiltradas = ordensDeServico.where((os) {
+      if (_perfilUsuario == 'tecnico' && os.idTecnico != _idUsuarioLogado) return false;
+      return true;
+    }).toList();
+
+    // Busca cliente e técnico de todas as OS em paralelo
+    final detalhadas = await Future.wait(
+      osFiltradas.map((os) async {
+        final clienteFuture = buscarCliente(os.idCliente);
+        final tecnicoFuture = buscarTecnico(os.idTecnico);
+        return OrdemServicoDetalhada(
+          os: os,
+          cliente: await clienteFuture,
+          tecnico: await tecnicoFuture,
+        );
+      }),
+    );
+
     List<OrdemServicoDetalhada> pendentesTemp = [];
     List<OrdemServicoDetalhada> emAndamentoTemp = [];
     List<OrdemServicoDetalhada> concluidasTemp = [];
     List<OrdemServicoDetalhada> reabertasTemp = [];
-    for (final os in ordensDeServico) {
-      // Se for técnico, exibe apenas as OSs atribuídas a ele
-      if (_perfilUsuario == 'tecnico' && os.idTecnico != _idUsuarioLogado) {
-        continue;
-      }
-      
-      final cliente = await _buscarCliente.executar(os.idCliente);
-      final tecnico = await _buscarTecnico.executar(os.idTecnico);
-      final itemDetalhado = OrdemServicoDetalhada(
-        os: os,
-        cliente: cliente,
-        tecnico: tecnico,
-      );
-      switch (os.status) {
+
+    for (final itemDetalhado in detalhadas) {
+      switch (itemDetalhado.os.status) {
         case 'Pendente':
           pendentesTemp.add(itemDetalhado);
           break;
@@ -211,6 +232,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
                 listarFormasPagamento: widget.listarFormasPagamento,
                 cadastrarOS: widget.cadastrarOS,
                 agendamentoRepo: widget.agendamentoRepo,
+                authServico: _authServico,
               )),
     );
     if (resultado == true) {

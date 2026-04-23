@@ -18,8 +18,11 @@ import 'editar_os_tela.dart';
 
 class DetalhesOSTela extends StatefulWidget {
   final OrdemServico ordemServico;
+  final AutenticacaoServico? authServico;
+  final BuscarClientePorId? buscarCliente;
+  final BuscarTecnicoPorId? buscarTecnico;
 
-  const DetalhesOSTela({super.key, required this.ordemServico});
+  const DetalhesOSTela({super.key, required this.ordemServico, this.authServico, this.buscarCliente, this.buscarTecnico});
 
   @override
   State<DetalhesOSTela> createState() => _DetalhesOSTelaState();
@@ -27,21 +30,24 @@ class DetalhesOSTela extends StatefulWidget {
 
 class _DetalhesOSTelaState extends State<DetalhesOSTela> {
   late Future<Map<String, dynamic>> _dadosFuture;
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
+  late final BuscarClientePorId _buscarCliente;
+  late final BuscarTecnicoPorId _buscarTecnico;
   String _perfilUsuario = "";
   bool _carregandoAcao = false;
 
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
+    _buscarCliente = widget.buscarCliente ?? BuscarClientePorId(ClienteRepositorioAdaptativo());
+    _buscarTecnico = widget.buscarTecnico ?? BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
     _dadosFuture = _carregarDados();
   }
 
   Future<Map<String, dynamic>> _carregarDados() async {
-    final clienteFuture = BuscarClientePorId(ClienteRepositorioAdaptativo())
-        .executar(widget.ordemServico.idCliente);
-    final tecnicoFuture = BuscarTecnicoPorId(TecnicoRepositorioAdaptativo())
-        .executar(widget.ordemServico.idTecnico);
+    final clienteFuture = _buscarCliente.executar(widget.ordemServico.idCliente);
+    final tecnicoFuture = _buscarTecnico.executar(widget.ordemServico.idTecnico);
     final dadosUsuarioFuture = _authServico.buscarDadosUsuarioLogado();
 
     final resultados =

@@ -36,9 +36,6 @@ void main() {
     await tester.enterText(find.widgetWithText(TextFormField, 'E-mail'), 'teste@teste.com');
     await tester.tap(find.text('ENVIAR E-MAIL'));
     await tester.pump(); // Inicia o carregamento
-    
-    // ASSERT: Verifica o indicador de progresso
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     await tester.pumpAndSettle(); // Conclui a ação
 

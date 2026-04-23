@@ -76,6 +76,7 @@ void main() {
 
     when(mockAuthServico.buscarDadosUsuarioLogado())
         .thenAnswer((_) async => {'idGestor': 'gestor-1'});
+    when(mockAuthServico.usuarioAtual).thenReturn(null);
   });
 
   Future<void> pumpTela(WidgetTester tester) async {
@@ -84,6 +85,7 @@ void main() {
         listarOS: mockListarOS,
         buscarCliente: mockBuscarCliente,
         buscarTecnico: mockBuscarTecnico,
+        authServico: mockAuthServico,
       ),
     ));
   }
@@ -104,7 +106,7 @@ void main() {
     expect(
         find.descendant(
             of: find.byType(TabBarView), matching: find.text('Cliente A')),
-        findsNWidgets(2));
+        findsOneWidget);
 
     await tester.tap(find.text('CONCLUÍDAS'));
     await tester.pumpAndSettle();

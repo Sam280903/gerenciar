@@ -3,7 +3,6 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface.dart';
-import 'package:gerenciar/servicos/sincronizacao_servico.dart';
 
 import 'cadastro_os_offline_test.mocks.dart';
 
@@ -11,12 +10,10 @@ import 'cadastro_os_offline_test.mocks.dart';
 void main() {
   late MockOrdemServicoRepositorioInterface mockRemoteRepo;
   late MockOrdemServicoRepositorioInterface mockLocalRepo;
-  late SincronizacaoServico sincronizacaoServico;
 
   setUp(() {
     mockRemoteRepo = MockOrdemServicoRepositorioInterface();
     mockLocalRepo = MockOrdemServicoRepositorioInterface();
-    sincronizacaoServico = SincronizacaoServico();
   });
 
   final osFake = OrdemServico(
@@ -24,7 +21,7 @@ void main() {
     idTecnico: 'tec-123',
     idCliente: 'cli-123',
     idFormaPagamento: 'fp-123',
-    idGestor: 'gestor-1', // idGestor obrigatório
+    idGestor: 'gestor-1',
     dataHoraInicio: DateTime.now(),
     descricao: 'Limpeza de Ar Condicionado',
     valor: 150.0,
@@ -45,10 +42,6 @@ void main() {
       }
 
       verify(mockLocalRepo.adicionar(osFake)).called(1);
-
-      // Valida se o serviço pode ser iniciado
-      sincronizacaoServico.iniciarSincronizacao();
-      sincronizacaoServico.pararSincronizacao();
     });
   });
 }

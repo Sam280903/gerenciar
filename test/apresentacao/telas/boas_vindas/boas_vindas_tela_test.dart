@@ -70,7 +70,8 @@ void main() {
         },
       ));
 
-      // ACT: Toca no botão de login.
+      // ACT: Aguarda animação de entrada e toca no botão de login.
+      await tester.pumpAndSettle();
       await tester.tap(find.text('JÁ TENHO CADASTRO'));
       await tester.pumpAndSettle();
 

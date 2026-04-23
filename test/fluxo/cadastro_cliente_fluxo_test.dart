@@ -44,6 +44,7 @@ void main() {
 
     when(mockAuthServico.buscarDadosUsuarioLogado())
         .thenAnswer((_) async => {'idGestor': 'gestor-1'});
+    when(mockAuthServico.usuarioAtual).thenReturn(null);
   });
 
   testWidgets('Deve cadastrar um novo cliente e exibi-lo na lista',
@@ -67,7 +68,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: ClientesTela(
         listarClientes: mockListarClientes,
+        cadastrarCliente: mockCadastrarCliente,
         httpClient: mockHttpClient,
+        authServico: mockAuthServico,
       ),
     ));
 

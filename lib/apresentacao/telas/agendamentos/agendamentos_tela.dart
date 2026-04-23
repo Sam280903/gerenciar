@@ -19,9 +19,10 @@ class AgendamentosTela extends StatefulWidget {
   final AgendamentoRepositorioAdaptativo? agendamentoRepo;
   final ClienteRepositorioAdaptativo? clienteRepo;
   final TecnicoRepositorioAdaptativo? tecnicoRepo;
+  final AutenticacaoServico? authServico;
 
   const AgendamentosTela(
-      {super.key, this.agendamentoRepo, this.clienteRepo, this.tecnicoRepo});
+      {super.key, this.agendamentoRepo, this.clienteRepo, this.tecnicoRepo, this.authServico});
 
   @override
   State<AgendamentosTela> createState() => _AgendamentosTelaState();
@@ -46,8 +47,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   List<AgendamentoDetalhado> _antigosFiltrados = [];
   List<AgendamentoDetalhado> _inativosFiltrados = [];
 
-  // ADICIONADO
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String? _idGestor;
   String? _perfilUsuario;
   String? _idUsuarioLogado;
@@ -64,6 +64,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
     _clienteRepo = widget.clienteRepo ?? ClienteRepositorioAdaptativo();
     _tecnicoRepo = widget.tecnicoRepo ?? TecnicoRepositorioAdaptativo();
+    _authServico = widget.authServico ?? AutenticacaoServico();
 
     initializeDateFormatting('pt_BR', null);
     _carregarDadosIniciais(); // MÉTODO ALTERADO
@@ -117,37 +118,50 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   }
 
   Future<void> _carregarAgendamentos() async {
-    if (_idGestor == null) return; // Não carrega se não souber o gestor
+    if (_idGestor == null) return;
 
     setState(() => _carregando = true);
 
-    // ALTERADO: Passa o idGestor para o caso de uso
     final agendamentos = await ListarAgendamentos(_agendamentoRepo)
         .executar(idGestor: _idGestor!);
+
     final hoje = DateUtils.dateOnly(DateTime.now());
+
+    // Cache de futures por ID — evita buscar o mesmo cliente/técnico mais de uma vez
+    final cacheClientes = <String, Future<dynamic>>{};
+    final cacheTecnicos = <String, Future<dynamic>>{};
+
+    Future<dynamic> buscarCliente(String id) =>
+        cacheClientes.putIfAbsent(id, () => BuscarClientePorId(_clienteRepo).executar(id));
+    Future<dynamic> buscarTecnico(String id) =>
+        cacheTecnicos.putIfAbsent(id, () => BuscarTecnicoPorId(_tecnicoRepo).executar(id));
+
+    final agFiltrados = agendamentos.where((ag) {
+      if (ag.idCliente.isEmpty || ag.idTecnico.isEmpty) return false;
+      if (_perfilUsuario == 'tecnico' && ag.idTecnico != _idUsuarioLogado) return false;
+      return true;
+    }).toList();
+
+    // Busca cliente e técnico de todos os agendamentos em paralelo
+    final detalhados = await Future.wait(
+      agFiltrados.map((ag) async {
+        final clienteFuture = buscarCliente(ag.idCliente);
+        final tecnicoFuture = buscarTecnico(ag.idTecnico);
+        return AgendamentoDetalhado(
+          agendamento: ag,
+          cliente: await clienteFuture,
+          tecnico: await tecnicoFuture,
+        );
+      }),
+    );
+
     List<AgendamentoDetalhado> proximosTemp = [];
     List<AgendamentoDetalhado> concluidosTemp = [];
     List<AgendamentoDetalhado> antigosTemp = [];
     List<AgendamentoDetalhado> inativosTemp = [];
-    for (final ag in agendamentos) {
-      if (ag.idCliente.isEmpty || ag.idTecnico.isEmpty) {
-        continue;
-      }
-      
-      // Se for técnico, filtra apenas agendamentos dele
-      if (_perfilUsuario == 'tecnico' && ag.idTecnico != _idUsuarioLogado) {
-        continue;
-      }
 
-      final cliente =
-          await BuscarClientePorId(_clienteRepo).executar(ag.idCliente);
-      final tecnico =
-          await BuscarTecnicoPorId(_tecnicoRepo).executar(ag.idTecnico);
-      final itemDetalhado = AgendamentoDetalhado(
-        agendamento: ag,
-        cliente: cliente,
-        tecnico: tecnico,
-      );
+    for (final itemDetalhado in detalhados) {
+      final ag = itemDetalhado.agendamento;
       if (!ag.ativo) {
         inativosTemp.add(itemDetalhado);
       } else if (ag.status == 'Concluído') {

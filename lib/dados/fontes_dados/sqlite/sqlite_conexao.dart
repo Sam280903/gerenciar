@@ -18,7 +18,7 @@ class SQLiteConexao {
 
     return openDatabase(
       caminhoBanco,
-      version: 4, // ** IMPORTANTE: Incrementei a versão do banco para 4 **
+      version: 5,
       onCreate: _criarTabelas,
       onUpgrade: _atualizarTabelas,
     );
@@ -50,6 +50,20 @@ class SQLiteConexao {
     if (oldVersion < 4) {
       await db.execute('ALTER TABLE agendamentos ADD COLUMN lembreteNotificacao TEXT');
       await db.execute('ALTER TABLE agendamentos ADD COLUMN notificacaoEnviada INTEGER DEFAULT 0');
+    }
+    if (oldVersion < 5) {
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_tecnicos_gestor_ativo ON tecnicos(idGestor, ativo)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_tecnicos_sincronizado ON tecnicos(sincronizado)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_clientes_gestor_ativo ON clientes(idGestor, ativo)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_clientes_sincronizado ON clientes(sincronizado)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_formas_gestor_ativo ON formas_pagamento(idGestor, ativo)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_formas_sincronizado ON formas_pagamento(sincronizado)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_os_gestor_ativo ON ordens_servico(idGestor, ativo)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_os_gestor_status ON ordens_servico(idGestor, status)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_os_sincronizado ON ordens_servico(sincronizado)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_ag_gestor_ativo ON agendamentos(idGestor, ativo)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_ag_tecnico_data ON agendamentos(idTecnico, dataHora)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_ag_sincronizado ON agendamentos(sincronizado)');
     }
   }
 
@@ -125,6 +139,20 @@ class SQLiteConexao {
         notificacaoEnviada INTEGER DEFAULT 0
       );
     ''');
+
+    // Índices para acelerar as queries mais frequentes
+    await db.execute('CREATE INDEX idx_tecnicos_gestor_ativo ON tecnicos(idGestor, ativo)');
+    await db.execute('CREATE INDEX idx_tecnicos_sincronizado ON tecnicos(sincronizado)');
+    await db.execute('CREATE INDEX idx_clientes_gestor_ativo ON clientes(idGestor, ativo)');
+    await db.execute('CREATE INDEX idx_clientes_sincronizado ON clientes(sincronizado)');
+    await db.execute('CREATE INDEX idx_formas_gestor_ativo ON formas_pagamento(idGestor, ativo)');
+    await db.execute('CREATE INDEX idx_formas_sincronizado ON formas_pagamento(sincronizado)');
+    await db.execute('CREATE INDEX idx_os_gestor_ativo ON ordens_servico(idGestor, ativo)');
+    await db.execute('CREATE INDEX idx_os_gestor_status ON ordens_servico(idGestor, status)');
+    await db.execute('CREATE INDEX idx_os_sincronizado ON ordens_servico(sincronizado)');
+    await db.execute('CREATE INDEX idx_ag_gestor_ativo ON agendamentos(idGestor, ativo)');
+    await db.execute('CREATE INDEX idx_ag_tecnico_data ON agendamentos(idTecnico, dataHora)');
+    await db.execute('CREATE INDEX idx_ag_sincronizado ON agendamentos(sincronizado)');
   }
 
   static Future<void> fechar() async {

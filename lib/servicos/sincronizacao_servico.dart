@@ -88,45 +88,39 @@ class SincronizacaoServico {
 
   Future<void> _sincronizarParaNuvem() async {
     if (kDebugMode) debugPrint("--- Subindo dados locais pendentes... ---");
-    await _uploadClientes();
-    await _uploadTecnicos();
-    await _uploadAgendamentos();
-    await _uploadOrdensServico();
-    await _uploadFormasPagamento();
+    await Future.wait([
+      _uploadClientes(),
+      _uploadTecnicos(),
+      _uploadAgendamentos(),
+      _uploadOrdensServico(),
+      _uploadFormasPagamento(),
+    ]);
   }
 
   Future<void> _sincronizarDaNuvem() async {
     if (kDebugMode) debugPrint("--- Atualizando banco local com dados da nuvem... ---");
-
-    // Em vez de delete total, buscamos o que há de novo para fazer o "Upsert"
-    // Isso evita apagar dados locais que o usuário acabou de criar offline
-
     try {
-      final agendamentosNuvem = await _agendamentoFirebase.listarRecentes();
-      for (final a in agendamentosNuvem) {
-        // A lógica de adicionar deve verificar se o ID já existe (Update or Insert)
-        await _agendamentoSqlite.adicionar(a);
-      }
+      // Busca todas as entidades da nuvem em paralelo (tipadas separadamente)
+      final agendamentosFuture = _agendamentoFirebase.listarRecentes();
+      final clientesFuture = _clienteFirebase.listarRecentes();
+      final formasFuture = _formaPagamentoFirebase.listarRecentes();
+      final osFuture = _osFirebase.listarRecentes();
+      final tecnicosFuture = _tecnicoFirebase.listarRecentes();
 
-      final clientesNuvem = await _clienteFirebase.listarRecentes();
-      for (final c in clientesNuvem) {
-        await _clienteSqlite.adicionarCliente(c);
-      }
+      final agendamentosNuvem = await agendamentosFuture;
+      final clientesNuvem = await clientesFuture;
+      final formasNuvem = await formasFuture;
+      final osNuvem = await osFuture;
+      final tecnicosNuvem = await tecnicosFuture;
 
-      final formasNuvem = await _formaPagamentoFirebase.listarRecentes();
-      for (final f in formasNuvem) {
-        await _formaPagamentoSqlite.adicionar(f);
-      }
-
-      final osNuvem = await _osFirebase.listarRecentes();
-      for (final os in osNuvem) {
-        await _osSqlite.adicionar(os);
-      }
-
-      final tecnicosNuvem = await _tecnicoFirebase.listarRecentes();
-      for (final t in tecnicosNuvem) {
-        await _tecnicoSqlite.adicionarTecnico(t);
-      }
+      // Persiste todas as entidades no SQLite em paralelo
+      await Future.wait([
+        Future.forEach(agendamentosNuvem, (a) => _agendamentoSqlite.adicionar(a)),
+        Future.forEach(clientesNuvem, (c) => _clienteSqlite.adicionarCliente(c)),
+        Future.forEach(formasNuvem, (f) => _formaPagamentoSqlite.adicionar(f)),
+        Future.forEach(osNuvem, (os) => _osSqlite.adicionar(os)),
+        Future.forEach(tecnicosNuvem, (t) => _tecnicoSqlite.adicionarTecnico(t)),
+      ]);
     } catch (e) {
       if (kDebugMode) debugPrint("Erro ao baixar dados da nuvem: $e");
     }

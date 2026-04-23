@@ -1,19 +1,21 @@
 // lib/apresentacao/telas/clientes/clientes_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
+import 'package:gerenciar/dominio/casos_uso/cliente/cadastrar_cliente.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/listar_clientes.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
-import 'package:http/http.dart' as http; // Adicione este import
+import 'package:http/http.dart' as http;
 import 'cadastro_cliente_tela.dart';
 import 'detalhes_cliente_tela.dart';
 
 class ClientesTela extends StatefulWidget {
-  // Adicionamos as dependências que a tela e suas filhas usarão
   final ListarClientes? listarClientes;
+  final CadastrarCliente? cadastrarCliente;
   final http.Client? httpClient;
+  final AutenticacaoServico? authServico;
 
-  const ClientesTela({super.key, this.listarClientes, this.httpClient});
+  const ClientesTela({super.key, this.listarClientes, this.cadastrarCliente, this.httpClient, this.authServico});
   @override
   State<ClientesTela> createState() => _ClientesTelaState();
 }
@@ -27,13 +29,13 @@ class _ClientesTelaState extends State<ClientesTela> {
   List<Cliente> _clientesFiltrados = [];
   final _buscaController = TextEditingController();
 
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String? _idGestor;
 
   @override
   void initState() {
     super.initState();
-    // Usa a dependência injetada ou cria uma padrão
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _listarClientes =
         widget.listarClientes ?? ListarClientes(ClienteRepositorioAdaptativo());
     _carregarDadosIniciais();
@@ -93,8 +95,9 @@ class _ClientesTelaState extends State<ClientesTela> {
         context,
         MaterialPageRoute(
             builder: (context) => CadastroClienteTela(
-                  // Passamos as dependências para a próxima tela
                   httpClient: widget.httpClient,
+                  authServico: _authServico,
+                  cadastrarCliente: widget.cadastrarCliente,
                 )));
     if (resultado == true) _carregarClientes();
   }

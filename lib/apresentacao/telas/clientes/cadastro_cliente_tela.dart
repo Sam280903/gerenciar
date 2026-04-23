@@ -13,8 +13,9 @@ import 'package:uuid/uuid.dart';
 class CadastroClienteTela extends StatefulWidget {
   final CadastrarCliente? cadastrarCliente;
   final http.Client? httpClient;
+  final AutenticacaoServico? authServico;
 
-  const CadastroClienteTela({super.key, this.cadastrarCliente, this.httpClient});
+  const CadastroClienteTela({super.key, this.cadastrarCliente, this.httpClient, this.authServico});
   @override
   State<CadastroClienteTela> createState() => _CadastroClienteTelaState();
 }
@@ -37,8 +38,7 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   late final CadastrarCliente _cadastrarCliente;
   late final http.Client _httpClient;
 
-  // ADICIONADO
-  final AutenticacaoServico _authServico = AutenticacaoServico();
+  late final AutenticacaoServico _authServico;
   String? _idGestor;
 
   bool _carregando = false;
@@ -48,10 +48,11 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _cadastrarCliente =
         widget.cadastrarCliente ?? CadastrarCliente(ClienteRepositorioAdaptativo());
     _httpClient = widget.httpClient ?? http.Client();
-    _carregarDadosIniciais(); // ADICIONADO
+    _carregarDadosIniciais();
   }
 
   // NOVO MÉTODO

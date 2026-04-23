@@ -87,6 +87,7 @@ void main() {
 
     when(mockAuthServico.buscarDadosUsuarioLogado())
         .thenAnswer((_) async => {'idGestor': 'g1'});
+    when(mockAuthServico.usuarioAtual).thenReturn(null);
   });
 
   testWidgets('Deve criar uma nova Ordem de Serviço e exibi-la na lista',
@@ -130,6 +131,7 @@ void main() {
         listarFormasPagamento: mockListarFormasPagamento,
         cadastrarOS: mockCadastrarOS,
         agendamentoRepo: mockAgendamentoRepo,
+        authServico: mockAuthServico,
       ),
     ));
 
@@ -161,6 +163,7 @@ void main() {
     await tester.enterText(
         find.widgetWithText(TextFormField, 'Valor do Serviço (R\$)'), '150');
 
+    await tester.ensureVisible(find.text('SALVAR OS'));
     await tester.tap(find.text('SALVAR OS'));
     await tester.pumpAndSettle();
 
