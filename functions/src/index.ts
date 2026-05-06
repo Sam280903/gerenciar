@@ -1,14 +1,14 @@
-import {onDocumentCreated} from "firebase-functions/v2/firestore";
-import {onSchedule} from "firebase-functions/v2/scheduler";
-import {logger} from "firebase-functions";
-import {initializeApp} from "firebase-admin/app";
-import {getFirestore, Timestamp} from "firebase-admin/firestore";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { logger } from "firebase-functions";
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import axios from "axios";
 
 initializeApp();
 
 const ONESIGNAL_APP_ID = "a0e5e812-11d0-46f9-8019-4992adacdb83";
-const ONESIGNAL_REST_KEY = "os_v2_app_uds6qeqr2bdptaazjgjk3lg3qobwdseyfhjeg64rpag5saajwkyaefr2o4ossgqrsr7l4duwrdaav36xzz32tnzzaxoem3fgas62o2a";
+const ONESIGNAL_REST_KEY = "os_v2_app_uds6qeqr2bdptaazjgjk3lg3qnojd4hu45qem5uzfx32nsl6lwjymwtobdmkclrpvbfyhaognqvgpb4he72q7ibnwukaoarjpk3zg3q";
 
 interface Agendamento {
   idTecnico: string;
@@ -23,13 +23,16 @@ async function enviarNotificacaoOneSignal(idUsuario: string, titulo: string, men
   try {
     await axios.post("https://onesignal.com/api/v1/notifications", {
       app_id: ONESIGNAL_APP_ID,
-      headings: {en: titulo, pt: titulo},
-      contents: {en: mensagem, pt: mensagem},
+      headings: { en: titulo, pt: titulo },
+      contents: { en: mensagem, pt: mensagem },
       include_external_user_ids: [idUsuario], // Usa o ID do técnico como alvo
-      data: data}, {
+      data: data
+    }, {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Basic ${ONESIGNAL_REST_KEY}`}});
+        "Authorization": `Basic ${ONESIGNAL_REST_KEY}`
+      }
+    });
     logger.log(`Notificação enviada para o usuário: ${idUsuario}`);
   } catch (error) {
     logger.error("Erro ao enviar para OneSignal:", error);
@@ -37,65 +40,65 @@ async function enviarNotificacaoOneSignal(idUsuario: string, titulo: string, men
 }
 
 export const notificarNovoAgendamento = onDocumentCreated(
-    {document: "agendamentos/{agendamentoId}", region: "southamerica-east1"},
-    async (event) => {
-      const snapshot = event.data;
-      if (!snapshot) return;
+  { document: "agendamentos/{agendamentoId}", region: "southamerica-east1" },
+  async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) return;
 
-      const agendamento = snapshot.data() as Agendamento;
-      const clienteDoc = await getFirestore().collection("clientes").doc(agendamento.idCliente).get();
-      const nomeCliente = clienteDoc.data()?.nome || "Cliente";
+    const agendamento = snapshot.data() as Agendamento;
+    const clienteDoc = await getFirestore().collection("clientes").doc(agendamento.idCliente).get();
+    const nomeCliente = clienteDoc.data()?.nome || "Cliente";
 
-      await enviarNotificacaoOneSignal(agendamento.idTecnico,
-          "Novo Agendamento!",
-          `Você tem um novo atendimento para o cliente: ${nomeCliente}.`,
-          {agendamentoId: snapshot.id}
-      );
-    }
+    await enviarNotificacaoOneSignal(agendamento.idTecnico,
+      "Novo Agendamento!",
+      `Você tem um novo atendimento para o cliente: ${nomeCliente}.`,
+      { agendamentoId: snapshot.id }
+    );
+  }
 );
 
 export const enviarLembretesDeAgendamento = onSchedule(
-    {schedule: "every 15 minutes", region: "southamerica-east1"},
-    async () => {
-      const now = Timestamp.now();
-      const db = getFirestore();
+  { schedule: "every 15 minutes", region: "southamerica-east1" },
+  async () => {
+    const now = Timestamp.now();
+    const db = getFirestore();
 
-      // Busca agendamentos ativos que ainda não tiveram notificação enviada
-      const snapshot = await db.collection("agendamentos")
-          .where("ativo", "==", true)
-          .where("notificacaoEnviada", "==", false)
-          .where("dataHora", ">", now).get();
+    // Busca agendamentos ativos que ainda não tiveram notificação enviada
+    const snapshot = await db.collection("agendamentos")
+      .where("ativo", "==", true)
+      .where("notificacaoEnviada", "==", false)
+      .where("dataHora", ">", now).get();
 
-      for (const doc of snapshot.docs) {
-        const agendamento = doc.data() as Agendamento;
-        // Pula se não houver configuração de lembrete
-        if (!agendamento.lembreteNotificacao) continue;
+    for (const doc of snapshot.docs) {
+      const agendamento = doc.data() as Agendamento;
+      // Pula se não houver configuração de lembrete
+      if (!agendamento.lembreteNotificacao) continue;
 
-        // Calcula quando a notificação deveria ser enviada
-        const dataHoraLembrete = calcularHorarioLembrete(
-            agendamento.dataHora,
-            agendamento.lembreteNotificacao
+      // Calcula quando a notificação deveria ser enviada
+      const dataHoraLembrete = calcularHorarioLembrete(
+        agendamento.dataHora,
+        agendamento.lembreteNotificacao
+      );
+
+      // Se o horário do lembrete já passou ou é agora, envia a notificação
+      if (dataHoraLembrete.toMillis() <= now.toMillis()) {
+        await enviarNotificacaoOneSignal(
+          agendamento.idTecnico,
+          "Lembrete de Agendamento",
+          "Seu atendimento está se aproximando.",
+          { agendamentoId: doc.id }
         );
-
-        // Se o horário do lembrete já passou ou é agora, envia a notificação
-        if (dataHoraLembrete.toMillis() <= now.toMillis()) {
-          await enviarNotificacaoOneSignal(
-              agendamento.idTecnico,
-              "Lembrete de Agendamento",
-              "Seu atendimento está se aproximando.",
-              {agendamentoId: doc.id}
-          );
-          // Marca como enviada para não repetir no próximo ciclo de 15 min
-          await doc.ref.update({notificacaoEnviada: true});
-          logger.log(`Lembrete enviado com sucesso para o agendamento: ${doc.id}`);
-        }
+        // Marca como enviada para não repetir no próximo ciclo de 15 min
+        await doc.ref.update({ notificacaoEnviada: true });
+        logger.log(`Lembrete enviado com sucesso para o agendamento: ${doc.id}`);
       }
     }
+  }
 );
 
 function calcularHorarioLembrete(
-    dataHora: Timestamp,
-    tipoLembrete: string,
+  dataHora: Timestamp,
+  tipoLembrete: string,
 ): Timestamp {
   let milissegundosParaSubtrair = 0;
 

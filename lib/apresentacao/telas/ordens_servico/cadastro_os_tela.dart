@@ -354,6 +354,17 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
                     const InputDecoration(labelText: 'Valor do Serviço (R\$)'),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Informe o valor do serviço';
+                  }
+                  final valor = double.tryParse(
+                      v.contains(',') ? v.replaceAll('.', '').replaceAll(',', '.') : v);
+                  if (valor == null || valor <= 0) {
+                    return 'Informe um valor válido maior que zero';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 32),
               ElevatedButton(

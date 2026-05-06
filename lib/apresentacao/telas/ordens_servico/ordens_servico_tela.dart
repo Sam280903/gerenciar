@@ -192,6 +192,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
           concluidasTemp.add(itemDetalhado);
           break;
         case 'Reaberta':
+        case 'Reaberto': // legado — compatibilidade com registros antigos
           reabertasTemp.add(itemDetalhado);
           break;
       }

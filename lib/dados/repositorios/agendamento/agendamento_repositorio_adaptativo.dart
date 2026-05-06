@@ -1,4 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:gerenciar/dados/fontes_dados/sqlite/agendamento_sqlite.dart';
+import 'package:gerenciar/dados/modelos/agendamento_model.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'package:gerenciar/dominio/interfaces/agendamento_repositorio_interface.dart';
 import 'agendamento_repositorio_impl.dart';
@@ -34,20 +36,41 @@ class AgendamentoRepositorioAdaptativo
 
   @override
   Future<void> atualizar(Agendamento agendamento) async {
-    final repo = await _escolherRepositorio();
-    await repo.atualizar(agendamento);
+    if (await _temConexao()) {
+      await _firebase.atualizar(agendamento);
+      // Espelha no SQLite já marcado como sincronizado para evitar
+      // que a sincronização suba o dado antigo de volta ao Firebase
+      final model = AgendamentoModel.fromEntidade(agendamento);
+      final sqlite = AgendamentoSQLite();
+      await sqlite.atualizar(model);
+      await sqlite.marcarComoSincronizado(agendamento.id);
+    } else {
+      await _sqlite.atualizar(agendamento);
+    }
   }
 
   @override
   Future<void> inativar(String id) async {
-    final repo = await _escolherRepositorio();
-    await repo.inativar(id);
+    if (await _temConexao()) {
+      await _firebase.inativar(id);
+      final sqlite = AgendamentoSQLite();
+      await sqlite.inativar(id);
+      await sqlite.marcarComoSincronizado(id);
+    } else {
+      await _sqlite.inativar(id);
+    }
   }
 
   @override
   Future<void> reativar(String id) async {
-    final repo = await _escolherRepositorio();
-    await repo.reativar(id);
+    if (await _temConexao()) {
+      await _firebase.reativar(id);
+      final sqlite = AgendamentoSQLite();
+      await sqlite.reativar(id);
+      await sqlite.marcarComoSincronizado(id);
+    } else {
+      await _sqlite.reativar(id);
+    }
   }
 
   @override

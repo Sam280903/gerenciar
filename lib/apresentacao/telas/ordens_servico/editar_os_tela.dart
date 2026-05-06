@@ -1,16 +1,32 @@
 // lib/apresentacao/telas/ordens_servico/editar_os_tela.dart
 import 'package:flutter/material.dart';
+import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_id.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/atualizar_ordem_servico.dart';
+import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
+import 'package:gerenciar/apresentacao/widgets/_tela_busca.dart';
+import 'package:gerenciar/apresentacao/widgets/_widget_selecao.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'package:intl/intl.dart';
 
 class EditarOSTela extends StatefulWidget {
   final OrdemServico ordemServico;
-  // Permite injetar o caso de uso para facilitar os testes
   final AtualizarOrdemServico? atualizarOS;
+  final BuscarFormaPagamentoPorId? buscarFormaPagamento;
+  final ListarFormasPagamento? listarFormasPagamento;
+  final AutenticacaoServico? authServico;
 
-  const EditarOSTela({super.key, required this.ordemServico, this.atualizarOS});
+  const EditarOSTela({
+    super.key,
+    required this.ordemServico,
+    this.atualizarOS,
+    this.buscarFormaPagamento,
+    this.listarFormasPagamento,
+    this.authServico,
+  });
 
   @override
   State<EditarOSTela> createState() => _EditarOSTelaState();
@@ -26,21 +42,27 @@ class _EditarOSTelaState extends State<EditarOSTela> {
   late String _prioridadeSelecionada;
   late String _statusSelecionado;
   late DateTime _dataSelecionada;
+  FormaPagamento? _formaPagamentoSelecionada;
   bool _carregando = false;
+  String? _idGestor;
 
-  // Dependência que será injetada ou criada
   late final AtualizarOrdemServico _atualizarOS;
+  late final BuscarFormaPagamentoPorId _buscarFormaPagamento;
+  late final ListarFormasPagamento _listarFormasPagamento;
+  late final AutenticacaoServico _authServico;
 
   @override
   void initState() {
     super.initState();
 
-    // Se o caso de uso foi passado pelo construtor (no teste), usa ele.
-    // Senão, cria uma instância padrão para o app rodar normalmente.
     _atualizarOS = widget.atualizarOS ??
         AtualizarOrdemServico(OrdemServicoRepositorioAdaptativo());
+    _buscarFormaPagamento = widget.buscarFormaPagamento ??
+        BuscarFormaPagamentoPorId(FormaPagamentoRepositorioAdaptativo());
+    _listarFormasPagamento = widget.listarFormasPagamento ??
+        ListarFormasPagamento(FormaPagamentoRepositorioAdaptativo());
+    _authServico = widget.authServico ?? AutenticacaoServico();
 
-    // Inicialização dos controllers e variáveis de estado
     final os = widget.ordemServico;
     _descricaoController = TextEditingController(text: os.descricao);
     _valorController = TextEditingController(text: os.valor.toStringAsFixed(2));
@@ -48,7 +70,37 @@ class _EditarOSTelaState extends State<EditarOSTela> {
     _dataController = TextEditingController(
         text: DateFormat('dd/MM/yyyy').format(os.dataHoraInicio));
     _prioridadeSelecionada = os.prioridade;
-    _statusSelecionado = os.status;
+    _statusSelecionado = os.status == 'Reaberto' ? 'Reaberta' : os.status;
+
+    _carregarDadosIniciais();
+  }
+
+  Future<void> _carregarDadosIniciais() async {
+    final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
+    if (mounted && dadosUsuario != null) {
+      setState(() => _idGestor = dadosUsuario['idGestor']);
+    }
+    final forma = await _buscarFormaPagamento.executar(widget.ordemServico.idFormaPagamento);
+    if (mounted) {
+      setState(() => _formaPagamentoSelecionada = forma);
+    }
+  }
+
+  Future<void> _abrirBuscaFormaPagamento() async {
+    if (_idGestor == null) return;
+    final forma = await Navigator.push<FormaPagamento>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => TelaBusca<FormaPagamento>(
+          titulo: 'Selecionar Forma de Pagamento',
+          futureItens: _listarFormasPagamento.executar(idGestor: _idGestor!),
+          getNomeItem: (f) => f.nome,
+        ),
+      ),
+    );
+    if (forma != null) {
+      setState(() => _formaPagamentoSelecionada = forma);
+    }
   }
 
   @override
@@ -83,7 +135,7 @@ class _EditarOSTelaState extends State<EditarOSTela> {
         id: widget.ordemServico.id,
         idCliente: widget.ordemServico.idCliente,
         idTecnico: widget.ordemServico.idTecnico,
-        idFormaPagamento: widget.ordemServico.idFormaPagamento,
+        idFormaPagamento: _formaPagamentoSelecionada?.id ?? widget.ordemServico.idFormaPagamento,
         idGestor: widget.ordemServico.idGestor,
         dataHoraInicio: _dataSelecionada,
         descricao: _descricaoController.text.trim(),
@@ -184,6 +236,15 @@ class _EditarOSTelaState extends State<EditarOSTela> {
                     setState(() => _statusSelecionado = val);
                   }
                 },
+              ),
+              const SizedBox(height: 16),
+              WidgetSelecao(
+                label: 'Forma de Pagamento',
+                valor: _formaPagamentoSelecionada?.nome ?? '',
+                onTap: _abrirBuscaFormaPagamento,
+                validator: (v) => _formaPagamentoSelecionada == null
+                    ? 'Selecione uma forma de pagamento'
+                    : null,
               ),
               const SizedBox(height: 16),
               TextFormField(

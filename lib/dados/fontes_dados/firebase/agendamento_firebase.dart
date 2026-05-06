@@ -17,7 +17,7 @@ class AgendamentoFirebase {
 //METODO ADICIONADO
   Future<List<AgendamentoModel>> listarRecentes() async {
     final snapshot =
-        await _colecao.orderBy('dataHora', descending: true).limit(20).get();
+        await _colecao.orderBy('dataHora', descending: true).limit(500).get();
     return snapshot.docs
         .map((doc) => AgendamentoModel.fromMap(doc.data(), doc.id))
         .toList();

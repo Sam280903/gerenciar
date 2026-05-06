@@ -21,6 +21,7 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
 
   late DateTime _dataSelecionada;
   late TimeOfDay _horaSelecionada;
+  late String _lembreteSelecionado;
   bool _carregando = false;
 
   @override
@@ -28,11 +29,11 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
     super.initState();
     _dataSelecionada = widget.agendamento.dataHora;
     _horaSelecionada = TimeOfDay.fromDateTime(widget.agendamento.dataHora);
+    _lembreteSelecionado = widget.agendamento.lembreteNotificacao ?? '15_minutos_antes';
 
     _dataController = TextEditingController(
         text: DateFormat('dd/MM/yyyy').format(_dataSelecionada));
-    _horaController =
-        TextEditingController(); // Será inicializado no didChangeDependencies
+    _horaController = TextEditingController();
     _obsController = TextEditingController(text: widget.agendamento.observacao);
   }
 
@@ -87,11 +88,13 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
           id: widget.agendamento.id,
           idCliente: widget.agendamento.idCliente,
           idTecnico: widget.agendamento.idTecnico,
-          idGestor: widget.agendamento.idGestor, // ADICIONADO (ESSENCIAL)
+          idGestor: widget.agendamento.idGestor,
           dataHora: dataHoraAgendamento,
           observacao: _obsController.text.trim(),
           status: widget.agendamento.status,
           ativo: widget.agendamento.ativo,
+          lembreteNotificacao: _lembreteSelecionado,
+          notificacaoEnviada: false,
         );
 
         await (widget.atualizarAgendamento ?? AtualizarAgendamento(AgendamentoRepositorioAdaptativo()))
@@ -148,6 +151,24 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _lembreteSelecionado,
+                decoration: const InputDecoration(
+                  labelText: 'Lembrar-me',
+                  prefixIcon: Icon(Icons.notifications_active_outlined),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'na_hora', child: Text('Na hora do agendamento')),
+                  DropdownMenuItem(value: '15_minutos_antes', child: Text('15 minutos antes')),
+                  DropdownMenuItem(value: '30_minutos_antes', child: Text('30 minutos antes')),
+                  DropdownMenuItem(value: '1_hora_antes', child: Text('1 hora antes')),
+                  DropdownMenuItem(value: '1_dia_antes', child: Text('1 dia antes')),
+                ],
+                onChanged: (val) {
+                  if (val != null) setState(() => _lembreteSelecionado = val);
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(

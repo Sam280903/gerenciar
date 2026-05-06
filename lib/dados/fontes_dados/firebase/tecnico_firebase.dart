@@ -8,7 +8,7 @@ class TecnicoFirebase {
 
 //METODO ADICIONADO
   Future<List<TecnicoModel>> listarRecentes() async {
-    final snapshot = await _colecao.orderBy('nome').limit(20).get();
+    final snapshot = await _colecao.orderBy('nome').limit(500).get();
     return snapshot.docs
         .map((doc) => TecnicoModel.fromMap(doc.data(), doc.id))
         .toList();

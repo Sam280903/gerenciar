@@ -43,7 +43,7 @@ class OrdemServicoFirebase {
   Future<List<OrdemServicoModel>> listarRecentes() async {
     final snapshot = await _colecao
         .orderBy('dataHoraInicio', descending: true)
-        .limit(20)
+        .limit(500)
         .get();
     return snapshot.docs
         .map((doc) => OrdemServicoModel.fromMap(doc.data(), doc.id))
@@ -53,7 +53,7 @@ class OrdemServicoFirebase {
   Future<void> reabrir(
       {required String id, required String justificativa}) async {
     await _colecao.doc(id).update({
-      'status': 'Reaberto',
+      'status': 'Reaberta',
       'justificativaReabertura': justificativa,
       'dataReabertura': Timestamp.now(),
     });

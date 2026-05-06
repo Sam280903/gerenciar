@@ -8,7 +8,7 @@ class FormaPagamentoFirebase {
 
 //METODO ADICIONADO
   Future<List<FormaPagamentoModel>> listarRecentes() async {
-    final snapshot = await _colecao.orderBy('nome').limit(20).get();
+    final snapshot = await _colecao.orderBy('nome').limit(500).get();
     return snapshot.docs
         .map((doc) => FormaPagamentoModel.fromMap(
             doc.data() as Map<String, dynamic>, doc.id))

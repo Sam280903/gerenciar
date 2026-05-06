@@ -89,37 +89,70 @@ class SincronizacaoServico {
   Future<void> _sincronizarParaNuvem() async {
     if (kDebugMode) debugPrint("--- Subindo dados locais pendentes... ---");
     await Future.wait([
-      _uploadClientes(),
-      _uploadTecnicos(),
-      _uploadAgendamentos(),
-      _uploadOrdensServico(),
-      _uploadFormasPagamento(),
+      _uploadClientes().catchError((e) {
+        if (kDebugMode) debugPrint('Falha geral no upload de clientes: $e');
+      }),
+      _uploadTecnicos().catchError((e) {
+        if (kDebugMode) debugPrint('Falha geral no upload de técnicos: $e');
+      }),
+      _uploadAgendamentos().catchError((e) {
+        if (kDebugMode) debugPrint('Falha geral no upload de agendamentos: $e');
+      }),
+      _uploadOrdensServico().catchError((e) {
+        if (kDebugMode) debugPrint('Falha geral no upload de OS: $e');
+      }),
+      _uploadFormasPagamento().catchError((e) {
+        if (kDebugMode) debugPrint('Falha geral no upload de formas de pagamento: $e');
+      }),
     ]);
   }
 
   Future<void> _sincronizarDaNuvem() async {
     if (kDebugMode) debugPrint("--- Atualizando banco local com dados da nuvem... ---");
     try {
-      // Busca todas as entidades da nuvem em paralelo (tipadas separadamente)
-      final agendamentosFuture = _agendamentoFirebase.listarRecentes();
-      final clientesFuture = _clienteFirebase.listarRecentes();
-      final formasFuture = _formaPagamentoFirebase.listarRecentes();
-      final osFuture = _osFirebase.listarRecentes();
-      final tecnicosFuture = _tecnicoFirebase.listarRecentes();
+      // 1. Coleta os IDs de registros pendentes de upload (edições locais)
+      //    para não sobrescrevê-los com dados mais antigos da nuvem
+      final pendentesAg = await _agendamentoSqlite.listarNaoSincronizados();
+      final pendentesClientes = await _clienteSqlite.listarNaoSincronizados();
+      final pendentesFormas = await _formaPagamentoSqlite.listarNaoSincronizados();
+      final pendentesOS = await _osSqlite.listarNaoSincronizados();
+      final pendentesTecnicos = await _tecnicoSqlite.listarNaoSincronizados();
 
-      final agendamentosNuvem = await agendamentosFuture;
-      final clientesNuvem = await clientesFuture;
-      final formasNuvem = await formasFuture;
-      final osNuvem = await osFuture;
-      final tecnicosNuvem = await tecnicosFuture;
+      final idsAgPendentes = pendentesAg.map((e) => e.id).toSet();
+      final idsClientesPendentes = pendentesClientes.map((e) => e.id).toSet();
+      final idsFormasPendentes = pendentesFormas.map((e) => e.id).toSet();
+      final idsOSPendentes = pendentesOS.map((e) => e.id).toSet();
+      final idsTecnicosPendentes = pendentesTecnicos.map((e) => e.id).toSet();
 
-      // Persiste todas as entidades no SQLite em paralelo
+      // 2. Busca todas as entidades da nuvem em paralelo
+      final agendamentosNuvem = await _agendamentoFirebase.listarRecentes();
+      final clientesNuvem = await _clienteFirebase.listarRecentes();
+      final formasNuvem = await _formaPagamentoFirebase.listarRecentes();
+      final osNuvem = await _osFirebase.listarRecentes();
+      final tecnicosNuvem = await _tecnicoFirebase.listarRecentes();
+
+      // 3. Persiste apenas os registros que NÃO estão pendentes de upload
       await Future.wait([
-        Future.forEach(agendamentosNuvem, (a) => _agendamentoSqlite.adicionar(a)),
-        Future.forEach(clientesNuvem, (c) => _clienteSqlite.adicionarCliente(c)),
-        Future.forEach(formasNuvem, (f) => _formaPagamentoSqlite.adicionar(f)),
-        Future.forEach(osNuvem, (os) => _osSqlite.adicionar(os)),
-        Future.forEach(tecnicosNuvem, (t) => _tecnicoSqlite.adicionarTecnico(t)),
+        Future.forEach(
+          agendamentosNuvem.where((a) => !idsAgPendentes.contains(a.id)),
+          (a) => _agendamentoSqlite.adicionar(a),
+        ),
+        Future.forEach(
+          clientesNuvem.where((c) => !idsClientesPendentes.contains(c.id)),
+          (c) => _clienteSqlite.adicionarCliente(c),
+        ),
+        Future.forEach(
+          formasNuvem.where((f) => !idsFormasPendentes.contains(f.id)),
+          (f) => _formaPagamentoSqlite.adicionar(f),
+        ),
+        Future.forEach(
+          osNuvem.where((os) => !idsOSPendentes.contains(os.id)),
+          (os) => _osSqlite.adicionar(os),
+        ),
+        Future.forEach(
+          tecnicosNuvem.where((t) => !idsTecnicosPendentes.contains(t.id)),
+          (t) => _tecnicoSqlite.adicionarTecnico(t),
+        ),
       ]);
     } catch (e) {
       if (kDebugMode) debugPrint("Erro ao baixar dados da nuvem: $e");
@@ -158,11 +191,18 @@ class SincronizacaoServico {
     final itens = await _agendamentoSqlite.listarNaoSincronizados();
     for (final model in itens) {
       try {
-        await _agendamentoFirebase.adicionar(model);
+        await _agendamentoFirebase.atualizar(model);
         await _agendamentoSqlite.marcarComoSincronizado(model.id);
         if (kDebugMode) debugPrint('Agendamento ${model.id} sincronizado.');
       } catch (e) {
-        if (kDebugMode) debugPrint('Erro no upload do agendamento ${model.id}: $e');
+        // Documento ainda não existe na nuvem — faz insert
+        try {
+          await _agendamentoFirebase.adicionar(model);
+          await _agendamentoSqlite.marcarComoSincronizado(model.id);
+          if (kDebugMode) debugPrint('Agendamento ${model.id} criado na nuvem.');
+        } catch (e2) {
+          if (kDebugMode) debugPrint('Erro no upload do agendamento ${model.id}: $e2');
+        }
       }
     }
   }

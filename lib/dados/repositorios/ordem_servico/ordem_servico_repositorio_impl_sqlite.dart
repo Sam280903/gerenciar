@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/servicos/relatorio_servico.dart';
 import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface.dart';
@@ -47,9 +48,7 @@ class OrdemServicoRepositorioImplSQLite
   @override
   Future<List<OrdemServico>> listarComFiltros(
       FiltrosRelatorio filtros, String idGestor) async {
-    // Para o modo offline, a implementação mais simples é buscar todos os dados
-    // do gestor e deixar a tela filtrar os detalhes (como datas e status).
-    print("Modo offline: retornando todas as OS do gestor para filtragem na UI.");
+    if (kDebugMode) debugPrint("Modo offline: retornando todas as OS do gestor para filtragem na UI.");
     return listarTodos(idGestor: idGestor);
   }
 }

@@ -1,7 +1,9 @@
 // lib/servicos/autenticacao_servico.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class AutenticacaoServico {
@@ -81,8 +83,7 @@ class AutenticacaoServico {
       }
       return false;
     } catch (e) {
-      // ignore: avoid_print
-      print("Erro ao verificar primeiro gestor: $e");
+      if (kDebugMode) debugPrint("Erro ao verificar primeiro gestor: $e");
       return false;
     }
   }
@@ -146,31 +147,45 @@ class AutenticacaoServico {
         throw Exception("Nenhum gestor logado para cadastrar o técnico.");
       }
 
-      final credenciais = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: senha,
+      // Usa uma instância secundária do Firebase para criar o usuário
+      // sem deslogar o gestor da instância principal
+      FirebaseApp tempApp = await Firebase.initializeApp(
+        name: 'tempAuthApp_${DateTime.now().millisecondsSinceEpoch}',
+        options: Firebase.app().options,
       );
-      final usuario = credenciais.user;
 
-      if (usuario != null) {
-        await _firestore.collection('usuarios').doc(usuario.uid).set({
-          'nome': nome,
-          'email': email,
-          'perfil': 'tecnico',
-          'ativo': true,
-          'idGestor': idGestor, // ADICIONADO
-        });
+      try {
+        final tempAuth = FirebaseAuth.instanceFor(app: tempApp);
+        final credenciais = await tempAuth.createUserWithEmailAndPassword(
+          email: email,
+          password: senha,
+        );
+        final usuario = credenciais.user;
 
-        await _firestore.collection('tecnicos').doc(usuario.uid).set({
-          'id': usuario.uid,
-          'nome': nome,
-          'email': email,
-          'telefone': telefone,
-          'ativo': true,
-          'idGestor': idGestor, // ADICIONADO
-        });
+        if (usuario != null) {
+          await _firestore.collection('usuarios').doc(usuario.uid).set({
+            'nome': nome,
+            'email': email,
+            'perfil': 'tecnico',
+            'ativo': true,
+            'idGestor': idGestor,
+          });
+
+          await _firestore.collection('tecnicos').doc(usuario.uid).set({
+            'id': usuario.uid,
+            'nome': nome,
+            'email': email,
+            'telefone': telefone,
+            'ativo': true,
+            'idGestor': idGestor,
+          });
+        }
+
+        await tempAuth.signOut();
+        return usuario;
+      } finally {
+        await tempApp.delete();
       }
-      return usuario;
     } on FirebaseAuthException catch (e) {
       throw Exception(_traduzirErro(e.code));
     } catch (e) {
@@ -183,14 +198,33 @@ class AutenticacaoServico {
   //   ...
   // }
 
-  Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() async {
+  // Cache em memória para evitar leituras repetidas no Firestore
+  static Map<String, dynamic>? _cacheUsuario;
+  static String? _cacheUid;
+
+  Future<Map<String, dynamic>?> buscarDadosUsuarioLogado({bool forcarAtualizacao = false}) async {
     final usuario = _auth.currentUser;
-    if (usuario != null) {
+    if (usuario == null) return null;
+
+    // Retorna cache se o UID for o mesmo e não foi pedida atualização forçada
+    if (!forcarAtualizacao && _cacheUid == usuario.uid && _cacheUsuario != null) {
+      return _cacheUsuario;
+    }
+
+    try {
       final docSnapshot =
           await _firestore.collection('usuarios').doc(usuario.uid).get();
       if (docSnapshot.exists) {
-        return docSnapshot.data();
+        _cacheUid = usuario.uid;
+        _cacheUsuario = docSnapshot.data();
+        return _cacheUsuario;
       }
+    } catch (e) {
+      // Se estiver offline, retorna o cache anterior se houver
+      if (_cacheUid == usuario.uid && _cacheUsuario != null) {
+        return _cacheUsuario;
+      }
+      if (kDebugMode) debugPrint('Erro ao buscar dados do usuário: $e');
     }
     return null;
   }

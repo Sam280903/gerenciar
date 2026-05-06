@@ -123,7 +123,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     setState(() => _carregando = true);
 
     final agendamentos = await ListarAgendamentos(_agendamentoRepo)
-        .executar(idGestor: _idGestor!);
+        .executar(idGestor: _idGestor!, incluirInativos: true);
 
     final hoje = DateUtils.dateOnly(DateTime.now());
 

@@ -32,7 +32,7 @@ class OrdemServicoSQLite {
     await db.update(
       'ordens_servico',
       {
-        'status': 'Reaberto',
+        'status': 'Reaberta',
         'justificativaReabertura': justificativa,
         'sincronizado': 0,
       },

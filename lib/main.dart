@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:gerenciar/servicos/sincronizacao_servico.dart';
+import 'package:gerenciar/servicos/migracao_servico.dart';
 import 'aplicativo.dart';
 
 // IMPORT ADICIONADO:
@@ -49,6 +50,9 @@ void main() async {
 
   SincronizacaoServico().iniciarSincronizacao();
 
+  // Executa migrações pendentes de dados no Firestore
+  MigracaoServico().executarMigracoesPendentes();
+
   // --- INÍCIO DO BLOCO DO ONESIGNAL ---
 
   // Coloque aqui o App ID que você pegou no painel do OneSignal
@@ -60,7 +64,8 @@ void main() async {
 
   // Opcional: Adiciona um "ouvinte" para quando o usuário clicar na notificação
   OneSignal.Notifications.addClickListener((event) {
-    if (kDebugMode) debugPrint('Notificação clicada: ${event.notification.title}');
+    if (kDebugMode)
+      debugPrint('Notificação clicada: ${event.notification.title}');
   });
 
   // --- FIM DO BLOCO DO ONESIGNAL ---

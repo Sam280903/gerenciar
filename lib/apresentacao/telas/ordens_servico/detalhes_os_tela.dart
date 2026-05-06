@@ -1,12 +1,15 @@
 // lib/apresentacao/telas/ordens_servico/detalhes_os_tela.dart
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
+import 'package:gerenciar/dados/repositorios/forma_pagamento/forma_pagamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_id.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/reabrir_ordem_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
@@ -33,6 +36,7 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
   late final AutenticacaoServico _authServico;
   late final BuscarClientePorId _buscarCliente;
   late final BuscarTecnicoPorId _buscarTecnico;
+  late final BuscarFormaPagamentoPorId _buscarFormaPagamento;
   String _perfilUsuario = "";
   bool _carregandoAcao = false;
 
@@ -42,6 +46,7 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
     _authServico = widget.authServico ?? AutenticacaoServico();
     _buscarCliente = widget.buscarCliente ?? BuscarClientePorId(ClienteRepositorioAdaptativo());
     _buscarTecnico = widget.buscarTecnico ?? BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
+    _buscarFormaPagamento = BuscarFormaPagamentoPorId(FormaPagamentoRepositorioAdaptativo());
     _dadosFuture = _carregarDados();
   }
 
@@ -49,9 +54,9 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
     final clienteFuture = _buscarCliente.executar(widget.ordemServico.idCliente);
     final tecnicoFuture = _buscarTecnico.executar(widget.ordemServico.idTecnico);
     final dadosUsuarioFuture = _authServico.buscarDadosUsuarioLogado();
+    final formaPagamentoFuture = _buscarFormaPagamento.executar(widget.ordemServico.idFormaPagamento);
 
-    final resultados =
-        await Future.wait([clienteFuture, tecnicoFuture, dadosUsuarioFuture]);
+    final resultados = await Future.wait([clienteFuture, tecnicoFuture, dadosUsuarioFuture, formaPagamentoFuture]);
 
     if (mounted && resultados[2] != null) {
       final dadosUsuario = resultados[2] as Map<String, dynamic>;
@@ -63,6 +68,7 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
     return {
       'cliente': resultados[0] as Cliente?,
       'tecnico': resultados[1] as Tecnico?,
+      'formaPagamento': resultados[3] as FormaPagamento?,
     };
   }
 
@@ -226,6 +232,7 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
 
           final cliente = snapshot.data!['cliente'] as Cliente?;
           final tecnico = snapshot.data!['tecnico'] as Tecnico?;
+          final formaPagamento = snapshot.data!['formaPagamento'] as FormaPagamento?;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
@@ -276,6 +283,11 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
                     'Valor',
                     'R\$ ${widget.ordemServico.valor.toStringAsFixed(2)}',
                     Icons.monetization_on_outlined),
+                const SizedBox(height: 16),
+                _buildInfoCard(
+                    'Forma de Pagamento',
+                    formaPagamento?.nome ?? 'Não informado',
+                    Icons.payment_outlined),
                 const SizedBox(height: 40),
                 if (_carregandoAcao)
                   const Center(child: CircularProgressIndicator())
@@ -290,37 +302,38 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
   }
 
   Widget _buildActionButtons() {
+    final concluida = widget.ordemServico.status == 'Concluída';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ElevatedButton.icon(
-          onPressed: _abrirEdicao,
-          icon: const Icon(Icons.edit_outlined),
-          label: const Text('EDITAR'),
+        if (!concluida) ...[
+          ElevatedButton.icon(
+            onPressed: _abrirEdicao,
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('EDITAR'),
+          ),
+          const SizedBox(height: 12),
+        ],
+        OutlinedButton.icon(
+          onPressed: _exportarPDF,
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          label: const Text('EXPORTAR PDF'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.blueAccent,
+            side: const BorderSide(color: Colors.blueAccent),
+          ),
         ),
-        const SizedBox(height: 12),
-        if (widget.ordemServico.status == 'Concluída') ...[
+        if (concluida && _perfilUsuario == 'gestor') ...[
+          const SizedBox(height: 12),
           OutlinedButton.icon(
-            onPressed: _exportarPDF,
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            label: const Text('EXPORTAR PDF'),
+            onPressed: _reabrirOS,
+            icon: const Icon(Icons.replay_outlined),
+            label: const Text('REABRIR OS'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.blueAccent,
-              side: const BorderSide(color: Colors.blueAccent),
+              foregroundColor: Colors.orangeAccent,
+              side: const BorderSide(color: Colors.orangeAccent),
             ),
           ),
-          if (_perfilUsuario == 'gestor') ...[
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: _reabrirOS,
-              icon: const Icon(Icons.replay_outlined),
-              label: const Text('REABRIR OS'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.orangeAccent,
-                side: const BorderSide(color: Colors.orangeAccent),
-              ),
-            ),
-          ],
         ],
       ],
     );
@@ -333,6 +346,7 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
       case 'concluída':
         return Colors.greenAccent;
       case 'reaberta':
+      case 'reaberto': // legado
         return Colors.redAccent;
       default:
         return Colors.white;

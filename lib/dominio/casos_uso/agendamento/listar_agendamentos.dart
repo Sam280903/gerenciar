@@ -6,7 +6,9 @@ class ListarAgendamentos {
 
   ListarAgendamentos(this.repositorio);
 
-  Future<List<Agendamento>> executar({required String idGestor}) async {
-    return await repositorio.listarTodos(idGestor: idGestor);
+  Future<List<Agendamento>> executar(
+      {required String idGestor, bool incluirInativos = false}) async {
+    return await repositorio.listarTodos(
+        idGestor: idGestor, incluirInativos: incluirInativos);
   }
 }

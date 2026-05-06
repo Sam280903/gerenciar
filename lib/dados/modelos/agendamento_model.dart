@@ -66,7 +66,9 @@ class AgendamentoModel {
       status: map['status'] ?? 'Pendente',
       ativo: map['ativo'] is bool ? map['ativo'] : (map['ativo'] == 1),
       lembreteNotificacao: map['lembreteNotificacao'],
-      notificacaoEnviada: map['notificacaoEnviada'] ?? false,
+      notificacaoEnviada: map['notificacaoEnviada'] is bool
+          ? map['notificacaoEnviada']
+          : (map['notificacaoEnviada'] == 1),
     );
   }
 
