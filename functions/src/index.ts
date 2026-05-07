@@ -1,6 +1,7 @@
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { logger } from "firebase-functions";
+import { defineSecret } from "firebase-functions/params";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import axios from "axios";
@@ -8,7 +9,7 @@ import axios from "axios";
 initializeApp();
 
 const ONESIGNAL_APP_ID = "a0e5e812-11d0-46f9-8019-4992adacdb83";
-const ONESIGNAL_REST_KEY = "os_v2_app_uds6qeqr2bdptaazjgjk3lg3qnojd4hu45qem5uzfx32nsl6lwjymwtobdmkclrpvbfyhaognqvgpb4he72q7ibnwukaoarjpk3zg3q";
+const onesignalRestKey = defineSecret("ONESIGNAL_REST_KEY");
 
 interface Agendamento {
   idTecnico: string;
@@ -25,12 +26,12 @@ async function enviarNotificacaoOneSignal(idUsuario: string, titulo: string, men
       app_id: ONESIGNAL_APP_ID,
       headings: { en: titulo, pt: titulo },
       contents: { en: mensagem, pt: mensagem },
-      include_external_user_ids: [idUsuario], // Usa o ID do técnico como alvo
+      include_external_user_ids: [idUsuario],
       data: data
     }, {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Basic ${ONESIGNAL_REST_KEY}`
+        "Authorization": `Basic ${onesignalRestKey.value()}`
       }
     });
     logger.log(`Notificação enviada para o usuário: ${idUsuario}`);
@@ -40,25 +41,36 @@ async function enviarNotificacaoOneSignal(idUsuario: string, titulo: string, men
 }
 
 export const notificarNovoAgendamento = onDocumentCreated(
-  { document: "agendamentos/{agendamentoId}", region: "southamerica-east1" },
+  { document: "agendamentos/{agendamentoId}", region: "southamerica-east1", secrets: [onesignalRestKey] },
   async (event) => {
     const snapshot = event.data;
     if (!snapshot) return;
 
     const agendamento = snapshot.data() as Agendamento;
     const clienteDoc = await getFirestore().collection("clientes").doc(agendamento.idCliente).get();
-    const nomeCliente = clienteDoc.data()?.nome || "Cliente";
+    const dadosCliente = clienteDoc.data();
+    const nomeCliente = dadosCliente?.nome || "Cliente";
+    const enderecoCliente = dadosCliente?.endereco || "";
+
+    const dataAg = agendamento.dataHora.toDate();
+    const dataFormatada = formatarData(dataAg);
+    const horaFormatada = formatarHora(dataAg);
+
+    let mensagem = `Cliente: ${nomeCliente}\nData: ${dataFormatada} às ${horaFormatada}`;
+    if (enderecoCliente) {
+      mensagem += `\nEndereço: ${enderecoCliente}`;
+    }
 
     await enviarNotificacaoOneSignal(agendamento.idTecnico,
-      "Novo Agendamento!",
-      `Você tem um novo atendimento para o cliente: ${nomeCliente}.`,
+      "Novo agendamento atribuído",
+      mensagem,
       { agendamentoId: snapshot.id }
     );
   }
 );
 
 export const enviarLembretesDeAgendamento = onSchedule(
-  { schedule: "every 15 minutes", region: "southamerica-east1" },
+  { schedule: "every 1 minutes", region: "southamerica-east1", secrets: [onesignalRestKey] },
   async () => {
     const now = Timestamp.now();
     const db = getFirestore();
@@ -71,30 +83,72 @@ export const enviarLembretesDeAgendamento = onSchedule(
 
     for (const doc of snapshot.docs) {
       const agendamento = doc.data() as Agendamento;
-      // Pula se não houver configuração de lembrete
       if (!agendamento.lembreteNotificacao) continue;
 
-      // Calcula quando a notificação deveria ser enviada
       const dataHoraLembrete = calcularHorarioLembrete(
         agendamento.dataHora,
         agendamento.lembreteNotificacao
       );
 
-      // Se o horário do lembrete já passou ou é agora, envia a notificação
       if (dataHoraLembrete.toMillis() <= now.toMillis()) {
+        const clienteDoc = await db.collection("clientes").doc(agendamento.idCliente).get();
+        const dadosCliente = clienteDoc.data();
+        const nomeCliente = dadosCliente?.nome || "Cliente";
+        const enderecoCliente = dadosCliente?.endereco || "";
+
+        const dataAg = agendamento.dataHora.toDate();
+        const dataFormatada = formatarData(dataAg);
+        const horaFormatada = formatarHora(dataAg);
+        const tituloLembrete = tituloPorTipoLembrete(agendamento.lembreteNotificacao);
+
+        let mensagem = `Cliente: ${nomeCliente}\nData: ${dataFormatada} às ${horaFormatada}`;
+        if (enderecoCliente) {
+          mensagem += `\nEndereço: ${enderecoCliente}`;
+        }
+
         await enviarNotificacaoOneSignal(
           agendamento.idTecnico,
-          "Lembrete de Agendamento",
-          "Seu atendimento está se aproximando.",
+          tituloLembrete,
+          mensagem,
           { agendamentoId: doc.id }
         );
-        // Marca como enviada para não repetir no próximo ciclo de 15 min
         await doc.ref.update({ notificacaoEnviada: true });
         logger.log(`Lembrete enviado com sucesso para o agendamento: ${doc.id}`);
       }
     }
   }
 );
+
+function formatarData(data: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit", month: "2-digit", year: "numeric",
+    timeZone: "America/Sao_Paulo",
+  }).format(data);
+}
+
+function formatarHora(data: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    hour: "2-digit", minute: "2-digit",
+    timeZone: "America/Sao_Paulo",
+  }).format(data);
+}
+
+function tituloPorTipoLembrete(tipo: string | undefined): string {
+  switch (tipo) {
+    case "na_hora":
+      return "Atendimento começando agora";
+    case "15_minutos_antes":
+      return "Atendimento em 15 minutos";
+    case "30_minutos_antes":
+      return "Atendimento em 30 minutos";
+    case "1_hora_antes":
+      return "Atendimento em 1 hora";
+    case "1_dia_antes":
+      return "Atendimento amanhã";
+    default:
+      return "Lembrete de atendimento";
+  }
+}
 
 function calcularHorarioLembrete(
   dataHora: Timestamp,
