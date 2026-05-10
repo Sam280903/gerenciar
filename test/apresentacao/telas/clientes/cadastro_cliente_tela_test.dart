@@ -100,4 +100,34 @@ void main() {
     expect(find.text('Flutter City'), findsOneWidget);
     expect(find.text('FT'), findsOneWidget);
   });
+
+  testWidgets('Deve exibir erro de validação ao tentar salvar sem preencher campos obrigatórios', (WidgetTester tester) async {
+    await pumpTela(tester);
+
+    // Tenta salvar direto, com campos vazios
+    await tester.tap(find.text('SALVAR CLIENTE'));
+    await tester.pump();
+
+    // Como o nome e o telefone são obrigatórios, as mensagens devem aparecer
+    expect(find.text('Campo obrigatório'), findsWidgets);
+
+    // Garante que o mock não foi chamado
+    verifyNever(mockCadastrarCliente.executar(any));
+  });
+
+  testWidgets('Deve exibir SnackBar de erro caso o caso de uso falhe', (WidgetTester tester) async {
+    when(mockCadastrarCliente.executar(any)).thenThrow(Exception('Falha no Firebase'));
+
+    await pumpTela(tester);
+
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nome completo *'), 'Cliente Teste');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Telefone *'), '(64) 99999-9999');
+
+    await tester.tap(find.text('SALVAR CLIENTE'));
+    await tester.pump(); // Inicia state
+    await tester.pump(); // Renderiza o SnackBar
+
+    // Verifica se a tela exibe o erro retornado
+    expect(find.textContaining('Falha no Firebase'), findsOneWidget);
+  });
 }

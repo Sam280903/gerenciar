@@ -3,20 +3,25 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i5;
+import 'dart:async' as _i6;
 
-import 'package:firebase_auth/firebase_auth.dart' as _i10;
+import 'package:firebase_auth/firebase_auth.dart' as _i13;
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart'
-    as _i4;
+    as _i5;
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_id.dart'
+    as _i10;
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart'
-    as _i7;
-import 'package:gerenciar/dominio/entidades/cliente.dart' as _i6;
-import 'package:gerenciar/dominio/entidades/tecnico.dart' as _i8;
+    as _i8;
+import 'package:gerenciar/dominio/entidades/cliente.dart' as _i7;
+import 'package:gerenciar/dominio/entidades/forma_pagamento.dart' as _i11;
+import 'package:gerenciar/dominio/entidades/tecnico.dart' as _i9;
 import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart'
     as _i2;
+import 'package:gerenciar/dominio/interfaces/forma_pagamento_repositorio_interface.dart'
+    as _i4;
 import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart'
     as _i3;
-import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i9;
+import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -56,11 +61,22 @@ class _FakeTecnicoRepositorioInterface_1 extends _i1.SmartFake
         );
 }
 
+class _FakeFormaPagamentoRepositorioInterface_2 extends _i1.SmartFake
+    implements _i4.FormaPagamentoRepositorioInterface {
+  _FakeFormaPagamentoRepositorioInterface_2(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [BuscarClientePorId].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBuscarClientePorId extends _i1.Mock
-    implements _i4.BuscarClientePorId {
+    implements _i5.BuscarClientePorId {
   MockBuscarClientePorId() {
     _i1.throwOnMissingStub(this);
   }
@@ -75,20 +91,20 @@ class MockBuscarClientePorId extends _i1.Mock
       ) as _i2.ClienteRepositorioInterface);
 
   @override
-  _i5.Future<_i6.Cliente?> executar(String? id) => (super.noSuchMethod(
+  _i6.Future<_i7.Cliente?> executar(String? id) => (super.noSuchMethod(
         Invocation.method(
           #executar,
           [id],
         ),
-        returnValue: _i5.Future<_i6.Cliente?>.value(),
-      ) as _i5.Future<_i6.Cliente?>);
+        returnValue: _i6.Future<_i7.Cliente?>.value(),
+      ) as _i6.Future<_i7.Cliente?>);
 }
 
 /// A class which mocks [BuscarTecnicoPorId].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBuscarTecnicoPorId extends _i1.Mock
-    implements _i7.BuscarTecnicoPorId {
+    implements _i8.BuscarTecnicoPorId {
   MockBuscarTecnicoPorId() {
     _i1.throwOnMissingStub(this);
   }
@@ -103,37 +119,65 @@ class MockBuscarTecnicoPorId extends _i1.Mock
       ) as _i3.TecnicoRepositorioInterface);
 
   @override
-  _i5.Future<_i8.Tecnico?> executar(String? id) => (super.noSuchMethod(
+  _i6.Future<_i9.Tecnico?> executar(String? id) => (super.noSuchMethod(
         Invocation.method(
           #executar,
           [id],
         ),
-        returnValue: _i5.Future<_i8.Tecnico?>.value(),
-      ) as _i5.Future<_i8.Tecnico?>);
+        returnValue: _i6.Future<_i9.Tecnico?>.value(),
+      ) as _i6.Future<_i9.Tecnico?>);
+}
+
+/// A class which mocks [BuscarFormaPagamentoPorId].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockBuscarFormaPagamentoPorId extends _i1.Mock
+    implements _i10.BuscarFormaPagamentoPorId {
+  MockBuscarFormaPagamentoPorId() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.FormaPagamentoRepositorioInterface get repositorio => (super.noSuchMethod(
+        Invocation.getter(#repositorio),
+        returnValue: _FakeFormaPagamentoRepositorioInterface_2(
+          this,
+          Invocation.getter(#repositorio),
+        ),
+      ) as _i4.FormaPagamentoRepositorioInterface);
+
+  @override
+  _i6.Future<_i11.FormaPagamento?> executar(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #executar,
+          [id],
+        ),
+        returnValue: _i6.Future<_i11.FormaPagamento?>.value(),
+      ) as _i6.Future<_i11.FormaPagamento?>);
 }
 
 /// A class which mocks [AutenticacaoServico].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAutenticacaoServico extends _i1.Mock
-    implements _i9.AutenticacaoServico {
+    implements _i12.AutenticacaoServico {
   MockAutenticacaoServico() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i5.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
+  _i6.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
       (super.noSuchMethod(
         Invocation.method(
           #enviarEmailRedefinicaoSenha,
           [email],
         ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i5.Future<_i10.User?> login(
+  _i6.Future<_i13.User?> login(
     String? email,
     String? senha,
   ) =>
@@ -145,30 +189,30 @@ class MockAutenticacaoServico extends _i1.Mock
             senha,
           ],
         ),
-        returnValue: _i5.Future<_i10.User?>.value(),
-      ) as _i5.Future<_i10.User?>);
+        returnValue: _i6.Future<_i13.User?>.value(),
+      ) as _i6.Future<_i13.User?>);
 
   @override
-  _i5.Future<void> logout() => (super.noSuchMethod(
+  _i6.Future<void> logout() => (super.noSuchMethod(
         Invocation.method(
           #logout,
           [],
         ),
-        returnValue: _i5.Future<void>.value(),
-        returnValueForMissingStub: _i5.Future<void>.value(),
-      ) as _i5.Future<void>);
+        returnValue: _i6.Future<void>.value(),
+        returnValueForMissingStub: _i6.Future<void>.value(),
+      ) as _i6.Future<void>);
 
   @override
-  _i5.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
+  _i6.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
         Invocation.method(
           #primeiroGestorJaCadastrado,
           [],
         ),
-        returnValue: _i5.Future<bool>.value(false),
-      ) as _i5.Future<bool>);
+        returnValue: _i6.Future<bool>.value(false),
+      ) as _i6.Future<bool>);
 
   @override
-  _i5.Future<_i10.User?> cadastrarPrimeiroGestor({
+  _i6.Future<_i13.User?> cadastrarPrimeiroGestor({
     required String? nome,
     required String? email,
     required String? senha,
@@ -183,11 +227,11 @@ class MockAutenticacaoServico extends _i1.Mock
             #senha: senha,
           },
         ),
-        returnValue: _i5.Future<_i10.User?>.value(),
-      ) as _i5.Future<_i10.User?>);
+        returnValue: _i6.Future<_i13.User?>.value(),
+      ) as _i6.Future<_i13.User?>);
 
   @override
-  _i5.Future<_i10.User?> cadastrarTecnico({
+  _i6.Future<_i13.User?> cadastrarTecnico({
     required String? nome,
     required String? email,
     required String? senha,
@@ -204,16 +248,18 @@ class MockAutenticacaoServico extends _i1.Mock
             #telefone: telefone,
           },
         ),
-        returnValue: _i5.Future<_i10.User?>.value(),
-      ) as _i5.Future<_i10.User?>);
+        returnValue: _i6.Future<_i13.User?>.value(),
+      ) as _i6.Future<_i13.User?>);
 
   @override
-  _i5.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
+  _i6.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado(
+          {bool? forcarAtualizacao = false}) =>
       (super.noSuchMethod(
         Invocation.method(
           #buscarDadosUsuarioLogado,
           [],
+          {#forcarAtualizacao: forcarAtualizacao},
         ),
-        returnValue: _i5.Future<Map<String, dynamic>?>.value(),
-      ) as _i5.Future<Map<String, dynamic>?>);
+        returnValue: _i6.Future<Map<String, dynamic>?>.value(),
+      ) as _i6.Future<Map<String, dynamic>?>);
 }

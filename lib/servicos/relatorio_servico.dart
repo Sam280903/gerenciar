@@ -6,7 +6,9 @@ import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptat
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
+import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart';
 import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface.dart';
+import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart';
 
 class FiltrosRelatorio {
   final DateTime? dataInicial;
@@ -25,10 +27,17 @@ class FiltrosRelatorio {
 }
 
 class RelatorioServico {
-  final OrdemServicoRepositorioInterface _ordemServicoRepositorio =
-      OrdemServicoRepositorioAdaptativo();
-  final _clienteRepo = ClienteRepositorioAdaptativo();
-  final _tecnicoRepo = TecnicoRepositorioAdaptativo();
+  final OrdemServicoRepositorioInterface _ordemServicoRepositorio;
+  final ClienteRepositorioInterface _clienteRepo;
+  final TecnicoRepositorioInterface _tecnicoRepo;
+
+  RelatorioServico({
+    OrdemServicoRepositorioInterface? ordemServicoRepositorio,
+    ClienteRepositorioInterface? clienteRepo,
+    TecnicoRepositorioInterface? tecnicoRepo,
+  })  : _ordemServicoRepositorio = ordemServicoRepositorio ?? OrdemServicoRepositorioAdaptativo(),
+        _clienteRepo = clienteRepo ?? ClienteRepositorioAdaptativo(),
+        _tecnicoRepo = tecnicoRepo ?? TecnicoRepositorioAdaptativo();
 
   // MÉTODO ALTERADO
   Future<List<OrdemServicoDetalhada>> gerarRelatorioOrdensServico(

@@ -24,8 +24,9 @@ class DetalhesOSTela extends StatefulWidget {
   final AutenticacaoServico? authServico;
   final BuscarClientePorId? buscarCliente;
   final BuscarTecnicoPorId? buscarTecnico;
+  final BuscarFormaPagamentoPorId? buscarFormaPagamento;
 
-  const DetalhesOSTela({super.key, required this.ordemServico, this.authServico, this.buscarCliente, this.buscarTecnico});
+  const DetalhesOSTela({super.key, required this.ordemServico, this.authServico, this.buscarCliente, this.buscarTecnico, this.buscarFormaPagamento});
 
   @override
   State<DetalhesOSTela> createState() => _DetalhesOSTelaState();
@@ -46,7 +47,7 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
     _authServico = widget.authServico ?? AutenticacaoServico();
     _buscarCliente = widget.buscarCliente ?? BuscarClientePorId(ClienteRepositorioAdaptativo());
     _buscarTecnico = widget.buscarTecnico ?? BuscarTecnicoPorId(TecnicoRepositorioAdaptativo());
-    _buscarFormaPagamento = BuscarFormaPagamentoPorId(FormaPagamentoRepositorioAdaptativo());
+    _buscarFormaPagamento = widget.buscarFormaPagamento ?? BuscarFormaPagamentoPorId(FormaPagamentoRepositorioAdaptativo());
     _dadosFuture = _carregarDados();
   }
 

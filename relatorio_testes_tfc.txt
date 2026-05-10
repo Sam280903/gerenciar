@@ -1,0 +1,51 @@
+﻿========================================
+   RELATÓRIO DE TESTES - TFC
+========================================
+
+------ ERROS IDENTIFICADOS ------
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY WIDGETS LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following FirebaseException was thrown building Builder:
+When the exception was thrown, this was the stack:
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+When the exception was thrown, this was the stack:
+The test description was:
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+00:04 +33 -1: C:/tfc/test/apresentacao/telas/ordens_servico/detalhes_os_tela_test.dart: Deve exibir CircularProgressIndicator e depois os dados da OS [E]
+  Test failed. See exception logs above.
+  The test description was: Deve exibir CircularProgressIndicator e depois os dados da OS
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY WIDGETS LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following FirebaseException was thrown building Builder:
+When the exception was thrown, this was the stack:
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+When the exception was thrown, this was the stack:
+The test description was:
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+00:05 +34 -2: C:/tfc/test/apresentacao/telas/ordens_servico/editar_os_tela_test.dart: Deve preencher os campos com os dados da OS [E]
+  Test failed. See exception logs above.
+  The test description was: Deve preencher os campos com os dados da OS
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY WIDGETS LIBRARY Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following FirebaseException was thrown building Builder:
+When the exception was thrown, this was the stack:
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+Bad state: No element
+When the exception was thrown, this was the stack:
+The test description was:
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+Multiple exceptions (2) were detected during the running of the current test, and at least one was
+00:05 +34 -3: C:/tfc/test/apresentacao/telas/ordens_servico/editar_os_tela_test.dart: Deve chamar o m├®todo de atualizar ao salvar [E]
+  Test failed. See exception logs above.
+  The test description was: Deve chamar o m├®todo de atualizar ao salvar
+
+------ RESULTADO FINAL ------
+00:13 +288 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:13 +289 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:13 +290 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:13 +291 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:13 +292 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:13 +293 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:13 +294 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:13 +295 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:14 +296 -3: C:/tfc/test/fluxo/cadastro_os_fluxo_test.dart: Deve criar uma nova Ordem de Servi├ºo e exibi-la na lista
+00:14 +297 -3: Some tests failed.

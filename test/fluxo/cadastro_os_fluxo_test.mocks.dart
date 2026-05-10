@@ -511,11 +511,13 @@ class MockAutenticacaoServico extends _i1.Mock
       ) as _i7.Future<_i21.User?>);
 
   @override
-  _i7.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado() =>
+  _i7.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado(
+          {bool? forcarAtualizacao = false}) =>
       (super.noSuchMethod(
         Invocation.method(
           #buscarDadosUsuarioLogado,
           [],
+          {#forcarAtualizacao: forcarAtualizacao},
         ),
         returnValue: _i7.Future<Map<String, dynamic>?>.value(),
       ) as _i7.Future<Map<String, dynamic>?>);

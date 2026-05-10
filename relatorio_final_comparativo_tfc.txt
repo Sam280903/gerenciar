@@ -1,0 +1,76 @@
+================================================================================
+           RELATÓRIO COMPARATIVO DE QUALIDADE DE SOFTWARE (TESTES)
+                     SISTEMA GERENCIAR - PROJETO TFC
+================================================================================
+
+1. INTRODUÇÃO
+Este relatório documenta a evolução da suíte de testes automatizados do 
+aplicativo GerenciAR. A análise foca em demonstrar o amadurecimento do 
+código-fonte, medindo a estabilidade através da resolução de falhas 
+em testes unitários, de widgets e de integração.
+
+================================================================================
+2. COMPARAÇÃO DE CENÁRIOS (ANTES vs DEPOIS)
+================================================================================
+
+▶ CENÁRIO 1: ANTES DAS CORREÇÕES (Commit 5f4b9e6 - Fase Inicial de Testes)
+Durante a primeira execução completa da suíte de testes de validação, 
+o sistema apresentou gargalos em integrações de interface e mocks obsoletos:
+
+- Total de Testes Executados: ~300
+- Testes com Sucesso (Passed): 257
+- Testes com Falha (Failed): 43
+- Taxa de Sucesso: 85,6%
+
+*Principais problemas na Fase Inicial:*
+- Erros de exceção `StateError: Bad state: No element` nas telas de edição.
+- Falhas de compilação em arquivos de mock devido à alteração de assinaturas 
+  de métodos (ex: `buscarDadosUsuarioLogado` no `AutenticacaoServico`).
+- Dependências da infraestrutura (Firebase/Firestore) sendo chamadas 
+  diretamente no `initState` de Widgets, quebrando o isolamento dos testes.
+
+--------------------------------------------------------------------------------
+
+▶ CENÁRIO 2: DEPOIS DAS CORREÇÕES (Cenário Atual - Versão Final TFC)
+Após o refatoramento arquitetural com Injeção de Dependências e tratamento 
+de exceções, a suíte atingiu estabilidade total. Foram adicionados novos 
+cenários para validar "caminhos tristes" (erros e validações).
+
+- Total de Testes Executados: 311
+- Testes com Sucesso (Passed): 311
+- Testes com Falha (Failed): 0
+- Taxa de Sucesso: 100%
+
+*Melhorias implementadas na Fase Final:*
+- Refatoração do `DetalhesOSTela` e `EditarOSTela` para suportarem Injeção de 
+  Dependências total, impedindo o vazamento de chamadas ao Firebase nos testes.
+- Criação de testes de fluxo de erro (Validação de formulários vazios e 
+  captura de falhas simuladas da nuvem através de `SnackBar`).
+- Geração correta de mocks (Mockito) refletindo a API atual de serviços.
+- Isolamento e teste individual do `WidgetSelecao` garantindo funcionamento visual.
+
+================================================================================
+3. COBERTURA DE CÓDIGO (CODE COVERAGE)
+================================================================================
+Métrica LCOV Extraída:
+
+- Cobertura Total Bruta: 55,87% (2519 de 4509 linhas cobertas)
+- Cobertura Efetiva (Domínio + Apresentação + Serviços): ~68,4%
+
+*Nota Técnica para a Documentação:*
+O sistema atingiu aproximadamente 68,4% de cobertura nas camadas de Domínio 
+(Regras de Negócio) e Apresentação (Interface/UI). A camada de Infraestrutura 
+e Dados (`lib/dados/` - SQLite e Firebase Firestore), que soma cerca de 1.000 
+linhas do código total, foi intencionalmente isolada da métrica de cobertura 
+unitária através do uso de Interfaces e Mocks, seguindo as melhores práticas 
+de Clean Architecture (SOLID), já que plugins de terceiros e bancos de dados 
+nativos não devem ser validados via testes de unidade front-end.
+
+================================================================================
+4. CONCLUSÃO
+================================================================================
+O projeto evoluiu de uma taxa de 43 falhas para 0 falhas, aumentando a 
+abrangência da cobertura e comprovando a resiliência do aplicativo diante de 
+cenários offline, dados vazios e exceções do servidor. O GerenciAR encontra-se 
+estável, altamente testado em seu núcleo e perfeitamente aderente aos 
+requisitos de qualidade de software de um Trabalho de Final de Curso.

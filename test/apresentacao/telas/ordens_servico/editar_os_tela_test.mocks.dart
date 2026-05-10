@@ -3,13 +3,22 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
+import 'dart:async' as _i5;
 
+import 'package:firebase_auth/firebase_auth.dart' as _i11;
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_id.dart'
+    as _i7;
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/listar_formas_pagamento.dart'
+    as _i9;
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/atualizar_ordem_servico.dart'
+    as _i4;
+import 'package:gerenciar/dominio/entidades/forma_pagamento.dart' as _i8;
+import 'package:gerenciar/dominio/entidades/ordem_servico.dart' as _i6;
+import 'package:gerenciar/dominio/interfaces/forma_pagamento_repositorio_interface.dart'
     as _i3;
-import 'package:gerenciar/dominio/entidades/ordem_servico.dart' as _i5;
 import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface.dart'
     as _i2;
+import 'package:gerenciar/servicos/autenticacao_servico.dart' as _i10;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -38,11 +47,22 @@ class _FakeOrdemServicoRepositorioInterface_0 extends _i1.SmartFake
         );
 }
 
+class _FakeFormaPagamentoRepositorioInterface_1 extends _i1.SmartFake
+    implements _i3.FormaPagamentoRepositorioInterface {
+  _FakeFormaPagamentoRepositorioInterface_1(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [AtualizarOrdemServico].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockAtualizarOrdemServico extends _i1.Mock
-    implements _i3.AtualizarOrdemServico {
+    implements _i4.AtualizarOrdemServico {
   MockAtualizarOrdemServico() {
     _i1.throwOnMissingStub(this);
   }
@@ -57,12 +77,185 @@ class MockAtualizarOrdemServico extends _i1.Mock
       ) as _i2.OrdemServicoRepositorioInterface);
 
   @override
-  _i4.Future<void> executar(_i5.OrdemServico? ordem) => (super.noSuchMethod(
+  _i5.Future<void> executar(_i6.OrdemServico? ordem) => (super.noSuchMethod(
         Invocation.method(
           #executar,
           [ordem],
         ),
-        returnValue: _i4.Future<void>.value(),
-        returnValueForMissingStub: _i4.Future<void>.value(),
-      ) as _i4.Future<void>);
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+}
+
+/// A class which mocks [BuscarFormaPagamentoPorId].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockBuscarFormaPagamentoPorId extends _i1.Mock
+    implements _i7.BuscarFormaPagamentoPorId {
+  MockBuscarFormaPagamentoPorId() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.FormaPagamentoRepositorioInterface get repositorio => (super.noSuchMethod(
+        Invocation.getter(#repositorio),
+        returnValue: _FakeFormaPagamentoRepositorioInterface_1(
+          this,
+          Invocation.getter(#repositorio),
+        ),
+      ) as _i3.FormaPagamentoRepositorioInterface);
+
+  @override
+  _i5.Future<_i8.FormaPagamento?> executar(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #executar,
+          [id],
+        ),
+        returnValue: _i5.Future<_i8.FormaPagamento?>.value(),
+      ) as _i5.Future<_i8.FormaPagamento?>);
+}
+
+/// A class which mocks [ListarFormasPagamento].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockListarFormasPagamento extends _i1.Mock
+    implements _i9.ListarFormasPagamento {
+  MockListarFormasPagamento() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.FormaPagamentoRepositorioInterface get repositorio => (super.noSuchMethod(
+        Invocation.getter(#repositorio),
+        returnValue: _FakeFormaPagamentoRepositorioInterface_1(
+          this,
+          Invocation.getter(#repositorio),
+        ),
+      ) as _i3.FormaPagamentoRepositorioInterface);
+
+  @override
+  _i5.Future<List<_i8.FormaPagamento>> executar({
+    required String? idGestor,
+    bool? incluirInativos = false,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #executar,
+          [],
+          {
+            #idGestor: idGestor,
+            #incluirInativos: incluirInativos,
+          },
+        ),
+        returnValue:
+            _i5.Future<List<_i8.FormaPagamento>>.value(<_i8.FormaPagamento>[]),
+      ) as _i5.Future<List<_i8.FormaPagamento>>);
+}
+
+/// A class which mocks [AutenticacaoServico].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAutenticacaoServico extends _i1.Mock
+    implements _i10.AutenticacaoServico {
+  MockAutenticacaoServico() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i5.Future<void> enviarEmailRedefinicaoSenha(String? email) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #enviarEmailRedefinicaoSenha,
+          [email],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<_i11.User?> login(
+    String? email,
+    String? senha,
+  ) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #login,
+          [
+            email,
+            senha,
+          ],
+        ),
+        returnValue: _i5.Future<_i11.User?>.value(),
+      ) as _i5.Future<_i11.User?>);
+
+  @override
+  _i5.Future<void> logout() => (super.noSuchMethod(
+        Invocation.method(
+          #logout,
+          [],
+        ),
+        returnValue: _i5.Future<void>.value(),
+        returnValueForMissingStub: _i5.Future<void>.value(),
+      ) as _i5.Future<void>);
+
+  @override
+  _i5.Future<bool> primeiroGestorJaCadastrado() => (super.noSuchMethod(
+        Invocation.method(
+          #primeiroGestorJaCadastrado,
+          [],
+        ),
+        returnValue: _i5.Future<bool>.value(false),
+      ) as _i5.Future<bool>);
+
+  @override
+  _i5.Future<_i11.User?> cadastrarPrimeiroGestor({
+    required String? nome,
+    required String? email,
+    required String? senha,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarPrimeiroGestor,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+          },
+        ),
+        returnValue: _i5.Future<_i11.User?>.value(),
+      ) as _i5.Future<_i11.User?>);
+
+  @override
+  _i5.Future<_i11.User?> cadastrarTecnico({
+    required String? nome,
+    required String? email,
+    required String? senha,
+    required String? telefone,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cadastrarTecnico,
+          [],
+          {
+            #nome: nome,
+            #email: email,
+            #senha: senha,
+            #telefone: telefone,
+          },
+        ),
+        returnValue: _i5.Future<_i11.User?>.value(),
+      ) as _i5.Future<_i11.User?>);
+
+  @override
+  _i5.Future<Map<String, dynamic>?> buscarDadosUsuarioLogado(
+          {bool? forcarAtualizacao = false}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #buscarDadosUsuarioLogado,
+          [],
+          {#forcarAtualizacao: forcarAtualizacao},
+        ),
+        returnValue: _i5.Future<Map<String, dynamic>?>.value(),
+      ) as _i5.Future<Map<String, dynamic>?>);
 }

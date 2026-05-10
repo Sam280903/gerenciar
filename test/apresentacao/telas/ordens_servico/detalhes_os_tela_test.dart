@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gerenciar/apresentacao/telas/ordens_servico/detalhes_os_tela.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
+import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_id.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
+import 'package:gerenciar/dominio/entidades/forma_pagamento.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
@@ -14,10 +16,16 @@ import 'package:mockito/mockito.dart';
 
 import 'detalhes_os_tela_test.mocks.dart';
 
-@GenerateMocks([BuscarClientePorId, BuscarTecnicoPorId, AutenticacaoServico])
+@GenerateMocks([
+  BuscarClientePorId,
+  BuscarTecnicoPorId,
+  BuscarFormaPagamentoPorId,
+  AutenticacaoServico
+])
 void main() {
   late MockBuscarClientePorId mockBuscarCliente;
   late MockBuscarTecnicoPorId mockBuscarTecnico;
+  late MockBuscarFormaPagamentoPorId mockBuscarFormaPagamento;
   late MockAutenticacaoServico mockAuthServico;
 
   final osExemplo = OrdemServico(
@@ -51,6 +59,13 @@ void main() {
       ativo: true,
       idGestor: 'gestor-1');
 
+  final formaPagamentoExemplo = FormaPagamento(
+    id: 'fp-1',
+    nome: 'Dinheiro',
+    ativo: true,
+    idGestor: 'gestor-1',
+  );
+
   Future<void> pumpTela(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: DetalhesOSTela(
@@ -58,6 +73,7 @@ void main() {
         authServico: mockAuthServico,
         buscarCliente: mockBuscarCliente,
         buscarTecnico: mockBuscarTecnico,
+        buscarFormaPagamento: mockBuscarFormaPagamento,
       ),
     ));
   }
@@ -65,14 +81,20 @@ void main() {
   setUp(() {
     mockBuscarCliente = MockBuscarClientePorId();
     mockBuscarTecnico = MockBuscarTecnicoPorId();
+    mockBuscarFormaPagamento = MockBuscarFormaPagamentoPorId();
     mockAuthServico = MockAutenticacaoServico();
+
     when(mockAuthServico.buscarDadosUsuarioLogado())
-        .thenAnswer((_) async => {'perfil': 'gestor'});
+        .thenAnswer((_) async => {'perfil': 'gestor', 'idGestor': 'gestor-1'});
+    when(mockAuthServico.buscarDadosUsuarioLogado(
+            forcarAtualizacao: anyNamed('forcarAtualizacao')))
+        .thenAnswer((_) async => {'perfil': 'gestor', 'idGestor': 'gestor-1'});
+    when(mockBuscarFormaPagamento.executar(any))
+        .thenAnswer((_) async => formaPagamentoExemplo);
   });
 
-  testWidgets('Deve exibir CircularProgressIndicator e depois os dados da OS',
+  testWidgets('Deve exibir CircularProgressIndicator enquanto carrega',
       (WidgetTester tester) async {
-    // ARRANGE
     when(mockBuscarCliente.executar(any))
         .thenAnswer((_) async => clienteExemplo);
     when(mockBuscarTecnico.executar(any))
@@ -80,14 +102,35 @@ void main() {
 
     await pumpTela(tester);
 
-    // ACT & ASSERT
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Deve exibir os dados da OS após carregamento',
+      (WidgetTester tester) async {
+    when(mockBuscarCliente.executar(any))
+        .thenAnswer((_) async => clienteExemplo);
+    when(mockBuscarTecnico.executar(any))
+        .thenAnswer((_) async => tecnicoExemplo);
+
+    await pumpTela(tester);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
 
     expect(find.text('Cliente da OS'), findsOneWidget);
     expect(find.text('Técnico da OS'), findsOneWidget);
     expect(find.text('Ar condicionado não está gelando.'), findsOneWidget);
     expect(find.text('R\$ 250.00'), findsOneWidget);
     expect(find.text('Pendente'), findsOneWidget);
+  });
+
+  testWidgets('Deve exibir "Não informado" quando cliente não é encontrado',
+      (WidgetTester tester) async {
+    when(mockBuscarCliente.executar(any)).thenAnswer((_) async => null);
+    when(mockBuscarTecnico.executar(any))
+        .thenAnswer((_) async => tecnicoExemplo);
+
+    await pumpTela(tester);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    expect(find.text('Não informado'), findsWidgets);
   });
 }

@@ -61,4 +61,25 @@ void main() {
 
     verify(mockAuthServico.login('teste@teste.com', '123456')).called(1);
   });
+
+  testWidgets('Deve exibir mensagem de erro na tela quando o login falha',
+      (WidgetTester tester) async {
+    when(mockAuthServico.login(any, any))
+        .thenThrow(Exception('E-mail ou senha incorretos'));
+
+    await pumpTela(tester);
+
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'E-mail'), 'teste@teste.com');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Senha'), 'errada123');
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'ENTRAR'));
+    await tester.pump(); // Para processar o clique
+    await tester.pump(); // Para processar o setState de erro
+
+    // O widget exibe um container vermelho com a mensagem e um ícone de erro
+    expect(find.text('E-mail ou senha incorretos'), findsOneWidget);
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+  });
 }
