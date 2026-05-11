@@ -177,7 +177,7 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
   Widget _buildActionButtons() {
     return Row(
       children: [
-        if (_perfilUsuario == 'gestor')
+        if (_perfilUsuario.toLowerCase() == 'gestor')
           Expanded(
             child: OutlinedButton.icon(
               onPressed: _toggleAtivo,
@@ -195,7 +195,7 @@ class _DetalhesClienteTelaState extends State<DetalhesClienteTela> {
                           : Colors.greenAccent)),
             ),
           ),
-        if (_perfilUsuario == 'gestor') const SizedBox(width: 16),
+        if (_perfilUsuario.toLowerCase() == 'gestor') const SizedBox(width: 16),
         Expanded(
             child: ElevatedButton.icon(
                 onPressed: _abrirEdicao,

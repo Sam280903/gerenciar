@@ -229,7 +229,23 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           CpfOuCnpjFormatter(),
-                        ]),
+                        ],
+                        validator: (v) {
+                          if (_isCadastroRapido) return null;
+                          if (v == null || v.isEmpty) return null;
+
+                          final cleanValue = UtilBrasilFields.removeCaracteres(v);
+                          if (cleanValue.length <= 11) {
+                            if (!CPFValidator.isValid(cleanValue)) {
+                              return 'CPF inválido';
+                            }
+                          } else {
+                            if (!CNPJValidator.isValid(cleanValue)) {
+                              return 'CNPJ inválido';
+                            }
+                          }
+                          return null;
+                        }),
                     const SizedBox(height: 16),
                     TextFormField(
                         controller: _emailController,
