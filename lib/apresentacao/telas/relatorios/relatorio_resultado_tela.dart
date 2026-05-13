@@ -61,7 +61,9 @@ class RelatorioResultadoTela extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    final double valorTotal = ordensDeServico.fold(0.0, (sum, item) => sum + item.os.valor);
+    final sortedOrdens = List<OrdemServicoDetalhada>.from(ordensDeServico)
+      ..sort((a, b) => (a.cliente?.nome ?? '').compareTo(b.cliente?.nome ?? ''));
+    final double valorTotal = sortedOrdens.fold(0.0, (sum, item) => sum + item.os.valor);
     final formatadorMoeda =
         NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
@@ -146,44 +148,50 @@ class RelatorioResultadoTela extends StatelessWidget {
             )
           else
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 80),
-                itemCount: ordensDeServico.length,
-                itemBuilder: (context, index) {
-                  final item = ordensDeServico[index];
-                  final os = item.os;
-                  final statusColor = _getStatusColor(os.status);
+              child: Builder(
+                builder: (context) {
+                  final sortedOrdens = List<OrdemServicoDetalhada>.from(ordensDeServico)
+                    ..sort((a, b) => (a.cliente?.nome ?? '').compareTo(b.cliente?.nome ?? ''));
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 80),
+                    itemCount: sortedOrdens.length,
+                    itemBuilder: (context, index) {
+                      final item = sortedOrdens[index];
+                      final os = item.os;
+                      final statusColor = _getStatusColor(os.status);
 
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          color: statusColor.withAlpha(80), width: 1.5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      leading: _getPrioridadeIcon(os.prioridade),
-                      title: Text(
-                          item.cliente?.nome ?? 'Cliente não encontrado',
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                              'Técnico: ${item.tecnico?.nome ?? 'Não definido'}'),
-                          Text(
-                            'Detalhe: ${os.descricao}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                              color: statusColor.withAlpha(80), width: 1.5),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          leading: _getPrioridadeIcon(os.prioridade),
+                          title: Text(
+                              item.cliente?.nome ?? 'Cliente não encontrado',
+                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  'Técnico: ${item.tecnico?.nome ?? 'Não definido'}'),
+                              Text(
+                                'Detalhe: ${os.descricao}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      trailing: Text(
-                        os.status,
-                        style: TextStyle(
-                            color: statusColor, fontWeight: FontWeight.bold),
-                      ),
-                      onTap: () => _abrirDetalhes(context, os),
-                    ),
+                          trailing: Text(
+                            os.status,
+                            style: TextStyle(
+                                color: statusColor, fontWeight: FontWeight.bold),
+                          ),
+                          onTap: () => _abrirDetalhes(context, os),
+                        ),
+                      );
+                    },
                   );
                 },
               ),

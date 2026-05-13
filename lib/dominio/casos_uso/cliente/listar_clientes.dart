@@ -9,7 +9,9 @@ class ListarClientes {
   // A mudança principal está aqui: a função agora exige 'idGestor'
   Future<List<Cliente>> executar(
       {required String idGestor, bool incluirInativos = false}) async {
-    return await repositorio.listarTodos(
+    final clientes = await repositorio.listarTodos(
         idGestor: idGestor, incluirInativos: incluirInativos);
+    clientes.sort((a, b) => a.nome.compareTo(b.nome));
+    return clientes;
   }
 }

@@ -8,7 +8,9 @@ class ListarTecnicos {
 
   Future<List<Tecnico>> executar(
       {required String idGestor, bool incluirInativos = false}) async {
-    return await repositorio.listarTodos(
+    final tecnicos = await repositorio.listarTodos(
         idGestor: idGestor, incluirInativos: incluirInativos);
+    tecnicos.sort((a, b) => a.nome.compareTo(b.nome));
+    return tecnicos;
   }
 }
