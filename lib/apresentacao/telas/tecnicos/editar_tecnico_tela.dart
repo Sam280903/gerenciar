@@ -1,6 +1,8 @@
 // lib/apresentacao/telas/tecnicos/editar_tecnico_tela.dart
 
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/atualizar_tecnico.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
@@ -124,6 +126,10 @@ class _EditarTecnicoTelaState extends State<EditarTecnicoTela> {
                   prefixIcon: Icon(Icons.phone_outlined),
                 ),
                 keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  TelefoneInputFormatter(),
+                ],
               ),
               const SizedBox(height: 40),
               _carregando

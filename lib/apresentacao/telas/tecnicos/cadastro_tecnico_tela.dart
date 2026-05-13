@@ -1,6 +1,8 @@
 // lib/apresentacao/telas/tecnicos/cadastro_tecnico_tela.dart
 
+import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gerenciar/servicos/autenticacao_servico.dart';
 
 class CadastroTecnicoTela extends StatefulWidget {
@@ -140,6 +142,10 @@ class _CadastroTecnicoTelaState extends State<CadastroTecnicoTela> {
                   prefixIcon: Icon(Icons.phone_outlined),
                 ),
                 keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  TelefoneInputFormatter(),
+                ],
               ),
               const SizedBox(height: 40),
               ElevatedButton(
