@@ -1,5 +1,6 @@
 // lib/servicos/relatorio_servico.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
@@ -61,8 +62,8 @@ class RelatorioServico {
 
       return detalhadas;
     } catch (e) {
-      print('Erro ao gerar relatório: $e');
-      throw Exception('Não foi possível gerar o relatório: ${e.toString()}');
+      debugPrint('Erro ao gerar relatório: $e');
+      throw Exception('Não foi possível gerar o relatório.');
     }
   }
 }
