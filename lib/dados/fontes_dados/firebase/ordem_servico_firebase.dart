@@ -10,17 +10,6 @@ class OrdemServicoFirebase {
       FiltrosRelatorio filtros, String idGestor) async {
     Query query = _colecao.where('idGestor', isEqualTo: idGestor);
 
-    if (filtros.idTecnico != null && filtros.idTecnico!.isNotEmpty) {
-      query = query.where('idTecnico', isEqualTo: filtros.idTecnico);
-    }
-    if (filtros.idCliente != null && filtros.idCliente!.isNotEmpty) {
-      query = query.where('idCliente', isEqualTo: filtros.idCliente);
-    }
-    if (filtros.dataInicial != null) {
-      query = query.where('dataHoraInicio',
-          isGreaterThanOrEqualTo: Timestamp.fromDate(filtros.dataInicial!));
-    }
-
     final snapshot = await query.get();
     var resultado = snapshot.docs.map((doc) {
       return OrdemServicoModel.fromMap(
@@ -29,9 +18,24 @@ class OrdemServicoFirebase {
       );
     }).toList();
 
+    if (filtros.idTecnico != null && filtros.idTecnico!.isNotEmpty) {
+      resultado = resultado
+          .where((os) => os.idTecnico == filtros.idTecnico)
+          .toList();
+    }
+    if (filtros.idCliente != null && filtros.idCliente!.isNotEmpty) {
+      resultado = resultado
+          .where((os) => os.idCliente == filtros.idCliente)
+          .toList();
+    }
     if (filtros.status != null && filtros.status!.isNotEmpty) {
       resultado = resultado
           .where((os) => filtros.status!.contains(os.status))
+          .toList();
+    }
+    if (filtros.dataInicial != null) {
+      resultado = resultado
+          .where((os) => os.dataHoraInicio.isAfter(filtros.dataInicial!))
           .toList();
     }
     if (filtros.dataFinal != null) {
