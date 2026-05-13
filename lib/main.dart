@@ -67,8 +67,9 @@ void main() async {
 
   // Opcional: Adiciona um "ouvinte" para quando o usuário clicar na notificação
   OneSignal.Notifications.addClickListener((event) {
-    if (kDebugMode)
+    if (kDebugMode) {
       debugPrint('Notificação clicada: ${event.notification.title}');
+    }
   });
 
   // --- FIM DO BLOCO DO ONESIGNAL ---

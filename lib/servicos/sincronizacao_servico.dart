@@ -41,6 +41,7 @@ class SincronizacaoServico {
   Timer? _timer;
   StreamSubscription? _connectivitySubscription;
   Timer? _debounceTimer;
+  bool _sincronizando = false;
 
   void iniciarSincronizacao() {
     // 1. Inicia o Timer Periódico (Fallback)
@@ -81,13 +82,19 @@ class SincronizacaoServico {
   }
 
   Future<void> sincronizarDados() async {
-    if (await _temConexao()) {
-      if (kDebugMode) debugPrint("--- INICIANDO SINCRONIZAÇÃO COMPLETA ---");
-      await _sincronizarParaNuvem();
-      await _sincronizarDaNuvem();
-      if (kDebugMode) debugPrint("--- SINCRONIZAÇÃO COMPLETA CONCLUÍDA ---");
-    } else {
-      if (kDebugMode) debugPrint("Dispositivo offline. Operando apenas com banco local.");
+    if (_sincronizando) return;
+    _sincronizando = true;
+    try {
+      if (await _temConexao()) {
+        if (kDebugMode) debugPrint("--- INICIANDO SINCRONIZAÇÃO COMPLETA ---");
+        await _sincronizarParaNuvem();
+        await _sincronizarDaNuvem();
+        if (kDebugMode) debugPrint("--- SINCRONIZAÇÃO COMPLETA CONCLUÍDA ---");
+      } else {
+        if (kDebugMode) debugPrint("Dispositivo offline. Operando apenas com banco local.");
+      }
+    } finally {
+      _sincronizando = false;
     }
   }
 

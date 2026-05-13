@@ -184,7 +184,13 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   }
 
   Future<void> _salvarAgendamento() async {
-    if (_idGestor == null) return;
+    if (_idGestor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Não foi possível identificar o gestor. Tente novamente.'),
+        backgroundColor: Colors.redAccent,
+      ));
+      return;
+    }
 
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {

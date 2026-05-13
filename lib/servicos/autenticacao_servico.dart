@@ -39,6 +39,9 @@ class AutenticacaoServico {
   }
 
   Future<void> logout() async {
+    _cacheUsuario = null;
+    _cacheUid = null;
+    _cacheTimestamp = null;
     await OneSignal.logout(); // Remove o vínculo do usuário com o aparelho
     await _auth.signOut();
   }
@@ -201,13 +204,20 @@ class AutenticacaoServico {
   // Cache em memória para evitar leituras repetidas no Firestore
   static Map<String, dynamic>? _cacheUsuario;
   static String? _cacheUid;
+  static DateTime? _cacheTimestamp;
+  static const Duration _cacheTTL = Duration(minutes: 30);
 
   Future<Map<String, dynamic>?> buscarDadosUsuarioLogado({bool forcarAtualizacao = false}) async {
     final usuario = _auth.currentUser;
     if (usuario == null) return null;
 
-    // Retorna cache se o UID for o mesmo e não foi pedida atualização forçada
-    if (!forcarAtualizacao && _cacheUid == usuario.uid && _cacheUsuario != null) {
+    // Verifica se cache é válido (TTL não expirado)
+    final cacheValido = _cacheTimestamp != null &&
+        DateTime.now().difference(_cacheTimestamp!) < _cacheTTL;
+
+    // Retorna cache se o UID for o mesmo, não foi pedida atualização forçada e cache é válido
+    if (!forcarAtualizacao && _cacheUid == usuario.uid &&
+        _cacheUsuario != null && cacheValido) {
       return _cacheUsuario;
     }
 
@@ -217,6 +227,7 @@ class AutenticacaoServico {
       if (docSnapshot.exists) {
         _cacheUid = usuario.uid;
         _cacheUsuario = docSnapshot.data();
+        _cacheTimestamp = DateTime.now();
         return _cacheUsuario;
       }
     } catch (e) {

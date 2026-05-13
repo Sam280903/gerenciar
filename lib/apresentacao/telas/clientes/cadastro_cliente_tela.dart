@@ -213,7 +213,12 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
                     FilteringTextInputFormatter.digitsOnly,
                     TelefoneInputFormatter(),
                   ],
-                  validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Campo obrigatório';
+                    final digits = v.replaceAll(RegExp(r'\D'), '');
+                    if (digits.length < 10) return 'Telefone inválido';
+                    return null;
+                  }),
               const SizedBox(height: 16),
 
               Visibility(
@@ -252,7 +257,14 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
                         decoration: const InputDecoration(
                             labelText: 'E-mail',
                             prefixIcon: Icon(Icons.email_outlined)),
-                        keyboardType: TextInputType.emailAddress),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return null;
+                          if (!v.contains('@') || !v.contains('.')) {
+                            return 'E-mail inválido';
+                          }
+                          return null;
+                        }),
                     const SizedBox(height: 24),
                     const Divider(),
                     const Padding(
@@ -282,6 +294,14 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
                         FilteringTextInputFormatter.digitsOnly,
                         CepInputFormatter(),
                       ],
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return null;
+                        final digits = v.replaceAll(RegExp(r'\D'), '');
+                        if (digits.length != 8) {
+                          return 'CEP deve ter 8 dígitos';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -340,9 +360,16 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
                               controller: _ufController,
                               decoration:
                                   const InputDecoration(labelText: 'UF *'),
-                              validator: (v) => !_isCadastroRapido && v!.isEmpty
-                                  ? 'Campo obrigatório'
-                                  : null),
+                              validator: (v) {
+                                if (_isCadastroRapido) return null;
+                                if (v == null || v.isEmpty) {
+                                  return 'Campo obrigatório';
+                                }
+                                if (v.trim().length != 2) {
+                                  return 'UF deve ter 2 letras';
+                                }
+                                return null;
+                              }),
                         ),
                       ],
                     ),
