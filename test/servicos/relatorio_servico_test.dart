@@ -74,10 +74,10 @@ void main() {
 
     when(mockOSRepo.listarComFiltros(filtros, 'gestor-1'))
         .thenAnswer((_) async => [osExemplo]);
-    when(mockClienteRepo.buscarPorId('cliente-1'))
-        .thenAnswer((_) async => clienteExemplo);
-    when(mockTecnicoRepo.buscarPorId('tec-1'))
-        .thenAnswer((_) async => tecnicoExemplo);
+    when(mockClienteRepo.listarTodos(idGestor: 'gestor-1', incluirInativos: false))
+        .thenAnswer((_) async => [clienteExemplo]);
+    when(mockTecnicoRepo.listarTodos(idGestor: 'gestor-1', incluirInativos: false))
+        .thenAnswer((_) async => [tecnicoExemplo]);
 
     final resultado = await relatorioServico.gerarRelatorioOrdensServico(filtros, 'gestor-1');
 
@@ -90,7 +90,7 @@ void main() {
   test('Deve lançar Exception caso o repositório falhe', () async {
     final filtros = FiltrosRelatorio();
 
-    when(mockOSRepo.listarComFiltros(filtros, 'gestor-1'))
+    when(mockOSRepo.listarComFiltros(any, any))
         .thenThrow(Exception('Erro de conexão'));
 
     expect(
