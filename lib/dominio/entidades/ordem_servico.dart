@@ -10,8 +10,9 @@ class OrdemServico {
   final String descricao;
   final double valor;
   final String prioridade; // "Baixa", "Média", "Alta"
-  final String status; // "Pendente", "Em Andamento", "Concluída", "Reaberta"
+  final String status; // "Pendente", "Em Andamento", "Concluída", "Reaberta", "Cancelada"
   final String? justificativaReabertura;
+  final String? justificativaCancelamento;
   final bool ativo;
 
   OrdemServico({
@@ -27,6 +28,7 @@ class OrdemServico {
     required this.prioridade,
     required this.status,
     this.justificativaReabertura,
+    this.justificativaCancelamento,
     required this.ativo,
   });
 }

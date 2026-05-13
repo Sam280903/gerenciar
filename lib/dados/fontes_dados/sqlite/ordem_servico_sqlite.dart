@@ -41,6 +41,21 @@ class OrdemServicoSQLite {
     );
   }
 
+  Future<void> cancelar(
+      {required String id, required String justificativa}) async {
+    final db = await _db;
+    await db.update(
+      'ordens_servico',
+      {
+        'status': 'Cancelada',
+        'justificativaCancelamento': justificativa,
+        'sincronizado': 0,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> adicionar(OrdemServicoModel os) async {
     final db = await _db;
     await db.insert(

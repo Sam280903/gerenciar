@@ -6,6 +6,7 @@ import 'package:gerenciar/dados/repositorios/ordem_servico/ordem_servico_reposit
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/cliente/buscar_cliente_por_id.dart';
 import 'package:gerenciar/dominio/casos_uso/forma_pagamento/buscar_forma_pagamento_por_id.dart';
+import 'package:gerenciar/dominio/casos_uso/ordem_servico/cancelar_ordem_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/ordem_servico/reabrir_ordem_servico.dart';
 import 'package:gerenciar/dominio/casos_uso/tecnico/buscar_tecnico_por_id.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
@@ -71,6 +72,74 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
       'tecnico': resultados[1] as Tecnico?,
       'formaPagamento': resultados[3] as FormaPagamento?,
     };
+  }
+
+  Future<void> _cancelarOS() async {
+    final justificativaController = TextEditingController();
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancelar Ordem de Serviço'),
+        content: TextField(
+          controller: justificativaController,
+          decoration: const InputDecoration(
+            labelText: 'Justificativa do Cancelamento',
+            hintText: 'Ex: Cliente desistiu do serviço.',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Voltar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (justificativaController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('A justificativa é obrigatória.'),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+                return;
+              }
+              Navigator.of(context).pop(true);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text('CANCELAR OS'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar == true) {
+      setState(() => _carregandoAcao = true);
+      try {
+        await CancelarOrdemServico(OrdemServicoRepositorioAdaptativo()).executar(
+          id: widget.ordemServico.id,
+          justificativa: justificativaController.text.trim(),
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('OS cancelada com sucesso!'),
+            backgroundColor: Colors.green,
+          ));
+          Navigator.of(context).pop(true);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Erro ao cancelar OS: $e'),
+            backgroundColor: Colors.redAccent,
+          ));
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _carregandoAcao = false);
+        }
+      }
+    }
   }
 
   Future<void> _reabrirOS() async {
@@ -258,6 +327,15 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
                 _buildInfoCard(
                     'Status', widget.ordemServico.status, Icons.flag_outlined,
                     valueColor: _getStatusColor(widget.ordemServico.status)),
+                if (widget.ordemServico.status == 'Cancelada' &&
+                    (widget.ordemServico.justificativaCancelamento?.isNotEmpty ??
+                        false)) ...[
+                  const SizedBox(height: 16),
+                  _buildInfoCard(
+                      'Justificativa do Cancelamento',
+                      widget.ordemServico.justificativaCancelamento!,
+                      Icons.cancel_outlined),
+                ],
                 const SizedBox(height: 16),
                 _buildInfoCard('Descrição do Problema',
                     widget.ordemServico.descricao, Icons.description_outlined),
@@ -303,11 +381,14 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
   }
 
   Widget _buildActionButtons() {
-    final concluida = widget.ordemServico.status == 'Concluída';
+    final status = widget.ordemServico.status;
+    final concluida = status == 'Concluída';
+    final cancelada = status == 'Cancelada';
+    final podeCancelar = !concluida && !cancelada;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (!concluida) ...[
+        if (!concluida && !cancelada) ...[
           ElevatedButton.icon(
             onPressed: _abrirEdicao,
             icon: const Icon(Icons.edit_outlined),
@@ -336,6 +417,18 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
             ),
           ),
         ],
+        if (podeCancelar && _perfilUsuario == 'gestor') ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _cancelarOS,
+            icon: const Icon(Icons.cancel_outlined),
+            label: const Text('CANCELAR OS'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.redAccent,
+              side: const BorderSide(color: Colors.redAccent),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -349,6 +442,8 @@ class _DetalhesOSTelaState extends State<DetalhesOSTela> {
       case 'reaberta':
       case 'reaberto': // legado
         return Colors.redAccent;
+      case 'cancelada':
+        return Colors.grey;
       default:
         return Colors.white;
     }

@@ -114,6 +114,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // ASSERT
-    expect(find.text('Nenhum agendamento próximo.'), findsOneWidget);
+    expect(find.text('Nenhum agendamento pendente.'), findsOneWidget);
   });
 }

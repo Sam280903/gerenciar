@@ -13,6 +13,11 @@ class OrdemServicoRepositorioImpl implements OrdemServicoRepositorioInterface {
   }
 
   @override
+  Future<void> cancelar({required String id, required String justificativa}) {
+    return _fonteFirebase.cancelar(id: id, justificativa: justificativa);
+  }
+
+  @override
   Future<void> adicionar(OrdemServico ordem) async {
     final model = OrdemServicoModel.fromEntidade(ordem);
     await _fonteFirebase.adicionar(model);

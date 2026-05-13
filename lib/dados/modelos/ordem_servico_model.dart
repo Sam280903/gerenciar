@@ -15,6 +15,7 @@ class OrdemServicoModel {
   final String prioridade;
   final String status;
   final String? justificativaReabertura;
+  final String? justificativaCancelamento;
   final bool ativo;
 
   OrdemServicoModel({
@@ -30,6 +31,7 @@ class OrdemServicoModel {
     required this.prioridade,
     required this.status,
     this.justificativaReabertura,
+    this.justificativaCancelamento,
     required this.ativo,
   });
 
@@ -47,6 +49,7 @@ class OrdemServicoModel {
       prioridade: os.prioridade,
       status: os.status,
       justificativaReabertura: os.justificativaReabertura,
+      justificativaCancelamento: os.justificativaCancelamento,
       ativo: os.ativo,
     );
   }
@@ -67,6 +70,7 @@ class OrdemServicoModel {
       prioridade: map['prioridade'] ?? 'Baixa',
       status: map['status'] ?? 'Pendente',
       justificativaReabertura: map['justificativaReabertura'],
+      justificativaCancelamento: map['justificativaCancelamento'],
       ativo: map['ativo'] ?? true,
     );
   }
@@ -88,6 +92,7 @@ class OrdemServicoModel {
       status: map['status'],
       ativo: map['ativo'] == 1,
       justificativaReabertura: map['justificativaReabertura'],
+      justificativaCancelamento: map['justificativaCancelamento'],
     );
   }
 
@@ -105,6 +110,7 @@ class OrdemServicoModel {
       'prioridade': prioridade,
       'status': status,
       'justificativaReabertura': justificativaReabertura,
+      'justificativaCancelamento': justificativaCancelamento,
       'ativo': ativo,
     };
   }
@@ -123,6 +129,7 @@ class OrdemServicoModel {
       'prioridade': prioridade,
       'status': status,
       'justificativaReabertura': justificativaReabertura,
+      'justificativaCancelamento': justificativaCancelamento,
       'ativo': ativo ? 1 : 0,
     };
   }
@@ -141,6 +148,7 @@ class OrdemServicoModel {
       prioridade: prioridade,
       status: status,
       justificativaReabertura: justificativaReabertura,
+      justificativaCancelamento: justificativaCancelamento,
       ativo: ativo,
     );
   }

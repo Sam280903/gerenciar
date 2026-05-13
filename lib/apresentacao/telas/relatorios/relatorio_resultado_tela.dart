@@ -53,14 +53,17 @@ class RelatorioResultadoTela extends StatelessWidget {
         return Colors.redAccent;
       case 'em andamento':
         return Colors.lightBlueAccent;
+      case 'cancelada':
+        return Colors.grey;
       default:
         return Colors.orangeAccent;
     }
   }
 
   Widget _buildHeader() {
-    final double valorTotal =
-        ordensDeServico.fold(0.0, (sum, item) => sum + item.os.valor);
+    final double valorTotal = ordensDeServico
+        .where((item) => item.os.status != 'Cancelada')
+        .fold(0.0, (sum, item) => sum + item.os.valor);
     final formatadorMoeda =
         NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 

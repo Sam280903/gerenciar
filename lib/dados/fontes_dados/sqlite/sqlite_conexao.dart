@@ -18,7 +18,7 @@ class SQLiteConexao {
 
     return openDatabase(
       caminhoBanco,
-      version: 5,
+      version: 6,
       onCreate: _criarTabelas,
       onUpgrade: _atualizarTabelas,
     );
@@ -64,6 +64,10 @@ class SQLiteConexao {
       await db.execute('CREATE INDEX IF NOT EXISTS idx_ag_gestor_ativo ON agendamentos(idGestor, ativo)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_ag_tecnico_data ON agendamentos(idTecnico, dataHora)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_ag_sincronizado ON agendamentos(sincronizado)');
+    }
+    if (oldVersion < 6) {
+      await db.execute(
+          'ALTER TABLE ordens_servico ADD COLUMN justificativaCancelamento TEXT');
     }
   }
 
@@ -118,6 +122,7 @@ class SQLiteConexao {
         prioridade TEXT,
         status TEXT,
         justificativaReabertura TEXT,
+        justificativaCancelamento TEXT,
         ativo INTEGER,
         sincronizado INTEGER DEFAULT 0,
         idGestor TEXT

@@ -28,6 +28,13 @@ class OrdemServicoRepositorioAdaptativo
   }
 
   @override
+  Future<void> cancelar(
+      {required String id, required String justificativa}) async {
+    final repo = await _escolherRepositorio();
+    await repo.cancelar(id: id, justificativa: justificativa);
+  }
+
+  @override
   Future<void> adicionar(OrdemServico ordem) async {
     final repo = await _escolherRepositorio();
     await repo.adicionar(ordem);

@@ -235,7 +235,7 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
               hint: const Text('Todos'),
               decoration:
                   const InputDecoration(labelText: 'Filtrar por Status'),
-              items: ['Pendente', 'Em Andamento', 'Concluída', 'Reaberta']
+              items: ['Pendente', 'Em Andamento', 'Concluída', 'Reaberta', 'Cancelada']
                   .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                   .toList(),
               onChanged: (val) {

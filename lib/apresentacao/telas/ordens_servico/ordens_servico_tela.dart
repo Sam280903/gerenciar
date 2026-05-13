@@ -65,11 +65,13 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   List<OrdemServicoDetalhada> _todosEmAndamento = [];
   List<OrdemServicoDetalhada> _todosConcluidas = [];
   List<OrdemServicoDetalhada> _todosReabertas = [];
+  List<OrdemServicoDetalhada> _todosCanceladas = [];
 
   List<OrdemServicoDetalhada> _pendentesFiltrados = [];
   List<OrdemServicoDetalhada> _emAndamentoFiltrados = [];
   List<OrdemServicoDetalhada> _concluidasFiltrados = [];
   List<OrdemServicoDetalhada> _reabertasFiltrados = [];
+  List<OrdemServicoDetalhada> _canceladasFiltrados = [];
 
   late final AutenticacaoServico _authServico;
   String? _idGestor;
@@ -82,7 +84,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     _listarOS = widget.listarOS ??
         ListarOrdensServico(OrdemServicoRepositorioAdaptativo());
@@ -138,6 +140,11 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
         return nomeCliente.contains(query) || nomeTecnico.contains(query);
       }).toList();
+      _canceladasFiltrados = _todosCanceladas.where((item) {
+        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+        return nomeCliente.contains(query) || nomeTecnico.contains(query);
+      }).toList();
     });
   }
 
@@ -179,6 +186,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     List<OrdemServicoDetalhada> emAndamentoTemp = [];
     List<OrdemServicoDetalhada> concluidasTemp = [];
     List<OrdemServicoDetalhada> reabertasTemp = [];
+    List<OrdemServicoDetalhada> canceladasTemp = [];
 
     for (final itemDetalhado in detalhadas) {
       switch (itemDetalhado.os.status) {
@@ -195,6 +203,9 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         case 'Reaberto': // legado — compatibilidade com registros antigos
           reabertasTemp.add(itemDetalhado);
           break;
+        case 'Cancelada':
+          canceladasTemp.add(itemDetalhado);
+          break;
       }
     }
     void ordenar(List<OrdemServicoDetalhada> lista) {
@@ -210,6 +221,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
     ordenar(emAndamentoTemp);
     ordenar(concluidasTemp);
     ordenar(reabertasTemp);
+    ordenar(canceladasTemp);
 
     if (mounted) {
       setState(() {
@@ -217,6 +229,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         _todosEmAndamento = emAndamentoTemp;
         _todosConcluidas = concluidasTemp;
         _todosReabertas = reabertasTemp;
+        _todosCanceladas = canceladasTemp;
         _carregando = false;
         _filtrarOS();
       });
@@ -275,8 +288,9 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
           tabs: const [
             Tab(text: 'PENDENTES'),
             Tab(text: 'EM ANDAMENTO'),
-            Tab(text: 'CONCLUÍDAS'),
             Tab(text: 'REABERTAS'),
+            Tab(text: 'CONCLUÍDAS'),
+            Tab(text: 'CANCELADAS'),
           ],
         ),
       ),
@@ -308,9 +322,11 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
                       _buildListaOS(
                           _emAndamentoFiltrados, 'Nenhuma OS em andamento.'),
                       _buildListaOS(
+                          _reabertasFiltrados, 'Nenhuma OS reaberta.'),
+                      _buildListaOS(
                           _concluidasFiltrados, 'Nenhuma OS concluída.'),
                       _buildListaOS(
-                          _reabertasFiltrados, 'Nenhuma OS reaberta.'),
+                          _canceladasFiltrados, 'Nenhuma OS cancelada.'),
                     ],
                   ),
           ),
@@ -394,6 +410,8 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         return Colors.redAccent;
       case 'Em Andamento':
         return Colors.lightBlueAccent;
+      case 'Cancelada':
+        return Colors.grey;
       default: // Pendente
         return Colors.orangeAccent;
     }

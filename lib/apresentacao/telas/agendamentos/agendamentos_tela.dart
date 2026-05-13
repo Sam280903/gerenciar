@@ -37,14 +37,18 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   late final ClienteRepositorioAdaptativo _clienteRepo;
   late final TecnicoRepositorioAdaptativo _tecnicoRepo;
 
-  List<AgendamentoDetalhado> _todosProximos = [];
+  List<AgendamentoDetalhado> _todosPendentes = [];
+  List<AgendamentoDetalhado> _todosConfirmados = [];
   List<AgendamentoDetalhado> _todosConcluidos = [];
   List<AgendamentoDetalhado> _todosAntigos = [];
+  List<AgendamentoDetalhado> _todosCancelados = [];
   List<AgendamentoDetalhado> _todosInativos = [];
 
-  List<AgendamentoDetalhado> _proximosFiltrados = [];
+  List<AgendamentoDetalhado> _pendentesFiltrados = [];
+  List<AgendamentoDetalhado> _confirmadosFiltrados = [];
   List<AgendamentoDetalhado> _concluidosFiltrados = [];
   List<AgendamentoDetalhado> _antigosFiltrados = [];
+  List<AgendamentoDetalhado> _canceladosFiltrados = [];
   List<AgendamentoDetalhado> _inativosFiltrados = [];
 
   late final AutenticacaoServico _authServico;
@@ -58,7 +62,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
 
     _agendamentoRepo =
         widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
@@ -93,27 +97,18 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
 
   void _filtrarAgendamentos() {
     final query = _buscaController.text.toLowerCase();
+    bool casa(AgendamentoDetalhado item) {
+      final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
+      final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
+      return nomeCliente.contains(query) || nomeTecnico.contains(query);
+    }
     setState(() {
-      _proximosFiltrados = _todosProximos.where((item) {
-        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
-        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
-        return nomeCliente.contains(query) || nomeTecnico.contains(query);
-      }).toList();
-      _concluidosFiltrados = _todosConcluidos.where((item) {
-        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
-        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
-        return nomeCliente.contains(query) || nomeTecnico.contains(query);
-      }).toList();
-      _antigosFiltrados = _todosAntigos.where((item) {
-        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
-        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
-        return nomeCliente.contains(query) || nomeTecnico.contains(query);
-      }).toList();
-      _inativosFiltrados = _todosInativos.where((item) {
-        final nomeCliente = item.cliente?.nome.toLowerCase() ?? '';
-        final nomeTecnico = item.tecnico?.nome.toLowerCase() ?? '';
-        return nomeCliente.contains(query) || nomeTecnico.contains(query);
-      }).toList();
+      _pendentesFiltrados = _todosPendentes.where(casa).toList();
+      _confirmadosFiltrados = _todosConfirmados.where(casa).toList();
+      _concluidosFiltrados = _todosConcluidos.where(casa).toList();
+      _antigosFiltrados = _todosAntigos.where(casa).toList();
+      _canceladosFiltrados = _todosCancelados.where(casa).toList();
+      _inativosFiltrados = _todosInativos.where(casa).toList();
     });
   }
 
@@ -155,21 +150,27 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       }),
     );
 
-    List<AgendamentoDetalhado> proximosTemp = [];
+    List<AgendamentoDetalhado> pendentesTemp = [];
+    List<AgendamentoDetalhado> confirmadosTemp = [];
     List<AgendamentoDetalhado> concluidosTemp = [];
     List<AgendamentoDetalhado> antigosTemp = [];
+    List<AgendamentoDetalhado> canceladosTemp = [];
     List<AgendamentoDetalhado> inativosTemp = [];
 
     for (final itemDetalhado in detalhados) {
       final ag = itemDetalhado.agendamento;
       if (!ag.ativo) {
         inativosTemp.add(itemDetalhado);
+      } else if (ag.status == 'Cancelado') {
+        canceladosTemp.add(itemDetalhado);
       } else if (ag.status == 'Concluído') {
         concluidosTemp.add(itemDetalhado);
       } else if (DateUtils.dateOnly(ag.dataHora).isBefore(hoje)) {
         antigosTemp.add(itemDetalhado);
+      } else if (ag.status == 'Confirmado') {
+        confirmadosTemp.add(itemDetalhado);
       } else {
-        proximosTemp.add(itemDetalhado);
+        pendentesTemp.add(itemDetalhado);
       }
     }
     void ordenar(List<AgendamentoDetalhado> lista) {
@@ -181,16 +182,20 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       });
     }
 
-    ordenar(proximosTemp);
+    ordenar(pendentesTemp);
+    ordenar(confirmadosTemp);
     ordenar(concluidosTemp);
     ordenar(antigosTemp);
+    ordenar(canceladosTemp);
     ordenar(inativosTemp);
 
     if (mounted) {
       setState(() {
-        _todosProximos = proximosTemp;
+        _todosPendentes = pendentesTemp;
+        _todosConfirmados = confirmadosTemp;
         _todosConcluidos = concluidosTemp;
         _todosAntigos = antigosTemp;
+        _todosCancelados = canceladosTemp;
         _todosInativos = inativosTemp;
         _carregando = false;
         _filtrarAgendamentos();
@@ -222,7 +227,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   Future<void> _otimizarRota() async {
     final hoje = DateUtils.dateOnly(DateTime.now());
 
-    final agendamentosDoDia = _todosProximos
+    final agendamentosDoDia = _todosConfirmados
         .where((item) =>
             DateUtils.dateOnly(item.agendamento.dataHora) == hoje &&
             item.cliente?.endereco.isNotEmpty == true)
@@ -235,7 +240,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                'São necessários pelo menos 2 agendamentos com endereço para otimizar a rota do dia.'),
+                'São necessários pelo menos 2 agendamentos confirmados com endereço para otimizar a rota do dia.'),
             backgroundColor: Colors.orangeAccent,
           ),
         );
@@ -290,9 +295,11 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
           controller: _tabController,
           isScrollable: true,
           tabs: const [
-            Tab(text: 'PRÓXIMOS'),
+            Tab(text: 'PENDENTES'),
+            Tab(text: 'CONFIRMADOS'),
             Tab(text: 'CONCLUÍDOS'),
             Tab(text: 'ANTIGOS'),
+            Tab(text: 'CANCELADOS'),
             Tab(text: 'INATIVOS'),
           ],
         ),
@@ -335,11 +342,15 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
                     controller: _tabController,
                     children: [
                       _buildListaAgendamentos(
-                          _proximosFiltrados, 'Nenhum agendamento próximo.'),
+                          _pendentesFiltrados, 'Nenhum agendamento pendente.'),
+                      _buildListaAgendamentos(_confirmadosFiltrados,
+                          'Nenhum agendamento confirmado.'),
                       _buildListaAgendamentos(_concluidosFiltrados,
                           'Nenhum agendamento concluído.'),
                       _buildListaAgendamentos(
                           _antigosFiltrados, 'Nenhum agendamento antigo.'),
+                      _buildListaAgendamentos(
+                          _canceladosFiltrados, 'Nenhum agendamento cancelado.'),
                       _buildListaAgendamentos(
                           _inativosFiltrados, 'Nenhum agendamento inativo.'),
                     ],

@@ -59,6 +59,15 @@ class OrdemServicoFirebase {
     });
   }
 
+  Future<void> cancelar(
+      {required String id, required String justificativa}) async {
+    await _colecao.doc(id).update({
+      'status': 'Cancelada',
+      'justificativaCancelamento': justificativa,
+      'dataCancelamento': Timestamp.now(),
+    });
+  }
+
   Future<void> adicionar(OrdemServicoModel os) async {
     await _colecao.doc(os.id).set(os.toMap());
   }

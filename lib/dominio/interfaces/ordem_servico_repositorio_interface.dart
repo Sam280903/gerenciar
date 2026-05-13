@@ -7,6 +7,7 @@ abstract class OrdemServicoRepositorioInterface {
   Future<List<OrdemServico>> listarComFiltros(
       FiltrosRelatorio filtros, String idGestor);
   Future<void> reabrir({required String id, required String justificativa});
+  Future<void> cancelar({required String id, required String justificativa});
   Future<void> adicionar(OrdemServico ordem);
   Future<void> atualizar(OrdemServico ordem);
   Future<void> inativar(String id);

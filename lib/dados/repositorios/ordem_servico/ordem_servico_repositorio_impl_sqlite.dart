@@ -15,6 +15,11 @@ class OrdemServicoRepositorioImplSQLite
   }
 
   @override
+  Future<void> cancelar({required String id, required String justificativa}) {
+    return _fonteSQLite.cancelar(id: id, justificativa: justificativa);
+  }
+
+  @override
   Future<void> adicionar(OrdemServico ordem) async {
     final model = OrdemServicoModel.fromEntidade(ordem);
     await _fonteSQLite.adicionar(model);

@@ -60,6 +60,29 @@ class OrdemServicoRepositorioMemoria
   }
 
   @override
+  Future<void> cancelar(
+      {required String id, required String justificativa}) async {
+    final os = _dados[id];
+    if (os == null) return;
+    _dados[id] = OrdemServico(
+      id: os.id,
+      idTecnico: os.idTecnico,
+      idCliente: os.idCliente,
+      idFormaPagamento: os.idFormaPagamento,
+      idGestor: os.idGestor,
+      dataHoraInicio: os.dataHoraInicio,
+      dataHoraFim: os.dataHoraFim,
+      descricao: os.descricao,
+      valor: os.valor,
+      prioridade: os.prioridade,
+      status: 'Cancelada',
+      justificativaReabertura: os.justificativaReabertura,
+      justificativaCancelamento: justificativa,
+      ativo: os.ativo,
+    );
+  }
+
+  @override
   Future<OrdemServico?> buscarPorId(String id) async {
     return _dados[id];
   }
