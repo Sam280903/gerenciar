@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/servicos/relatorio_servico.dart';
 import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface.dart';
@@ -53,7 +52,30 @@ class OrdemServicoRepositorioImplSQLite
   @override
   Future<List<OrdemServico>> listarComFiltros(
       FiltrosRelatorio filtros, String idGestor) async {
-    if (kDebugMode) debugPrint("Modo offline: retornando todas as OS do gestor para filtragem na UI.");
-    return listarTodos(idGestor: idGestor);
+    var resultado = await listarTodos(idGestor: idGestor);
+
+    // Aplicar filtros em código (modo offline)
+    if (filtros.idTecnico != null && filtros.idTecnico!.isNotEmpty) {
+      resultado = resultado.where((os) => os.idTecnico == filtros.idTecnico).toList();
+    }
+    if (filtros.idCliente != null && filtros.idCliente!.isNotEmpty) {
+      resultado = resultado.where((os) => os.idCliente == filtros.idCliente).toList();
+    }
+    if (filtros.status != null && filtros.status!.isNotEmpty) {
+      resultado = resultado.where((os) => filtros.status!.contains(os.status)).toList();
+    }
+    if (filtros.dataInicial != null) {
+      resultado = resultado
+          .where((os) => os.dataHoraInicio.isAfter(filtros.dataInicial!))
+          .toList();
+    }
+    if (filtros.dataFinal != null) {
+      final dataFinalAjustada = filtros.dataFinal!.add(const Duration(hours: 23, minutes: 59, seconds: 59));
+      resultado = resultado
+          .where((os) => os.dataHoraInicio.isBefore(dataFinalAjustada))
+          .toList();
+    }
+
+    return resultado;
   }
 }

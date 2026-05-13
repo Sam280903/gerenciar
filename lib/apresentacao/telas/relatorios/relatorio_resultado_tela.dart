@@ -61,9 +61,7 @@ class RelatorioResultadoTela extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    final double valorTotal = ordensDeServico
-        .where((item) => item.os.status != 'Cancelada')
-        .fold(0.0, (sum, item) => sum + item.os.valor);
+    final double valorTotal = ordensDeServico.fold(0.0, (sum, item) => sum + item.os.valor);
     final formatadorMoeda =
         NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 

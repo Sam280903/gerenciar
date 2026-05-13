@@ -48,7 +48,6 @@ class RelatorioServico {
       final List<OrdemServicoDetalhada> detalhadas = [];
 
       for (final os in ordens) {
-        // Não precisamos filtrar por gestor aqui, pois as OS já vieram filtradas
         final cliente =
             await BuscarClientePorId(_clienteRepo).executar(os.idCliente);
         final tecnico =

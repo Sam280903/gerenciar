@@ -111,7 +111,9 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
       dataFinal: _dataFinal,
       idTecnico: _tecnicoSelecionado?.id,
       idCliente: _clienteSelecionado?.id,
-      status: _statusSelecionado != null ? [_statusSelecionado!] : null,
+      status: _statusSelecionado != null
+        ? [_statusSelecionado!]
+        : ['Pendente', 'Em Andamento', 'Concluída', 'Reaberta'],
     );
 
     try {
