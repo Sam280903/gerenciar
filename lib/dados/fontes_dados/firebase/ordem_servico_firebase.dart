@@ -16,9 +16,6 @@ class OrdemServicoFirebase {
     if (filtros.idCliente != null && filtros.idCliente!.isNotEmpty) {
       query = query.where('idCliente', isEqualTo: filtros.idCliente);
     }
-    if (filtros.status != null && filtros.status!.isNotEmpty) {
-      query = query.where('status', whereIn: filtros.status);
-    }
     if (filtros.dataInicial != null) {
       query = query.where('dataHoraInicio',
           isGreaterThanOrEqualTo: Timestamp.fromDate(filtros.dataInicial!));
@@ -32,6 +29,11 @@ class OrdemServicoFirebase {
       );
     }).toList();
 
+    if (filtros.status != null && filtros.status!.isNotEmpty) {
+      resultado = resultado
+          .where((os) => filtros.status!.contains(os.status))
+          .toList();
+    }
     if (filtros.dataFinal != null) {
       final dataFinalAjustada = filtros.dataFinal!
           .add(const Duration(hours: 23, minutes: 59, seconds: 59));
