@@ -23,20 +23,24 @@ class OrdemServicoFirebase {
       query = query.where('dataHoraInicio',
           isGreaterThanOrEqualTo: Timestamp.fromDate(filtros.dataInicial!));
     }
-    if (filtros.dataFinal != null) {
-      final dataFinalAjustada = filtros.dataFinal!
-          .add(const Duration(hours: 23, minutes: 59, seconds: 59));
-      query = query.where('dataHoraInicio',
-          isLessThanOrEqualTo: Timestamp.fromDate(dataFinalAjustada));
-    }
 
     final snapshot = await query.get();
-    return snapshot.docs.map((doc) {
+    var resultado = snapshot.docs.map((doc) {
       return OrdemServicoModel.fromMap(
         doc.data() as Map<String, dynamic>,
         doc.id,
       );
     }).toList();
+
+    if (filtros.dataFinal != null) {
+      final dataFinalAjustada = filtros.dataFinal!
+          .add(const Duration(hours: 23, minutes: 59, seconds: 59));
+      resultado = resultado
+          .where((os) => os.dataHoraInicio.isBefore(dataFinalAjustada))
+          .toList();
+    }
+
+    return resultado;
   }
 
 //METODO ADICIONADO
