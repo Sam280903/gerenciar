@@ -70,6 +70,6 @@ class OrdemServicoRepositorioAdaptativo
   Future<List<OrdemServico>> listarComFiltros(
       FiltrosRelatorio filtros, String idGestor) async {
     final repo = await _escolherRepositorio();
-    return repo.listarComFiltros(filtros, idGestor);
+    return await repo.listarComFiltros(filtros, idGestor);
   }
 }

@@ -61,7 +61,8 @@ class RelatorioServico {
 
       return detalhadas;
     } catch (e) {
-      throw Exception('Não foi possível gerar o relatório.');
+      print('Erro ao gerar relatório: $e');
+      throw Exception('Não foi possível gerar o relatório: ${e.toString()}');
     }
   }
 }
