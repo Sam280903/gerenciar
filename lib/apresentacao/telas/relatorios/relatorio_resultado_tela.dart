@@ -132,10 +132,16 @@ class RelatorioResultadoTela extends StatelessWidget {
         children: [
           _buildHeader(),
           if (ordensDeServico.isEmpty)
-            const Expanded(
+            Expanded(
               child: Center(
-                child: Text(
-                    'Nenhuma Ordem de Serviço encontrada para os filtros selecionados.'),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Text(
+                    'Nenhuma Ordem de Serviço encontrada para os filtros selecionados.',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16, color: Colors.white70),
+                  ),
+                ),
               ),
             )
           else
