@@ -89,8 +89,7 @@ class _ClientesTelaState extends State<ClientesTela> {
     });
   }
 
-  // --- CORREÇÃO PRINCIPAL AQUI ---
-  void _abrirFormularioCadastro() async {
+  Future<void> _abrirFormularioCadastro() async {
     final resultado = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -101,9 +100,8 @@ class _ClientesTelaState extends State<ClientesTela> {
                 )));
     if (resultado == true) _carregarClientes();
   }
-  // --- FIM DA CORREÇÃO ---
 
-  void _abrirDetalhes(Cliente cliente) async {
+  Future<void> _abrirDetalhes(Cliente cliente) async {
     final resultado = await Navigator.push(
         context,
         MaterialPageRoute(

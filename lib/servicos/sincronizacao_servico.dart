@@ -40,6 +40,7 @@ class SincronizacaoServico {
 
   Timer? _timer;
   StreamSubscription? _connectivitySubscription;
+  Timer? _debounceTimer;
 
   void iniciarSincronizacao() {
     // 1. Inicia o Timer Periódico (Fallback)
@@ -50,14 +51,14 @@ class SincronizacaoServico {
 
     // 2. Escuta mudanças de conectividade (Sincronização imediata ao voltar online)
     _connectivitySubscription?.cancel();
-    Timer? debounce;
     _connectivitySubscription =
         Connectivity().onConnectivityChanged.listen((results) {
       if (!results.contains(ConnectivityResult.none)) {
-        debounce?.cancel();
-        debounce = Timer(const Duration(seconds: 3), () {
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(const Duration(seconds: 3), () {
           if (kDebugMode) debugPrint("--- CONEXÃO RESTABELECIDA: Sincronizando agora ---");
           sincronizarDados();
+          _debounceTimer = null;
         });
       }
     });
@@ -68,6 +69,10 @@ class SincronizacaoServico {
   void pararSincronizacao() {
     _timer?.cancel();
     _connectivitySubscription?.cancel();
+    _debounceTimer?.cancel();
+    _timer = null;
+    _connectivitySubscription = null;
+    _debounceTimer = null;
   }
 
   Future<bool> _temConexao() async {

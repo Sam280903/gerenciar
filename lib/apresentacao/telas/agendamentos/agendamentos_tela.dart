@@ -203,7 +203,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     }
   }
 
-  void _abrirFormularioCadastro() async {
+  Future<void> _abrirFormularioCadastro() async {
     final resultado = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -213,7 +213,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     }
   }
 
-  void _abrirDetalhes(Agendamento agendamento) async {
+  Future<void> _abrirDetalhes(Agendamento agendamento) async {
     final resultado = await Navigator.push(
         context,
         MaterialPageRoute(

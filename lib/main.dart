@@ -55,9 +55,12 @@ void main() async {
 
   // --- INÍCIO DO BLOCO DO ONESIGNAL ---
 
-  // Coloque aqui o App ID que você pegou no painel do OneSignal
-  // (Este é o passo 1 que mencionei antes)
-  OneSignal.initialize("a0e5e812-11d0-46f9-8019-4992adacdb83");
+  // App ID do OneSignal (configurado em constantes)
+  const oneSignalAppId = String.fromEnvironment(
+    'ONESIGNAL_APP_ID',
+    defaultValue: 'a0e5e812-11d0-46f9-8019-4992adacdb83',
+  );
+  OneSignal.initialize(oneSignalAppId);
 
   // Solicita permissão para exibir notificações
   OneSignal.Notifications.requestPermission(true);
