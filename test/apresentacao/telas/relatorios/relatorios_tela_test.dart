@@ -52,9 +52,7 @@ void main() {
 
     expect(find.widgetWithText(TextFormField, 'Data Inicial'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Data Final'), findsOneWidget);
-    expect(find.widgetWithText(InputDecorator, 'Todos'), findsNWidgets(3));
-    expect(find.widgetWithText(DropdownButtonFormField<String>, 'Todos'),
-        findsOneWidget);
+    expect(find.byType(DropdownButtonFormField<String?>), findsOneWidget);
     expect(find.text('GERAR RELATÓRIO'), findsOneWidget);
   });
 

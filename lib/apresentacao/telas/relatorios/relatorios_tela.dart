@@ -204,8 +204,15 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
                 }
               },
               child: InputDecorator(
-                decoration:
-                    const InputDecoration(labelText: 'Filtrar por Técnico'),
+                decoration: InputDecoration(
+                  labelText: 'Filtrar por Técnico',
+                  suffixIcon: _tecnicoSelecionado != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () => setState(() => _tecnicoSelecionado = null),
+                        )
+                      : null,
+                ),
                 child: Text(_tecnicoSelecionado?.nome ?? 'Todos'),
               ),
             ),
@@ -226,24 +233,31 @@ class _RelatoriosTelaState extends State<RelatoriosTela> {
                 }
               },
               child: InputDecorator(
-                decoration:
-                    const InputDecoration(labelText: 'Filtrar por Cliente'),
+                decoration: InputDecoration(
+                  labelText: 'Filtrar por Cliente',
+                  suffixIcon: _clienteSelecionado != null
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () => setState(() => _clienteSelecionado = null),
+                        )
+                      : null,
+                ),
                 child: Text(_clienteSelecionado?.nome ?? 'Todos'),
               ),
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
+            DropdownButtonFormField<String?>(
               value: _statusSelecionado,
               hint: const Text('Todos'),
               decoration:
                   const InputDecoration(labelText: 'Filtrar por Status'),
-              items: ['Pendente', 'Em Andamento', 'Concluída', 'Reaberta', 'Cancelada']
-                  .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                  .toList(),
+              items: [
+                const DropdownMenuItem<String?>(value: null, child: Text('Todos')),
+                ...['Pendente', 'Em Andamento', 'Concluída', 'Reaberta', 'Cancelada']
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+              ],
               onChanged: (val) {
-                if (val != null) {
-                  setState(() => _statusSelecionado = val);
-                }
+                setState(() => _statusSelecionado = val);
               },
             ),
             const SizedBox(height: 40),
