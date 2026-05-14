@@ -174,7 +174,6 @@ void main() {
           id: 'ag-$i', idTecnico: 'tec-${i % 10}', idCliente: 'cli-${i % 50}',
           idGestor: _idGestor,
           dataHora: DateTime(2026, 6, 1).add(Duration(minutes: i * 30)),
-          ativo: true,
         ));
       }
       sw.stop();
@@ -190,7 +189,6 @@ void main() {
           id: 'ag-$i', idTecnico: 'tec-0', idCliente: 'cli-0',
           idGestor: _idGestor,
           dataHora: DateTime(2026, 6, 1).add(Duration(minutes: i * 30)),
-          ativo: true,
         ));
       }
       final sw = Stopwatch()..start();
@@ -309,7 +307,7 @@ void main() {
           id: 'ag-$i', idTecnico: 'tec-$i', idCliente: 'cli-$i',
           idGestor: _idGestor,
           dataHora: DateTime(2026, 6, 1).add(Duration(hours: i)),
-          status: 'Pendente', ativo: true, notificacaoEnviada: false,
+          status: 'Pendente', notificacaoEnviada: false,
         );
         final dbMap = model.toMapForDb();
         // Simula leitura do SQLite (String para dataHora)

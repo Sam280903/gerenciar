@@ -22,7 +22,6 @@ void main() {
     dataHora: DateTime.now().add(const Duration(days: 1)),
     observacao: 'Verificar barulho estranho',
     status: 'Pendente',
-    ativo: true,
   );
 
   Future<void> pumpTela(WidgetTester tester, Agendamento agendamento) async {
@@ -47,7 +46,6 @@ void main() {
     expect(find.text('Verificar barulho estranho'), findsOneWidget);
     expect(find.widgetWithText(ElevatedButton, 'CONFIRMAR'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, 'CANCELAR'), findsOneWidget);
-    expect(find.widgetWithText(OutlinedButton, 'INATIVAR'), findsOneWidget);
   });
 
   testWidgets('Deve chamar o método de atualizar status ao tocar em CONFIRMAR',

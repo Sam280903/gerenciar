@@ -92,7 +92,6 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
           dataHora: dataHoraAgendamento,
           observacao: _obsController.text.trim(),
           status: widget.agendamento.status,
-          ativo: widget.agendamento.ativo,
           lembreteNotificacao: _lembreteSelecionado,
           notificacaoEnviada: false,
         );

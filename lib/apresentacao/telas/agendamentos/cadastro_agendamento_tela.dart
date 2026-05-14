@@ -228,7 +228,6 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           dataHora: dataHoraAgendamento,
           observacao: _obsController.text.trim(),
           lembreteNotificacao: _lembreteSelecionado,
-          ativo: true,
           notificacaoEnviada: false,
         );
 

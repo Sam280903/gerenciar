@@ -22,7 +22,6 @@ void main() {
     dataHora: DateTime(2025, 10, 20, 14, 30),
     observacao: 'Obs original',
     status: 'Pendente',
-    ativo: true,
   );
 
   Future<void> pumpTela(WidgetTester tester) async {

@@ -1,14 +1,12 @@
 // RF02 - Evitar agendamento duplicado para o mesmo técnico no mesmo horário
-// RF06 - Agendamento de Atendimentos (listagem, busca, atualização, inativação)
+// RF06 - Agendamento de Atendimentos (listagem, busca, atualização)
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'package:gerenciar/dominio/casos_uso/agendamento/cadastrar_agendamento.dart';
 import 'package:gerenciar/dominio/casos_uso/agendamento/atualizar_agendamento.dart';
 import 'package:gerenciar/dominio/casos_uso/agendamento/buscar_agendamento_por_id.dart';
-import 'package:gerenciar/dominio/casos_uso/agendamento/inativar_agendamento.dart';
 import 'package:gerenciar/dominio/casos_uso/agendamento/listar_agendamentos.dart';
-import 'package:gerenciar/dominio/casos_uso/agendamento/reativar_agendamento.dart';
 
 import 'cadastrar_agendamento_test.mocks.dart';
 
@@ -17,9 +15,7 @@ void main() {
   late CadastrarAgendamento cadastrar;
   late AtualizarAgendamento atualizar;
   late BuscarAgendamentoPorId buscarPorId;
-  late InativarAgendamento inativar;
   late ListarAgendamentos listar;
-  late ReativarAgendamento reativar;
 
   final dataHora = DateTime(2025, 10, 20, 14, 30);
   final dataHoraAlternativa = DateTime(2025, 10, 20, 16, 0);
@@ -30,7 +26,6 @@ void main() {
     idCliente: 'cli-1',
     idGestor: 'gestor-1',
     dataHora: dataHora,
-    ativo: true,
   );
 
   setUp(() {
@@ -38,9 +33,7 @@ void main() {
     cadastrar = CadastrarAgendamento(mockRepositorio);
     atualizar = AtualizarAgendamento(mockRepositorio);
     buscarPorId = BuscarAgendamentoPorId(mockRepositorio);
-    inativar = InativarAgendamento(mockRepositorio);
     listar = ListarAgendamentos(mockRepositorio);
-    reativar = ReativarAgendamento(mockRepositorio);
   });
 
   group('RF02 - Evitar agendamento duplicado', () {
@@ -114,7 +107,6 @@ void main() {
         idCliente: 'cli-1',
         idGestor: 'gestor-1',
         dataHora: dataHora,
-        ativo: true,
       );
 
       when(mockRepositorio.verificarDisponibilidade('tec-2', dataHora))
@@ -134,7 +126,6 @@ void main() {
         idCliente: 'cli-2',
         idGestor: 'gestor-1',
         dataHora: dataHoraAlternativa,
-        ativo: true,
       );
 
       when(mockRepositorio.verificarDisponibilidade('tec-1', dataHoraAlternativa))
@@ -177,7 +168,6 @@ void main() {
         idGestor: 'gestor-1',
         dataHora: dataHora,
         observacao: 'Levar kit de limpeza',
-        ativo: true,
       );
 
       when(mockRepositorio.verificarDisponibilidade(any, any))
@@ -241,22 +231,5 @@ void main() {
       verify(mockRepositorio.atualizar(agendamento));
     });
 
-    test('Deve inativar agendamento pelo id', () async {
-      when(mockRepositorio.inativar(any))
-          .thenAnswer((_) => Future.value());
-
-      await inativar.executar('ag-1');
-
-      verify(mockRepositorio.inativar('ag-1'));
-    });
-
-    test('Deve reativar agendamento previamente inativado', () async {
-      when(mockRepositorio.reativar(any))
-          .thenAnswer((_) => Future.value());
-
-      await reativar.executar('ag-1');
-
-      verify(mockRepositorio.reativar('ag-1'));
-    });
   });
 }

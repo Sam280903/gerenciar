@@ -25,7 +25,6 @@ void main() {
     idCliente: 'cli-1',
     idGestor: 'gestor-1', // ADICIONADO
     dataHora: DateTime(2025, 10, 20, 14, 30),
-    ativo: true,
   );
 
   test('Deve cadastrar um agendamento com sucesso se o horário estiver livre',

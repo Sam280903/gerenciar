@@ -7,9 +7,8 @@ class Agendamento {
   final DateTime dataHora;
   final String? observacao;
   final String status;
-  final bool ativo;
-  final String? lembreteNotificacao; // NOVO CAMPO
-  final bool notificacaoEnviada; // NOVO CAMPO
+  final String? lembreteNotificacao;
+  final bool notificacaoEnviada;
 
   Agendamento({
     required this.id,
@@ -19,8 +18,7 @@ class Agendamento {
     required this.dataHora,
     this.observacao,
     this.status = 'Pendente',
-    required this.ativo,
-    this.lembreteNotificacao, // NOVO CAMPO
-    this.notificacaoEnviada = false, // NOVO CAMPO
+    this.lembreteNotificacao,
+    this.notificacaoEnviada = false,
   });
 }

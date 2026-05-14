@@ -24,7 +24,6 @@ void main() {
     idCliente: 'cli-123',
     dataHora: DateTime.now(),
     idGestor: 'gestor-1', // idGestor obrigatório
-    ativo: true,
   );
 
   group('Sincronização de Agendamentos', () {

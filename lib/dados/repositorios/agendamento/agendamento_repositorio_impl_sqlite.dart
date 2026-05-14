@@ -25,27 +25,14 @@ class AgendamentoRepositorioImplSQLite
   }
 
   @override
-  Future<void> inativar(String id) async {
-    await _sqlite.inativar(id);
-  }
-
-  @override
-  Future<void> reativar(String id) async {
-    await _sqlite.reativar(id);
-  }
-
-  @override
   Future<Agendamento?> buscarPorId(String id) async {
     final model = await _sqlite.buscarPorId(id);
     return model?.toEntidade();
   }
 
-  // MÉTODO ALTERADO
   @override
-  Future<List<Agendamento>> listarTodos(
-      {required String idGestor, bool incluirInativos = false}) async {
-    final modelos = await _sqlite.listarTodos(
-        idGestor: idGestor, incluirInativos: incluirInativos);
+  Future<List<Agendamento>> listarTodos({required String idGestor}) async {
+    final modelos = await _sqlite.listarTodos(idGestor: idGestor);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }

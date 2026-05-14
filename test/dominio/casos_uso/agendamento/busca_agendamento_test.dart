@@ -26,7 +26,6 @@ void main() {
     idCliente: 'cli-1',
     idGestor: 'gestor-1', // ADICIONADO
     dataHora: DateTime.now(),
-    ativo: true,
   );
 
   group('Busca de Agendamentos', () {

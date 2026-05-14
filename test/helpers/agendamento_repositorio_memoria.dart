@@ -8,7 +8,7 @@ class AgendamentoRepositorioMemoria implements AgendamentoRepositorioInterface {
   Future<bool> verificarDisponibilidade(
       String idTecnico, DateTime dataHora) async {
     return _dados.values.any((a) =>
-        a.ativo && a.idTecnico == idTecnico && a.dataHora == dataHora);
+        a.idTecnico == idTecnico && a.dataHora == dataHora);
   }
 
   @override
@@ -22,52 +22,15 @@ class AgendamentoRepositorioMemoria implements AgendamentoRepositorioInterface {
   }
 
   @override
-  Future<void> inativar(String id) async {
-    final a = _dados[id];
-    if (a == null) return;
-    _dados[id] = Agendamento(
-      id: a.id,
-      idTecnico: a.idTecnico,
-      idCliente: a.idCliente,
-      idGestor: a.idGestor,
-      dataHora: a.dataHora,
-      observacao: a.observacao,
-      status: a.status,
-      ativo: false,
-      lembreteNotificacao: a.lembreteNotificacao,
-      notificacaoEnviada: a.notificacaoEnviada,
-    );
-  }
-
-  @override
-  Future<void> reativar(String id) async {
-    final a = _dados[id];
-    if (a == null) return;
-    _dados[id] = Agendamento(
-      id: a.id,
-      idTecnico: a.idTecnico,
-      idCliente: a.idCliente,
-      idGestor: a.idGestor,
-      dataHora: a.dataHora,
-      observacao: a.observacao,
-      status: a.status,
-      ativo: true,
-      lembreteNotificacao: a.lembreteNotificacao,
-      notificacaoEnviada: a.notificacaoEnviada,
-    );
-  }
-
-  @override
   Future<Agendamento?> buscarPorId(String id) async {
     return _dados[id];
   }
 
   @override
   Future<List<Agendamento>> listarTodos(
-      {required String idGestor, bool incluirInativos = false}) async {
+      {required String idGestor}) async {
     return _dados.values
-        .where((a) =>
-            a.idGestor == idGestor && (incluirInativos || a.ativo))
+        .where((a) => a.idGestor == idGestor)
         .toList();
   }
 }

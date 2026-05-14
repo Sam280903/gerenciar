@@ -6,10 +6,8 @@ class ListarAgendamentos {
 
   ListarAgendamentos(this.repositorio);
 
-  Future<List<Agendamento>> executar(
-      {required String idGestor, bool incluirInativos = false}) async {
-    final agendamentos = await repositorio.listarTodos(
-        idGestor: idGestor, incluirInativos: incluirInativos);
+  Future<List<Agendamento>> executar({required String idGestor}) async {
+    final agendamentos = await repositorio.listarTodos(idGestor: idGestor);
     agendamentos.sort((a, b) => a.dataHora.compareTo(b.dataHora));
     return agendamentos;
   }

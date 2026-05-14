@@ -50,7 +50,6 @@ void main() {
     idGestor: 'gestor-1',
     dataHora: DateTime.now().add(const Duration(days: 1)),
     status: 'Pendente',
-    ativo: true,
   );
 
   setUp(() {

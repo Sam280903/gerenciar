@@ -2,8 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/agendamento/atualizar_agendamento.dart';
-import 'package:gerenciar/dominio/casos_uso/agendamento/inativar_agendamento.dart';
-import 'package:gerenciar/dominio/casos_uso/agendamento/reativar_agendamento.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 import 'editar_agendamento_tela.dart';
 import 'package:intl/intl.dart';
@@ -60,7 +58,6 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
         dataHora: _agendamentoAtual.dataHora,
         observacao: _agendamentoAtual.observacao,
         status: novoStatus,
-        ativo: _agendamentoAtual.ativo,
       );
 
       await (widget.atualizarAgendamento ?? AtualizarAgendamento(AgendamentoRepositorioAdaptativo()))
@@ -98,57 +95,6 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
     }
   }
 
-  Future<void> _toggleAtivo() async {
-    final bool vaiInativar = _agendamentoAtual.ativo;
-    final acao = vaiInativar ? 'inativar' : 'reativar';
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Confirmar ${vaiInativar ? "Inativação" : "Reativação"}'),
-        content: Text('Tem certeza que deseja $acao este agendamento?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-                foregroundColor:
-                    vaiInativar ? Colors.redAccent : Colors.greenAccent),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(acao.toUpperCase()),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmar == true) {
-      setState(() => _carregando = true);
-      try {
-        if (vaiInativar) {
-          await InativarAgendamento(AgendamentoRepositorioAdaptativo())
-              .executar(_agendamentoAtual.id);
-        } else {
-          await ReativarAgendamento(AgendamentoRepositorioAdaptativo())
-              .executar(_agendamentoAtual.id);
-        }
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Agendamento ${acao}do com sucesso!'),
-              backgroundColor: Colors.green));
-          Navigator.of(context).pop(true);
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('Erro ao $acao o agendamento: $e'),
-              backgroundColor: Colors.redAccent));
-        }
-      } finally {
-        if (mounted) setState(() => _carregando = false);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,16 +117,6 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
             const SizedBox(height: 16),
             _buildInfoCard('Observações', _agendamentoAtual.observacao ?? '',
                 Icons.description_outlined),
-            const SizedBox(height: 16),
-            _buildInfoCard(
-                'Situação',
-                _agendamentoAtual.ativo ? 'Ativo' : 'Inativo',
-                _agendamentoAtual.ativo
-                    ? Icons.check_circle_outline
-                    : Icons.cancel_outlined,
-                valueColor: _agendamentoAtual.ativo
-                    ? Colors.greenAccent
-                    : Colors.redAccent),
             const SizedBox(height: 40),
             if (_carregando)
               const Center(child: CircularProgressIndicator())
@@ -196,57 +132,39 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (_agendamentoAtual.ativo) ...[
+        ElevatedButton.icon(
+          onPressed: _abrirEdicao,
+          icon: const Icon(Icons.edit_calendar_outlined),
+          label: const Text('EDITAR DATA E OBS.'),
+        ),
+        const SizedBox(height: 16),
+        if (_agendamentoAtual.status == 'Confirmado')
           ElevatedButton.icon(
-            onPressed: _abrirEdicao,
-            icon: const Icon(Icons.edit_calendar_outlined),
-            label: const Text('EDITAR DATA E OBS.'),
+            onPressed: () => _atualizarStatus('Concluído'),
+            icon: const Icon(Icons.task_alt),
+            label: const Text('CONCLUIR AGENDAMENTO'),
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
           ),
-          const SizedBox(height: 16),
-          if (_agendamentoAtual.status == 'Confirmado')
-            ElevatedButton.icon(
-              onPressed: () => _atualizarStatus('Concluído'),
-              icon: const Icon(Icons.task_alt),
-              label: const Text('CONCLUIR AGENDAMENTO'),
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
-            ),
-          if (_agendamentoAtual.status != 'Confirmado' &&
-              _agendamentoAtual.status != 'Concluído')
-            ElevatedButton.icon(
-              onPressed: () => _atualizarStatus('Confirmado'),
-              icon: const Icon(Icons.check),
-              label: const Text('CONFIRMAR'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-            ),
-          const SizedBox(height: 12),
-          if (_agendamentoAtual.status != 'Cancelado' &&
-              _agendamentoAtual.status != 'Concluído')
-            OutlinedButton.icon(
-              onPressed: () => _atualizarStatus('Cancelado'),
-              icon: const Icon(Icons.close),
-              label: const Text('CANCELAR'),
-              style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.orangeAccent,
-                  side: const BorderSide(color: Colors.orangeAccent)),
-            ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _toggleAtivo,
-            icon: const Icon(Icons.visibility_off_outlined),
-            label: const Text('INATIVAR'),
-            style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.redAccent,
-                side: const BorderSide(color: Colors.redAccent)),
-          ),
-        ] else ...[
+        if (_agendamentoAtual.status != 'Confirmado' &&
+            _agendamentoAtual.status != 'Concluído')
           ElevatedButton.icon(
-            onPressed: _toggleAtivo,
-            icon: const Icon(Icons.visibility_outlined),
-            label: const Text('REATIVAR AGENDAMENTO'),
+            onPressed: () => _atualizarStatus('Confirmado'),
+            icon: const Icon(Icons.check),
+            label: const Text('CONFIRMAR'),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
           ),
-        ],
+        const SizedBox(height: 12),
+        if (_agendamentoAtual.status != 'Cancelado' &&
+            _agendamentoAtual.status != 'Concluído')
+          OutlinedButton.icon(
+            onPressed: () => _atualizarStatus('Cancelado'),
+            icon: const Icon(Icons.close),
+            label: const Text('CANCELAR'),
+            style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.orangeAccent,
+                side: const BorderSide(color: Colors.orangeAccent)),
+          ),
       ],
     );
   }

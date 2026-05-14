@@ -50,41 +50,14 @@ class AgendamentoRepositorioAdaptativo
   }
 
   @override
-  Future<void> inativar(String id) async {
-    if (await _temConexao()) {
-      await _firebase.inativar(id);
-      final sqlite = AgendamentoSQLite();
-      await sqlite.inativar(id);
-      await sqlite.marcarComoSincronizado(id);
-    } else {
-      await _sqlite.inativar(id);
-    }
-  }
-
-  @override
-  Future<void> reativar(String id) async {
-    if (await _temConexao()) {
-      await _firebase.reativar(id);
-      final sqlite = AgendamentoSQLite();
-      await sqlite.reativar(id);
-      await sqlite.marcarComoSincronizado(id);
-    } else {
-      await _sqlite.reativar(id);
-    }
-  }
-
-  @override
   Future<Agendamento?> buscarPorId(String id) async {
     final repo = await _escolherRepositorio();
     return await repo.buscarPorId(id);
   }
 
-  // MÉTODO ALTERADO
   @override
-  Future<List<Agendamento>> listarTodos(
-      {required String idGestor, bool incluirInativos = false}) async {
+  Future<List<Agendamento>> listarTodos({required String idGestor}) async {
     final repo = await _escolherRepositorio();
-    return await repo.listarTodos(
-        idGestor: idGestor, incluirInativos: incluirInativos);
+    return await repo.listarTodos(idGestor: idGestor);
   }
 }

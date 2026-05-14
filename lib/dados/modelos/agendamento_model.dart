@@ -10,7 +10,6 @@ class AgendamentoModel {
   final DateTime dataHora;
   final String? observacao;
   final String status;
-  final bool ativo;
   final String? lembreteNotificacao;
   final bool notificacaoEnviada;
 
@@ -22,7 +21,6 @@ class AgendamentoModel {
     required this.dataHora,
     this.observacao,
     required this.status,
-    required this.ativo,
     this.lembreteNotificacao,
     required this.notificacaoEnviada,
   });
@@ -36,7 +34,6 @@ class AgendamentoModel {
       dataHora: ag.dataHora,
       observacao: ag.observacao,
       status: ag.status,
-      ativo: ag.ativo,
       lembreteNotificacao: ag.lembreteNotificacao,
       notificacaoEnviada: ag.notificacaoEnviada,
     );
@@ -64,7 +61,6 @@ class AgendamentoModel {
       dataHora: parsedDate,
       observacao: map['observacao'],
       status: map['status'] ?? 'Pendente',
-      ativo: map['ativo'] is bool ? map['ativo'] : (map['ativo'] == 1),
       lembreteNotificacao: map['lembreteNotificacao'],
       notificacaoEnviada: map['notificacaoEnviada'] is bool
           ? map['notificacaoEnviada']
@@ -80,7 +76,6 @@ class AgendamentoModel {
       'dataHora': Timestamp.fromDate(dataHora),
       'observacao': observacao,
       'status': status,
-      'ativo': ativo,
       'lembreteNotificacao': lembreteNotificacao,
       'notificacaoEnviada': notificacaoEnviada,
     };
@@ -95,7 +90,6 @@ class AgendamentoModel {
       'dataHora': dataHora.toIso8601String(),
       'observacao': observacao,
       'status': status,
-      'ativo': ativo ? 1 : 0,
       'lembreteNotificacao': lembreteNotificacao,
       'notificacaoEnviada': notificacaoEnviada ? 1 : 0,
     };
@@ -110,7 +104,6 @@ class AgendamentoModel {
       dataHora: dataHora,
       observacao: observacao,
       status: status,
-      ativo: ativo,
       lembreteNotificacao: lembreteNotificacao,
       notificacaoEnviada: notificacaoEnviada,
     );

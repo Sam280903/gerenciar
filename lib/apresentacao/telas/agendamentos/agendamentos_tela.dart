@@ -42,14 +42,12 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   List<AgendamentoDetalhado> _todosConcluidos = [];
   List<AgendamentoDetalhado> _todosAntigos = [];
   List<AgendamentoDetalhado> _todosCancelados = [];
-  List<AgendamentoDetalhado> _todosInativos = [];
 
   List<AgendamentoDetalhado> _pendentesFiltrados = [];
   List<AgendamentoDetalhado> _confirmadosFiltrados = [];
   List<AgendamentoDetalhado> _concluidosFiltrados = [];
   List<AgendamentoDetalhado> _antigosFiltrados = [];
   List<AgendamentoDetalhado> _canceladosFiltrados = [];
-  List<AgendamentoDetalhado> _inativosFiltrados = [];
 
   late final AutenticacaoServico _authServico;
   String? _idGestor;
@@ -62,7 +60,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     _agendamentoRepo =
         widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
@@ -108,7 +106,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
       _concluidosFiltrados = _todosConcluidos.where(casa).toList();
       _antigosFiltrados = _todosAntigos.where(casa).toList();
       _canceladosFiltrados = _todosCancelados.where(casa).toList();
-      _inativosFiltrados = _todosInativos.where(casa).toList();
     });
   }
 
@@ -118,7 +115,7 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     setState(() => _carregando = true);
 
     final agendamentos = await ListarAgendamentos(_agendamentoRepo)
-        .executar(idGestor: _idGestor!, incluirInativos: true);
+        .executar(idGestor: _idGestor!);
 
     final hoje = DateUtils.dateOnly(DateTime.now());
 
@@ -155,13 +152,10 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     List<AgendamentoDetalhado> concluidosTemp = [];
     List<AgendamentoDetalhado> antigosTemp = [];
     List<AgendamentoDetalhado> canceladosTemp = [];
-    List<AgendamentoDetalhado> inativosTemp = [];
 
     for (final itemDetalhado in detalhados) {
       final ag = itemDetalhado.agendamento;
-      if (!ag.ativo) {
-        inativosTemp.add(itemDetalhado);
-      } else if (ag.status == 'Cancelado') {
+      if (ag.status == 'Cancelado') {
         canceladosTemp.add(itemDetalhado);
       } else if (ag.status == 'Concluído') {
         concluidosTemp.add(itemDetalhado);
@@ -187,7 +181,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     ordenar(concluidosTemp);
     ordenar(antigosTemp);
     ordenar(canceladosTemp);
-    ordenar(inativosTemp);
 
     if (mounted) {
       setState(() {
@@ -196,7 +189,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
         _todosConcluidos = concluidosTemp;
         _todosAntigos = antigosTemp;
         _todosCancelados = canceladosTemp;
-        _todosInativos = inativosTemp;
         _carregando = false;
         _filtrarAgendamentos();
       });
@@ -300,7 +292,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
             Tab(text: 'CONCLUÍDOS'),
             Tab(text: 'ANTIGOS'),
             Tab(text: 'CANCELADOS'),
-            Tab(text: 'INATIVOS'),
           ],
         ),
       ),
@@ -351,8 +342,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
                           _antigosFiltrados, 'Nenhum agendamento antigo.'),
                       _buildListaAgendamentos(
                           _canceladosFiltrados, 'Nenhum agendamento cancelado.'),
-                      _buildListaAgendamentos(
-                          _inativosFiltrados, 'Nenhum agendamento inativo.'),
                     ],
                   ),
           ),
@@ -388,7 +377,6 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
     final agendamento = item.agendamento;
     final statusColor = _getStatusColor(agendamento.status);
     return Card(
-      color: agendamento.ativo ? null : Colors.grey.shade800.withAlpha(150),
       shape: RoundedRectangleBorder(
         side: BorderSide(color: statusColor.withAlpha(80), width: 1.5),
         borderRadius: BorderRadius.circular(12),
@@ -399,11 +387,8 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
             color: statusColor, size: 32),
         title: Text(
           item.cliente?.nome ?? 'Cliente não encontrado',
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
-            decoration: agendamento.ativo
-                ? TextDecoration.none
-                : TextDecoration.lineThrough,
           ),
         ),
         subtitle: Column(

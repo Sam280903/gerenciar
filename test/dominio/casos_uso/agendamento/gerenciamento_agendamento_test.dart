@@ -2,7 +2,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:gerenciar/dominio/casos_uso/agendamento/atualizar_agendamento.dart';
-import 'package:gerenciar/dominio/casos_uso/agendamento/inativar_agendamento.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
 
 // Usa o mock que já criamos para o agendamento
@@ -22,7 +21,6 @@ void main() {
     idCliente: 'cli-1',
     idGestor: 'gestor-1', // ADICIONADO
     dataHora: DateTime.now(),
-    ativo: true,
   );
 
   group('Gerenciamento de Agendamento', () {
@@ -36,14 +34,5 @@ void main() {
       verifyNoMoreInteractions(mockRepositorio);
     });
 
-    test('Deve chamar o método INATIVAR do repositório', () async {
-      final casoDeUso = InativarAgendamento(mockRepositorio);
-      when(mockRepositorio.inativar(any)).thenAnswer((_) async => {});
-
-      await casoDeUso.executar(agendamento.id);
-
-      verify(mockRepositorio.inativar(agendamento.id));
-      verifyNoMoreInteractions(mockRepositorio);
-    });
   });
 }

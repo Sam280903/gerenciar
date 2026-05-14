@@ -24,27 +24,14 @@ class AgendamentoRepositorioImpl implements AgendamentoRepositorioInterface {
   }
 
   @override
-  Future<void> inativar(String id) async {
-    await _firebase.inativar(id);
-  }
-
-  @override
-  Future<void> reativar(String id) async {
-    await _firebase.reativar(id);
-  }
-
-  @override
   Future<Agendamento?> buscarPorId(String id) async {
     final model = await _firebase.buscarPorId(id);
     return model?.toEntidade();
   }
 
-  // MÉTODO ALTERADO
   @override
-  Future<List<Agendamento>> listarTodos(
-      {required String idGestor, bool incluirInativos = false}) async {
-    final modelos = await _firebase.listarTodos(
-        idGestor: idGestor, incluirInativos: incluirInativos);
+  Future<List<Agendamento>> listarTodos({required String idGestor}) async {
+    final modelos = await _firebase.listarTodos(idGestor: idGestor);
     return modelos.map((m) => m.toEntidade()).toList();
   }
 }
