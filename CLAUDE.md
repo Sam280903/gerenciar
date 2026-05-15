@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Portuguese localization with Brazilian field formatting
 - No state management library (direct repository usage + setState)
 - Firebase Auth + OneSignal push notifications
-- 118 source files, 98 test files, 312 passing tests
+- 118 source files, 98 test files, 346+ passing tests
 
 ## Common Commands
 
@@ -61,6 +61,15 @@ flutter test --coverage
 - **Models**: Data transfer objects with `toMap()` / `fromMap()` serialization
 
 **Key Pattern**: Repositories check connectivity via `connectivity_plus` and automatically use the appropriate implementation. Synchronization service handles bidirectional sync.
+
+**Adaptive Repository Dual-Write Rule**: When online, ALL mutation methods (`adicionar`, `atualizar`, `inativar`, `reativar`) must:
+1. Write to Firebase (online repo)
+2. Mirror the change to SQLite (offline repo / direct SQLite source)
+3. Call `marcarComoSincronizado(id)` on the SQLite source
+
+Only `adicionar` in some repos implements this fully — always verify all mutations follow this pattern when editing adaptive repositories.
+
+**Sync Service uses `listarRecentes()`**: Firebase data sources expose a `listarRecentes()` method (limit 500, no `idGestor` filter) used exclusively by `SincronizacaoServico` to download all records for local mirroring. This is separate from `listarTodos()` (which filters by `idGestor`) used by use cases.
 
 ## Critical Services
 
@@ -148,14 +157,9 @@ Each entity has a SQLite table initialized in `lib/dados/fontes_dados/sqlite/sql
 4. **Cache TTL**: User data cache expires after 30 minutes - force refresh with `buscarDadosUsuarioLogado(forcarAtualizacao: true)`
 5. **Pending items protected**: During sync, items marked `sincronizado: false` won't be overwritten by cloud data
 6. **Firebase queries**: Complex filters moved to code level (Map lookups) to avoid composite index requirements
-
-## Recent Fixes (Latest Commit)
-
-- Added `_sincronizando` flag with try/finally to prevent race conditions in sync service
-- Implemented cache TTL (30 min) with timestamp tracking and cleanup on logout
-- Enhanced form validators: email format, phone minimum length, CEP digit count, UF length
-- Added user-facing SnackBar when gestor identification fails in agendamento save
-- Fixed linter warnings with curly braces in flow control
+7. **Address format**: Stored as a single string: `"Logradouro, Nº X, Complemento, Bairro, Cidade, UF"`. Number is prefixed with `"Nº "` (unique sentinel). When parsing back to fields, use trailing indices (`parts.last` = UF, `parts.length-2` = cidade, `parts.length-3` = bairro) — never fixed indices, as número and complemento are optional.
+8. **Nullable string fields**: Fields like `cpf` (`String?`) must stay `null` when not provided — never coerce to `''`. In `fromMap()`, use `map['field']?.toString()` (no `?? ''`). In UI, convert empty controllers to null before saving: `text.isEmpty ? null : text`.
+9. **`mounted` guard placement**: Add `if (!mounted) return;` immediately before the *first* `setState` call in any async method — not just around SnackBar/navigation calls.
 
 ## When Adding Features
 
