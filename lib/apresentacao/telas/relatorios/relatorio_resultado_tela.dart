@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:gerenciar/apresentacao/telas/ordens_servico/detalhes_os_tela.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico_detalhada.dart';
+import 'package:gerenciar/servicos/pdf_servico.dart';
 import 'package:gerenciar/servicos/relatorio_servico.dart';
 import 'package:intl/intl.dart';
 
-class RelatorioResultadoTela extends StatelessWidget {
+class RelatorioResultadoTela extends StatefulWidget {
   final List<OrdemServicoDetalhada> ordensDeServico;
   final FiltrosRelatorio filtros;
 
@@ -15,6 +16,34 @@ class RelatorioResultadoTela extends StatelessWidget {
     required this.ordensDeServico,
     required this.filtros,
   });
+
+  @override
+  State<RelatorioResultadoTela> createState() => _RelatorioResultadoTelaState();
+}
+
+class _RelatorioResultadoTelaState extends State<RelatorioResultadoTela> {
+  bool _exportando = false;
+
+  Future<void> _exportarPDF() async {
+    if (!mounted) return;
+    setState(() => _exportando = true);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Gerando PDF do relatório...')),
+    );
+    try {
+      await PdfServico()
+          .gerarPdfRelatorio(widget.ordensDeServico, widget.filtros);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Erro ao gerar PDF: $e'),
+            backgroundColor: Colors.redAccent),
+      );
+    } finally {
+      if (mounted) setState(() => _exportando = false);
+    }
+  }
 
   void _abrirDetalhes(BuildContext context, OrdemServico os) {
     Navigator.push(
@@ -61,21 +90,26 @@ class RelatorioResultadoTela extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    final sortedOrdens = List<OrdemServicoDetalhada>.from(ordensDeServico)
-      ..sort((a, b) => (a.cliente?.nome ?? '').compareTo(b.cliente?.nome ?? ''));
-    final double valorTotal = sortedOrdens.fold(0.0, (sum, item) => sum + item.os.valor);
+    final sortedOrdens =
+        List<OrdemServicoDetalhada>.from(widget.ordensDeServico)
+          ..sort((a, b) =>
+              (a.cliente?.nome ?? '').compareTo(b.cliente?.nome ?? ''));
+    final double valorTotal =
+        sortedOrdens.fold(0.0, (sum, item) => sum + item.os.valor);
     final formatadorMoeda =
         NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
     String periodo = 'Período: Completo';
-    if (filtros.dataInicial != null && filtros.dataFinal != null) {
+    if (widget.filtros.dataInicial != null &&
+        widget.filtros.dataFinal != null) {
       periodo =
-          'De: ${DateFormat('dd/MM/yy').format(filtros.dataInicial!)} até ${DateFormat('dd/MM/yy').format(filtros.dataFinal!)}';
-    } else if (filtros.dataInicial != null) {
+          'De: ${DateFormat('dd/MM/yy').format(widget.filtros.dataInicial!)} até ${DateFormat('dd/MM/yy').format(widget.filtros.dataFinal!)}';
+    } else if (widget.filtros.dataInicial != null) {
       periodo =
-          'A partir de: ${DateFormat('dd/MM/yy').format(filtros.dataInicial!)}';
-    } else if (filtros.dataFinal != null) {
-      periodo = 'Até: ${DateFormat('dd/MM/yy').format(filtros.dataFinal!)}';
+          'A partir de: ${DateFormat('dd/MM/yy').format(widget.filtros.dataInicial!)}';
+    } else if (widget.filtros.dataFinal != null) {
+      periodo =
+          'Até: ${DateFormat('dd/MM/yy').format(widget.filtros.dataFinal!)}';
     }
 
     return Card(
@@ -98,7 +132,7 @@ class RelatorioResultadoTela extends StatelessWidget {
               children: [
                 const Text('Total de OS:', style: TextStyle(fontSize: 16)),
                 Text(
-                  ordensDeServico.length.toString(),
+                  widget.ordensDeServico.length.toString(),
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -129,19 +163,35 @@ class RelatorioResultadoTela extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Resultado do Relatório'),
+        actions: [
+          if (widget.ordensDeServico.isNotEmpty)
+            _exportando
+                ? const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                    tooltip: 'Exportar PDF',
+                    onPressed: _exportarPDF,
+                  ),
+        ],
       ),
       body: Column(
         children: [
           _buildHeader(),
-          if (ordensDeServico.isEmpty)
-            Expanded(
+          if (widget.ordensDeServico.isEmpty)
+            const Expanded(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: EdgeInsets.all(24.0),
                   child: Text(
                     'Nenhuma Ordem de Serviço encontrada para os filtros selecionados.',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.white70),
+                    style: TextStyle(fontSize: 16, color: Colors.white70),
                   ),
                 ),
               ),
@@ -150,8 +200,10 @@ class RelatorioResultadoTela extends StatelessWidget {
             Expanded(
               child: Builder(
                 builder: (context) {
-                  final sortedOrdens = List<OrdemServicoDetalhada>.from(ordensDeServico)
-                    ..sort((a, b) => (a.cliente?.nome ?? '').compareTo(b.cliente?.nome ?? ''));
+                  final sortedOrdens =
+                      List<OrdemServicoDetalhada>.from(widget.ordensDeServico)
+                        ..sort((a, b) => (a.cliente?.nome ?? '')
+                            .compareTo(b.cliente?.nome ?? ''));
                   return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(8, 0, 8, 80),
                     itemCount: sortedOrdens.length,
@@ -170,7 +222,8 @@ class RelatorioResultadoTela extends StatelessWidget {
                           leading: _getPrioridadeIcon(os.prioridade),
                           title: Text(
                               item.cliente?.nome ?? 'Cliente não encontrado',
-                              style: const TextStyle(fontWeight: FontWeight.bold)),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold)),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -186,7 +239,8 @@ class RelatorioResultadoTela extends StatelessWidget {
                           trailing: Text(
                             os.status,
                             style: TextStyle(
-                                color: statusColor, fontWeight: FontWeight.bold),
+                                color: statusColor,
+                                fontWeight: FontWeight.bold),
                           ),
                           onTap: () => _abrirDetalhes(context, os),
                         ),
