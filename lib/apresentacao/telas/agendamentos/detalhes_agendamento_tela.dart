@@ -129,6 +129,11 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
   }
 
   Widget _buildActionButtons() {
+    final status = _agendamentoAtual.status;
+    final isFinal = status == 'Cancelado' || status == 'Concluído';
+
+    if (isFinal) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -138,7 +143,7 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
           label: const Text('EDITAR DATA E OBS.'),
         ),
         const SizedBox(height: 16),
-        if (_agendamentoAtual.status == 'Confirmado')
+        if (status == 'Confirmado')
           ElevatedButton.icon(
             onPressed: () => _atualizarStatus('Concluído'),
             icon: const Icon(Icons.task_alt),
@@ -146,8 +151,7 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
             style:
                 ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent),
           ),
-        if (_agendamentoAtual.status != 'Confirmado' &&
-            _agendamentoAtual.status != 'Concluído')
+        if (status == 'Pendente')
           ElevatedButton.icon(
             onPressed: () => _atualizarStatus('Confirmado'),
             icon: const Icon(Icons.check),
@@ -155,16 +159,14 @@ class _DetalhesAgendamentoTelaState extends State<DetalhesAgendamentoTela> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
           ),
         const SizedBox(height: 12),
-        if (_agendamentoAtual.status != 'Cancelado' &&
-            _agendamentoAtual.status != 'Concluído')
-          OutlinedButton.icon(
-            onPressed: () => _atualizarStatus('Cancelado'),
-            icon: const Icon(Icons.close),
-            label: const Text('CANCELAR'),
-            style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.orangeAccent,
-                side: const BorderSide(color: Colors.orangeAccent)),
-          ),
+        OutlinedButton.icon(
+          onPressed: () => _atualizarStatus('Cancelado'),
+          icon: const Icon(Icons.close),
+          label: const Text('CANCELAR'),
+          style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.orangeAccent,
+              side: const BorderSide(color: Colors.orangeAccent)),
+        ),
       ],
     );
   }
