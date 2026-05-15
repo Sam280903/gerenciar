@@ -22,10 +22,9 @@ class AgendamentoRepositorioAdaptativo
   }
 
   @override
-  Future<bool> verificarDisponibilidade(
-      String idTecnico, DateTime dataHora) async {
+  Future<bool> verificarDisponibilidade(String idTecnico, DateTime dataHora, {String? idExcluir}) async {
     final repo = await _escolherRepositorio();
-    return repo.verificarDisponibilidade(idTecnico, dataHora);
+    return repo.verificarDisponibilidade(idTecnico, dataHora, idExcluir: idExcluir);
   }
 
   @override

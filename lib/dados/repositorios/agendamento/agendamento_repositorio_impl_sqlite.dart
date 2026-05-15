@@ -8,8 +8,8 @@ class AgendamentoRepositorioImplSQLite
   final AgendamentoSQLite _sqlite = AgendamentoSQLite();
 
   @override
-  Future<bool> verificarDisponibilidade(String idTecnico, DateTime dataHora) {
-    return _sqlite.verificarConflito(idTecnico, dataHora);
+  Future<bool> verificarDisponibilidade(String idTecnico, DateTime dataHora, {String? idExcluir}) {
+    return _sqlite.verificarConflito(idTecnico, dataHora, idExcluir: idExcluir);
   }
 
   @override

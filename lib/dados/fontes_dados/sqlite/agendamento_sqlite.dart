@@ -28,12 +28,18 @@ class AgendamentoSQLite {
     );
   }
 
-  Future<bool> verificarConflito(String idTecnico, DateTime dataHora) async {
+  Future<bool> verificarConflito(String idTecnico, DateTime dataHora, {String? idExcluir}) async {
     final db = await _db;
+    String where = 'idTecnico = ? AND dataHora = ? AND ativo = ?';
+    final whereArgs = <dynamic>[idTecnico, dataHora.toIso8601String(), 1];
+    if (idExcluir != null) {
+      where += ' AND id != ?';
+      whereArgs.add(idExcluir);
+    }
     final resultado = await db.query(
       'agendamentos',
-      where: 'idTecnico = ? AND dataHora = ? AND ativo = ?',
-      whereArgs: [idTecnico, dataHora.toIso8601String(), 1],
+      where: where,
+      whereArgs: whereArgs,
       limit: 1,
     );
     return resultado.isNotEmpty;

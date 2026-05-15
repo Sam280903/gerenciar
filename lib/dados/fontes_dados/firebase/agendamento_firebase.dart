@@ -4,13 +4,15 @@ import '../../modelos/agendamento_model.dart';
 class AgendamentoFirebase {
   final _colecao = FirebaseFirestore.instance.collection('agendamentos');
 
-  Future<bool> verificarConflito(String idTecnico, DateTime dataHora) async {
+  Future<bool> verificarConflito(String idTecnico, DateTime dataHora, {String? idExcluir}) async {
     final snapshot = await _colecao
         .where('idTecnico', isEqualTo: idTecnico)
         .where('dataHora', isEqualTo: Timestamp.fromDate(dataHora))
         .where('ativo', isEqualTo: true)
-        .limit(1)
         .get();
+    if (idExcluir != null) {
+      return snapshot.docs.any((doc) => doc.id != idExcluir);
+    }
     return snapshot.docs.isNotEmpty;
   }
 

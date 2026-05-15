@@ -84,6 +84,24 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
           _horaSelecionada.minute,
         );
 
+        final temConflito = await AgendamentoRepositorioAdaptativo()
+            .verificarDisponibilidade(
+          widget.agendamento.idTecnico,
+          dataHoraAgendamento,
+          idExcluir: widget.agendamento.id,
+        );
+
+        if (temConflito) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Já existe atendimento agendado para este técnico neste horário.'),
+              backgroundColor: Colors.redAccent,
+            ));
+          }
+          setState(() => _carregando = false);
+          return;
+        }
+
         final agendamentoAtualizado = Agendamento(
           id: widget.agendamento.id,
           idCliente: widget.agendamento.idCliente,

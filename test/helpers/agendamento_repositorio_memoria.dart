@@ -6,9 +6,11 @@ class AgendamentoRepositorioMemoria implements AgendamentoRepositorioInterface {
 
   @override
   Future<bool> verificarDisponibilidade(
-      String idTecnico, DateTime dataHora) async {
+      String idTecnico, DateTime dataHora, {String? idExcluir}) async {
     return _dados.values.any((a) =>
-        a.idTecnico == idTecnico && a.dataHora == dataHora);
+        a.idTecnico == idTecnico &&
+        a.dataHora == dataHora &&
+        a.id != idExcluir);
   }
 
   @override

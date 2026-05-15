@@ -1,6 +1,5 @@
 // lib/apresentacao/telas/agendamentos/cadastro_agendamento_tela.dart
 import 'package:flutter/material.dart';
-import 'package:gerenciar/dados/fontes_dados/sqlite/agendamento_sqlite.dart';
 import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart';
 import 'package:gerenciar/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart';
@@ -52,7 +51,6 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   late final CadastrarAgendamento _cadastrarAgendamento;
   late final ListarClientes _listarClientes;
   late final ListarTecnicos _listarTecnicos;
-  final AgendamentoSQLite _agendamentoSqlite = AgendamentoSQLite();
 
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
@@ -203,22 +201,6 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
           _horaSelecionada.hour,
           _horaSelecionada.minute,
         );
-
-        // RF02: Verificação de conflito de horário para o técnico selecionado
-        bool existeConflito = await _agendamentoSqlite.verificarConflito(
-            _tecnicoSelecionado!.id, dataHoraAgendamento);
-
-        if (existeConflito) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text(
-                  "Já existe atendimento agendado para este técnico neste horário"),
-              backgroundColor: Colors.red,
-            ));
-          }
-          setState(() => _carregando = false);
-          return;
-        }
 
         final novoAgendamento = Agendamento(
           id: const Uuid().v4(),

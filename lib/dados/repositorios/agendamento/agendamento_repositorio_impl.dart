@@ -7,8 +7,8 @@ class AgendamentoRepositorioImpl implements AgendamentoRepositorioInterface {
   final AgendamentoFirebase _firebase = AgendamentoFirebase();
 
   @override
-  Future<bool> verificarDisponibilidade(String idTecnico, DateTime dataHora) {
-    return _firebase.verificarConflito(idTecnico, dataHora);
+  Future<bool> verificarDisponibilidade(String idTecnico, DateTime dataHora, {String? idExcluir}) {
+    return _firebase.verificarConflito(idTecnico, dataHora, idExcluir: idExcluir);
   }
 
   @override
