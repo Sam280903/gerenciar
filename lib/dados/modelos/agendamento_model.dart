@@ -76,6 +76,7 @@ class AgendamentoModel {
       'dataHora': Timestamp.fromDate(dataHora),
       'observacao': observacao,
       'status': status,
+      'ativo': true,
       'lembreteNotificacao': lembreteNotificacao,
       'notificacaoEnviada': notificacaoEnviada,
     };
@@ -90,6 +91,7 @@ class AgendamentoModel {
       'dataHora': dataHora.toIso8601String(),
       'observacao': observacao,
       'status': status,
+      'ativo': 1,
       'lembreteNotificacao': lembreteNotificacao,
       'notificacaoEnviada': notificacaoEnviada ? 1 : 0,
     };
