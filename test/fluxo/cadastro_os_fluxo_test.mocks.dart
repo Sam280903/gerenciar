@@ -332,8 +332,9 @@ class MockAgendamentoRepositorioInterface extends _i1.Mock
   @override
   _i7.Future<bool> verificarDisponibilidade(
     String? idTecnico,
-    DateTime? dataHora,
-  ) =>
+    DateTime? dataHora, {
+    String? idExcluir,
+  }) =>
       (super.noSuchMethod(
         Invocation.method(
           #verificarDisponibilidade,
@@ -341,6 +342,7 @@ class MockAgendamentoRepositorioInterface extends _i1.Mock
             idTecnico,
             dataHora,
           ],
+          {#idExcluir: idExcluir},
         ),
         returnValue: _i7.Future<bool>.value(false),
       ) as _i7.Future<bool>);
@@ -368,26 +370,6 @@ class MockAgendamentoRepositorioInterface extends _i1.Mock
       ) as _i7.Future<void>);
 
   @override
-  _i7.Future<void> inativar(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #inativar,
-          [id],
-        ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
-
-  @override
-  _i7.Future<void> reativar(String? id) => (super.noSuchMethod(
-        Invocation.method(
-          #reativar,
-          [id],
-        ),
-        returnValue: _i7.Future<void>.value(),
-        returnValueForMissingStub: _i7.Future<void>.value(),
-      ) as _i7.Future<void>);
-
-  @override
   _i7.Future<_i19.Agendamento?> buscarPorId(String? id) => (super.noSuchMethod(
         Invocation.method(
           #buscarPorId,
@@ -397,18 +379,12 @@ class MockAgendamentoRepositorioInterface extends _i1.Mock
       ) as _i7.Future<_i19.Agendamento?>);
 
   @override
-  _i7.Future<List<_i19.Agendamento>> listarTodos({
-    required String? idGestor,
-    bool? incluirInativos = false,
-  }) =>
+  _i7.Future<List<_i19.Agendamento>> listarTodos({required String? idGestor}) =>
       (super.noSuchMethod(
         Invocation.method(
           #listarTodos,
           [],
-          {
-            #idGestor: idGestor,
-            #incluirInativos: incluirInativos,
-          },
+          {#idGestor: idGestor},
         ),
         returnValue:
             _i7.Future<List<_i19.Agendamento>>.value(<_i19.Agendamento>[]),

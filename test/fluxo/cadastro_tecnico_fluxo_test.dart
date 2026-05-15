@@ -74,12 +74,12 @@ void main() {
 
     expect(find.text('Novo Técnico'), findsOneWidget);
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'Nome Completo'), novoTecnico.nome);
+        find.widgetWithText(TextFormField, 'Nome Completo *'), novoTecnico.nome);
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'E-mail (para login)'),
+        find.widgetWithText(TextFormField, 'E-mail (para login) *'),
         novoTecnico.email);
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'Senha de Acesso'), '123456');
+        find.widgetWithText(TextFormField, 'Senha de Acesso *'), '123456');
     await tester.enterText(
         find.widgetWithText(TextFormField, 'Telefone'), novoTecnico.telefone);
 

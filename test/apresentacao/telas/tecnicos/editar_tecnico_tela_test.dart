@@ -52,7 +52,7 @@ void main() {
     await pumpTela(tester, tecnicoParaEditar);
 
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'Nome Completo'), 'Nome Modificado');
+        find.widgetWithText(TextFormField, 'Nome Completo *'), 'Nome Modificado');
     await tester.tap(find.text('SALVAR ALTERAÇÕES'));
     await tester.pump();
 

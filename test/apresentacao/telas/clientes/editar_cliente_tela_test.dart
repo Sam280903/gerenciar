@@ -62,7 +62,7 @@ void main() {
 
     // ACT
     // 1. Limpa o campo de nome e insere um novo nome
-    await tester.enterText(find.widgetWithText(TextFormField, 'Nome completo'),
+    await tester.enterText(find.widgetWithText(TextFormField, 'Nome completo *'),
         'Cliente Modificado');
     // Preenche campos obrigatórios de endereço não pre-populados pelo split
     await tester.enterText(find.widgetWithText(TextFormField, 'Cidade'), 'Jataí');

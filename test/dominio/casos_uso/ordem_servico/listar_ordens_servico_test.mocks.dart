@@ -71,6 +71,24 @@ class MockOrdemServicoRepositorioInterface extends _i1.Mock
       ) as _i3.Future<void>);
 
   @override
+  _i3.Future<void> cancelar({
+    required String? id,
+    required String? justificativa,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #cancelar,
+          [],
+          {
+            #id: id,
+            #justificativa: justificativa,
+          },
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
   _i3.Future<void> adicionar(_i4.OrdemServico? ordem) => (super.noSuchMethod(
         Invocation.method(
           #adicionar,
