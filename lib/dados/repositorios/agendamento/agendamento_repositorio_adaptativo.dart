@@ -30,8 +30,17 @@ class AgendamentoRepositorioAdaptativo
 
   @override
   Future<void> adicionar(Agendamento agendamento) async {
-    final repo = await _escolherRepositorio();
-    await repo.adicionar(agendamento);
+    if (await _temConexao()) {
+      // Online: salva no Firebase e espelha no SQLite
+      await _firebase.adicionar(agendamento);
+      final model = AgendamentoModel.fromEntidade(agendamento);
+      final sqlite = AgendamentoSQLite();
+      await sqlite.adicionar(model);
+      await sqlite.marcarComoSincronizado(agendamento.id);
+    } else {
+      // Offline: salva só no SQLite (será sincronizado depois)
+      await _sqlite.adicionar(agendamento);
+    }
   }
 
   @override

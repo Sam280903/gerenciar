@@ -1,5 +1,7 @@
 // lib/dados/repositorios/cliente/cliente_repositorio_adaptativo.dart
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:gerenciar/dados/fontes_dados/sqlite/cliente_sqlite.dart';
+import 'package:gerenciar/dados/modelos/cliente_model.dart';
 import 'package:gerenciar/dominio/entidades/cliente.dart';
 import 'package:gerenciar/dominio/interfaces/cliente_repositorio_interface.dart';
 import 'cliente_repositorio_impl.dart';
@@ -20,8 +22,17 @@ class ClienteRepositorioAdaptativo implements ClienteRepositorioInterface {
 
   @override
   Future<void> adicionar(Cliente cliente) async {
-    final repo = await _escolherRepositorio();
-    await repo.adicionar(cliente);
+    if (await _temConexao()) {
+      // Online: salva no Firebase e espelha no SQLite
+      await _repositorioOnline.adicionar(cliente);
+      final model = ClienteModel.fromEntidade(cliente);
+      final sqlite = ClienteSQLite();
+      await sqlite.adicionarCliente(model);
+      await sqlite.marcarComoSincronizado(cliente.id);
+    } else {
+      // Offline: salva só no SQLite (será sincronizado depois)
+      await _repositorioOffline.adicionar(cliente);
+    }
   }
 
   @override

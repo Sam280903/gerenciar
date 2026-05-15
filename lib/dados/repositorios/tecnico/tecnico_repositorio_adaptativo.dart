@@ -1,5 +1,7 @@
 // lib/dados/repositorios/tecnico/tecnico_repositorio_adaptativo.dart
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:gerenciar/dados/fontes_dados/sqlite/tecnico_sqlite.dart';
+import 'package:gerenciar/dados/modelos/tecnico_model.dart';
 import 'package:gerenciar/dominio/interfaces/tecnico_repositorio_interface.dart';
 import 'package:gerenciar/dominio/entidades/tecnico.dart';
 import 'tecnico_repositorio_impl.dart';
@@ -20,8 +22,17 @@ class TecnicoRepositorioAdaptativo implements TecnicoRepositorioInterface {
 
   @override
   Future<void> adicionar(Tecnico tecnico) async {
-    final repo = await _repositorio();
-    await repo.adicionar(tecnico);
+    if (await _temConexao()) {
+      // Online: salva no Firebase e espelha no SQLite
+      await _repositorioFirebase.adicionar(tecnico);
+      final model = TecnicoModel.fromEntidade(tecnico);
+      final sqlite = TecnicoSQLite();
+      await sqlite.adicionarTecnico(model);
+      await sqlite.marcarComoSincronizado(tecnico.id);
+    } else {
+      // Offline: salva só no SQLite (será sincronizado depois)
+      await _repositorioSQLite.adicionar(tecnico);
+    }
   }
 
   @override

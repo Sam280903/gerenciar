@@ -1,4 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:gerenciar/dados/fontes_dados/sqlite/ordem_servico_sqlite.dart';
+import 'package:gerenciar/dados/modelos/ordem_servico_model.dart';
 import 'package:gerenciar/servicos/relatorio_servico.dart';
 import 'package:gerenciar/dominio/entidades/ordem_servico.dart';
 import 'package:gerenciar/dominio/interfaces/ordem_servico_repositorio_interface.dart';
@@ -36,8 +38,17 @@ class OrdemServicoRepositorioAdaptativo
 
   @override
   Future<void> adicionar(OrdemServico ordem) async {
-    final repo = await _escolherRepositorio();
-    await repo.adicionar(ordem);
+    if (await _temConexao()) {
+      // Online: salva no Firebase e espelha no SQLite
+      await _repositorioOnline.adicionar(ordem);
+      final model = OrdemServicoModel.fromEntidade(ordem);
+      final sqlite = OrdemServicoSQLite();
+      await sqlite.adicionar(model);
+      await sqlite.marcarComoSincronizado(ordem.id);
+    } else {
+      // Offline: salva só no SQLite (será sincronizado depois)
+      await _repositorioOffline.adicionar(ordem);
+    }
   }
 
   @override
