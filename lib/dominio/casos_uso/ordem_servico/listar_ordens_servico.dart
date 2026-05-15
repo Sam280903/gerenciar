@@ -7,8 +7,6 @@ class ListarOrdensServico {
   ListarOrdensServico(this.repositorio);
 
   Future<List<OrdemServico>> executar({required String idGestor}) async {
-    final ordens = await repositorio.listarTodos(idGestor: idGestor);
-    ordens.sort((a, b) => a.descricao.compareTo(b.descricao));
-    return ordens;
+    return repositorio.listarTodos(idGestor: idGestor);
   }
 }

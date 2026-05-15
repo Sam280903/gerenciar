@@ -37,20 +37,39 @@ class TecnicoRepositorioAdaptativo implements TecnicoRepositorioInterface {
 
   @override
   Future<void> atualizar(Tecnico tecnico) async {
-    final repo = await _repositorio();
-    await repo.atualizar(tecnico);
+    if (await _temConexao()) {
+      await _repositorioFirebase.atualizar(tecnico);
+      final model = TecnicoModel.fromEntidade(tecnico);
+      final sqlite = TecnicoSQLite();
+      await sqlite.atualizarTecnico(model);
+      await sqlite.marcarComoSincronizado(tecnico.id);
+    } else {
+      await _repositorioSQLite.atualizar(tecnico);
+    }
   }
 
   @override
   Future<void> inativar(String id) async {
-    final repo = await _repositorio();
-    await repo.inativar(id);
+    if (await _temConexao()) {
+      await _repositorioFirebase.inativar(id);
+      final sqlite = TecnicoSQLite();
+      await sqlite.inativarTecnico(id);
+      await sqlite.marcarComoSincronizado(id);
+    } else {
+      await _repositorioSQLite.inativar(id);
+    }
   }
 
   @override
   Future<void> reativar(String id) async {
-    final repo = await _repositorio();
-    await repo.reativar(id);
+    if (await _temConexao()) {
+      await _repositorioFirebase.reativar(id);
+      final sqlite = TecnicoSQLite();
+      await sqlite.reativarTecnico(id);
+      await sqlite.marcarComoSincronizado(id);
+    } else {
+      await _repositorioSQLite.reativar(id);
+    }
   }
 
   @override

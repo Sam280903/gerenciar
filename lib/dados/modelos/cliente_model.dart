@@ -42,7 +42,7 @@ class ClienteModel {
       email: map['email'] ?? '',
       telefone: map['telefone']?.toString() ?? '',
       endereco: map['endereco'] ?? '',
-      cpf: map['cpf']?.toString() ?? '',
+      cpf: map['cpf']?.toString(),
       ativo: map['ativo'] is bool ? map['ativo'] : (map['ativo'] == 1),
       idGestor: map['idGestor'] ?? '', // ADICIONADO
     );

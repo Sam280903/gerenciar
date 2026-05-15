@@ -61,7 +61,7 @@ class OrdemServicoModel {
       idCliente: map['idCliente'] ?? '',
       idFormaPagamento: map['idFormaPagamento'] ?? '',
       idGestor: map['idGestor'] ?? '', // ADICIONADO
-      dataHoraInicio: (map['dataHoraInicio'] as Timestamp).toDate(),
+      dataHoraInicio: (map['dataHoraInicio'] as Timestamp?)?.toDate() ?? DateTime.now(),
       dataHoraFim: map['dataHoraFim'] != null
           ? (map['dataHoraFim'] as Timestamp).toDate()
           : null,

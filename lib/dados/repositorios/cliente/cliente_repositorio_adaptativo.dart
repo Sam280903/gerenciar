@@ -37,20 +37,39 @@ class ClienteRepositorioAdaptativo implements ClienteRepositorioInterface {
 
   @override
   Future<void> atualizar(Cliente cliente) async {
-    final repo = await _escolherRepositorio();
-    await repo.atualizar(cliente);
+    if (await _temConexao()) {
+      await _repositorioOnline.atualizar(cliente);
+      final model = ClienteModel.fromEntidade(cliente);
+      final sqlite = ClienteSQLite();
+      await sqlite.atualizarCliente(model);
+      await sqlite.marcarComoSincronizado(cliente.id);
+    } else {
+      await _repositorioOffline.atualizar(cliente);
+    }
   }
 
   @override
   Future<void> inativar(String id) async {
-    final repo = await _escolherRepositorio();
-    await repo.inativar(id);
+    if (await _temConexao()) {
+      await _repositorioOnline.inativar(id);
+      final sqlite = ClienteSQLite();
+      await sqlite.inativarCliente(id);
+      await sqlite.marcarComoSincronizado(id);
+    } else {
+      await _repositorioOffline.inativar(id);
+    }
   }
 
   @override
   Future<void> reativar(String id) async {
-    final repo = await _escolherRepositorio();
-    await repo.reativar(id);
+    if (await _temConexao()) {
+      await _repositorioOnline.reativar(id);
+      final sqlite = ClienteSQLite();
+      await sqlite.reativarCliente(id);
+      await sqlite.marcarComoSincronizado(id);
+    } else {
+      await _repositorioOffline.reativar(id);
+    }
   }
 
   @override

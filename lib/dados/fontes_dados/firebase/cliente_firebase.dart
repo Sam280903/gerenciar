@@ -6,7 +6,6 @@ class ClienteFirebase {
   final CollectionReference _colecao =
       FirebaseFirestore.instance.collection('clientes');
 
-//METODO ADICIONADO
   Future<List<ClienteModel>> listarRecentes() async {
     final snapshot = await _colecao.orderBy('nome').limit(500).get();
     return snapshot.docs
