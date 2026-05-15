@@ -87,11 +87,18 @@ class _TecnicosTelaState extends State<TecnicosTela> {
           _filtrarTecnicos();
         });
       }
+    }).catchError((e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erro ao carregar técnicos: $e'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
     });
   }
 
   // --- CORREÇÃO PRINCIPAL AQUI ---
-  void _abrirFormularioCadastro() async {
+  Future<void> _abrirFormularioCadastro() async {
     final resultado = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -103,7 +110,7 @@ class _TecnicosTelaState extends State<TecnicosTela> {
   }
   // --- FIM DA CORREÇÃO ---
 
-  void _abrirDetalhes(Tecnico tecnico) async {
+  Future<void> _abrirDetalhes(Tecnico tecnico) async {
     final resultado = await Navigator.push(
         context,
         MaterialPageRoute(

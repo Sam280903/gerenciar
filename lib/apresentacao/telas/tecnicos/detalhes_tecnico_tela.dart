@@ -93,7 +93,7 @@ class _DetalhesTecnicoTelaState extends State<DetalhesTecnicoTela> {
     }
   }
 
-  void _abrirEdicao() async {
+  Future<void> _abrirEdicao() async {
     final resultado = await Navigator.push<bool>(
         context,
         MaterialPageRoute(

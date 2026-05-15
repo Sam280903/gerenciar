@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class WidgetSelecao extends StatelessWidget {
   final String label;
   final String valor;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final FormFieldValidator<String>? validator;
 
   const WidgetSelecao({
@@ -17,13 +17,16 @@ class WidgetSelecao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onTap != null;
     return TextFormField(
       controller: TextEditingController(text: valor),
       readOnly: true,
+      enabled: enabled,
       onTap: onTap,
       decoration: InputDecoration(
         labelText: label,
-        suffixIcon: const Icon(Icons.search),
+        suffixIcon: Icon(Icons.search,
+            color: enabled ? null : Theme.of(context).disabledColor),
       ),
       validator: validator,
     );

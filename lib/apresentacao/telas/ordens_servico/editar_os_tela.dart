@@ -228,7 +228,7 @@ class _EditarOSTelaState extends State<EditarOSTela> {
               DropdownButtonFormField<String>(
                 value: _statusSelecionado,
                 decoration: const InputDecoration(labelText: 'Status'),
-                items: ['Pendente', 'Em Andamento', 'Concluída', 'Reaberta']
+                items: ['Pendente', 'Em Andamento', 'Concluída', 'Reaberta', 'Cancelada']
                     .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                     .toList(),
                 onChanged: (val) {
@@ -253,6 +253,13 @@ class _EditarOSTelaState extends State<EditarOSTela> {
                     const InputDecoration(labelText: 'Valor do Serviço (R\$)'),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Informe o valor do serviço';
+                  final valor = double.tryParse(
+                      v.contains(',') ? v.replaceAll('.', '').replaceAll(',', '.') : v);
+                  if (valor == null || valor <= 0) return 'Informe um valor válido maior que zero';
+                  return null;
+                },
               ),
               const SizedBox(height: 32),
               _carregando

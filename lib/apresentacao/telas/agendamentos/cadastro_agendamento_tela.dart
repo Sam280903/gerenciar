@@ -54,6 +54,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
 
   final AutenticacaoServico _authServico = AutenticacaoServico();
   String? _idGestor;
+  String _perfil = '';
   String _lembreteSelecionado = '15_minutos_antes';
 
   @override
@@ -72,10 +73,27 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
 
   Future<void> _carregarDadosIniciais() async {
     final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
-    if (mounted && dadosUsuario != null) {
-      setState(() {
-        _idGestor = dadosUsuario['idGestor'];
-      });
+    if (!mounted || dadosUsuario == null) return;
+
+    final idGestor = dadosUsuario['idGestor'] as String?;
+    final perfil = dadosUsuario['perfil'] as String? ?? '';
+
+    setState(() {
+      _idGestor = idGestor;
+      _perfil = perfil;
+    });
+
+    // Se for técnico, pré-seleciona ele mesmo e bloqueia a escolha
+    if (perfil == 'tecnico' && idGestor != null) {
+      final idTecnicoLogado = _authServico.idUsuarioLogado;
+      if (idTecnicoLogado == null) return;
+      try {
+        final tecnicos = await _listarTecnicos.executar(idGestor: idGestor);
+        final eu = tecnicos.where((t) => t.id == idTecnicoLogado).firstOrNull;
+        if (eu != null && mounted) {
+          setState(() => _tecnicoSelecionado = eu);
+        }
+      } catch (_) {}
     }
   }
 
@@ -137,7 +155,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
   }
 
   Future<void> _abrirBuscaTecnico() async {
-    if (_idGestor == null) return;
+    if (_idGestor == null || _perfil == 'tecnico') return;
     final tecnico = await Navigator.push<Tecnico>(
       context,
       MaterialPageRoute(
@@ -279,7 +297,7 @@ class _CadastroAgendamentoTelaState extends State<CadastroAgendamentoTela> {
               WidgetSelecao(
                 label: 'Técnico',
                 valor: _tecnicoSelecionado?.nome ?? '',
-                onTap: _abrirBuscaTecnico,
+                onTap: _perfil == 'tecnico' ? null : _abrirBuscaTecnico,
                 validator: (v) =>
                     _tecnicoSelecionado == null ? 'Selecione um técnico' : null,
               ),

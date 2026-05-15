@@ -101,7 +101,7 @@ class _EditarTecnicoTelaState extends State<EditarTecnicoTela> {
               TextFormField(
                 controller: _nomeController,
                 decoration: const InputDecoration(
-                  labelText: 'Nome Completo',
+                  labelText: 'Nome Completo *',
                   prefixIcon: Icon(Icons.person_outline),
                 ),
                 validator: (value) =>
@@ -111,12 +111,17 @@ class _EditarTecnicoTelaState extends State<EditarTecnicoTela> {
               TextFormField(
                 controller: _emailController,
                 decoration: const InputDecoration(
-                  labelText: 'E-mail (para login)',
+                  labelText: 'E-mail (para login) *',
                   prefixIcon: Icon(Icons.email_outlined),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) =>
-                    value!.isEmpty ? 'Campo obrigatório' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Campo obrigatório';
+                  if (!value.contains('@') || !value.contains('.')) {
+                    return 'E-mail inválido';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
               TextFormField(

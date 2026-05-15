@@ -153,6 +153,7 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
 
     setState(() => _carregando = true);
 
+    try {
     final ordensDeServico = await _listarOS.executar(idGestor: _idGestor!);
 
     // Cache de futures por ID — evita buscar o mesmo cliente/técnico mais de uma vez
@@ -230,9 +231,18 @@ class _OrdensServicoTelaState extends State<OrdensServicoTela>
         _todosConcluidas = concluidasTemp;
         _todosReabertas = reabertasTemp;
         _todosCanceladas = canceladasTemp;
-        _carregando = false;
         _filtrarOS();
       });
+    }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erro ao carregar ordens de serviço: $e'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _carregando = false);
     }
   }
 

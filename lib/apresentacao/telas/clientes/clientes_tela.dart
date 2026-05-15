@@ -86,6 +86,13 @@ class _ClientesTelaState extends State<ClientesTela> {
           _filtrarClientes();
         });
       }
+    }).catchError((e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Erro ao carregar clientes: $e'),
+          backgroundColor: Colors.redAccent,
+        ));
+      }
     });
   }
 

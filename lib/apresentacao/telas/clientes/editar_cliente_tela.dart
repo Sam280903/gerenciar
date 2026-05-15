@@ -59,16 +59,33 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
   }
 
   void _preencherEnderecoInicial() {
-    // Lógica simples para separar o endereço. Pode ser ajustada.
-    final parts = widget.cliente.endereco.split(',');
-    if (parts.isNotEmpty) _logradouroController.text = parts[0].trim();
-    if (parts.length > 1) _bairroController.text = parts[1].trim();
-    if (parts.length > 2) _cidadeController.text = parts[2].trim();
+    final parts = widget.cliente.endereco.split(', ');
+    if (parts.isEmpty) return;
+    _logradouroController.text = parts[0].trim();
+    if (parts.length >= 4) {
+      // Formato: logradouro, [Nº X,] [complemento,] bairro, cidade, UF
+      _ufController.text = parts.last.trim();
+      _cidadeController.text = parts[parts.length - 2].trim();
+      _bairroController.text = parts[parts.length - 3].trim();
+      for (int i = 1; i < parts.length - 3; i++) {
+        if (parts[i].startsWith('Nº ')) {
+          _numeroController.text = parts[i].substring(3).trim();
+        } else {
+          _complementoController.text = parts[i].trim();
+        }
+      }
+    } else if (parts.length == 3) {
+      _bairroController.text = parts[1].trim();
+      _cidadeController.text = parts[2].trim();
+    } else if (parts.length == 2) {
+      _bairroController.text = parts[1].trim();
+    }
   }
 
   Future<void> _buscarCep() async {
     final cep = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (cep.length != 8) return;
+    if (!mounted) return;
 
     setState(() => _buscandoCep = true);
     try {
@@ -101,6 +118,7 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
 
   Future<void> _salvarAlteracoes() async {
     if (_formKey.currentState!.validate()) {
+      if (!mounted) return;
       setState(() => _carregando = true);
 
       // Constrói o endereço completo a partir dos campos
@@ -118,7 +136,7 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
       final clienteAtualizado = Cliente(
         id: widget.cliente.id,
         nome: _nomeController.text.trim(),
-        cpf: _cpfController.text.trim(),
+        cpf: _cpfController.text.trim().isEmpty ? null : _cpfController.text.trim(),
         telefone: _telefoneController.text.trim(),
         email: _emailController.text.trim(),
         endereco: enderecoCompleto,
@@ -175,7 +193,7 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
             children: [
               TextFormField(
                   controller: _nomeController,
-                  decoration: const InputDecoration(labelText: 'Nome completo'),
+                  decoration: const InputDecoration(labelText: 'Nome completo *'),
                   validator: (v) => v!.isEmpty ? 'Campo obrigatório' : null),
               const SizedBox(height: 16),
               Row(children: [
@@ -183,14 +201,18 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
                     child: TextFormField(
                         controller: _telefoneController,
                         decoration:
-                            const InputDecoration(labelText: 'Telefone'),
+                            const InputDecoration(labelText: 'Telefone *'),
                         keyboardType: TextInputType.phone,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           TelefoneInputFormatter(),
                         ],
-                        validator: (v) =>
-                            v!.isEmpty ? 'Campo obrigatório' : null)),
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Campo obrigatório';
+                          final digits = v.replaceAll(RegExp(r'\D'), '');
+                          if (digits.length < 10) return 'Telefone inválido';
+                          return null;
+                        })),
                 const SizedBox(width: 16),
                 Expanded(
                     child: TextFormField(
@@ -208,7 +230,14 @@ class _EditarClienteTelaState extends State<EditarClienteTela> {
               TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'E-mail'),
-                  keyboardType: TextInputType.emailAddress),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return null;
+                    if (!v.contains('@') || !v.contains('.')) {
+                      return 'E-mail inválido';
+                    }
+                    return null;
+                  }),
               const SizedBox(height: 24),
               const Divider(),
               const Padding(

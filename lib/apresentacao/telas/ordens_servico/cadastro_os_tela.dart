@@ -59,6 +59,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
 
   late final AutenticacaoServico _authServico;
   String? _idGestor;
+  String _perfil = '';
 
   late final ListarClientes _listarClientes;
   late final ListarTecnicos _listarTecnicos;
@@ -87,10 +88,26 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
 
   Future<void> _carregarDadosIniciais() async {
     final dadosUsuario = await _authServico.buscarDadosUsuarioLogado();
-    if (mounted && dadosUsuario != null) {
-      setState(() {
-        _idGestor = dadosUsuario['idGestor'];
-      });
+    if (!mounted || dadosUsuario == null) return;
+
+    final idGestor = dadosUsuario['idGestor'] as String?;
+    final perfil = dadosUsuario['perfil'] as String? ?? '';
+
+    setState(() {
+      _idGestor = idGestor;
+      _perfil = perfil;
+    });
+
+    if (perfil == 'tecnico' && idGestor != null) {
+      final idTecnicoLogado = _authServico.idUsuarioLogado;
+      if (idTecnicoLogado == null) return;
+      try {
+        final tecnicos = await _listarTecnicos.executar(idGestor: idGestor);
+        final eu = tecnicos.where((t) => t.id == idTecnicoLogado).firstOrNull;
+        if (eu != null && mounted) {
+          setState(() => _tecnicoSelecionado = eu);
+        }
+      } catch (_) {}
     }
   }
 
@@ -130,7 +147,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
   }
 
   Future<void> _abrirBuscaTecnico() async {
-    if (_idGestor == null) return;
+    if (_idGestor == null || _perfil == 'tecnico') return;
     final tecnico = await Navigator.push<Tecnico>(
       context,
       MaterialPageRoute(
@@ -291,7 +308,7 @@ class _CadastroOSTelaState extends State<CadastroOSTela> {
               WidgetSelecao(
                 label: 'Técnico Responsável',
                 valor: _tecnicoSelecionado?.nome ?? '',
-                onTap: _abrirBuscaTecnico,
+                onTap: _perfil == 'tecnico' ? null : _abrirBuscaTecnico,
                 validator: (v) =>
                     _tecnicoSelecionado == null ? 'Selecione um técnico' : null,
               ),

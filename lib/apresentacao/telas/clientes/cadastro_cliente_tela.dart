@@ -69,6 +69,7 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
     final cep = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (cep.length != 8) return;
     FocusScope.of(context).unfocus();
+    if (!mounted) return;
 
     setState(() => _buscandoCep = true);
     try {
@@ -129,7 +130,7 @@ class _CadastroClienteTelaState extends State<CadastroClienteTela> {
         email: _emailController.text.trim(),
         telefone: _telefoneController.text.trim(),
         endereco: enderecoCompleto,
-        cpf: _cpfController.text.trim(),
+        cpf: _cpfController.text.trim().isEmpty ? null : _cpfController.text.trim(),
         ativo: true,
         idGestor: _idGestor!, // ADICIONADO
       );
