@@ -10,6 +10,8 @@ class AutenticacaoServico {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  String? get idUsuarioLogado => _auth.currentUser?.uid;
+
   Future<void> enviarEmailRedefinicaoSenha(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);

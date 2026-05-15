@@ -3,13 +3,23 @@
 class Tutorial {
   final String titulo;
   final String conteudo;
-  final String categoria; // Novo campo
-  final String? videoUrl;
+  final String categoria;
+  final String? videoUrlGestor;
+  final String? videoUrlTecnico;
+  final List<String> perfisPermitidos;
 
   Tutorial({
     required this.titulo,
     required this.conteudo,
     required this.categoria,
-    this.videoUrl,
+    this.videoUrlGestor,
+    this.videoUrlTecnico,
+    this.perfisPermitidos = const ['gestor', 'tecnico'],
   });
+
+  String? videoUrlParaPerfil(String perfil) {
+    if (perfil == 'gestor') return videoUrlGestor;
+    if (perfil == 'tecnico') return videoUrlTecnico;
+    return videoUrlGestor ?? videoUrlTecnico;
+  }
 }

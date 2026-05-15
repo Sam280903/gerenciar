@@ -2,20 +2,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:gerenciar/dominio/entidades/tutorial.dart';
+import 'package:gerenciar/servicos/autenticacao_servico.dart';
 import 'detalhes_tutorial_tela.dart';
 
 class TutoriaisTela extends StatefulWidget {
-  TutoriaisTela({super.key});
+  final AutenticacaoServico? authServico;
+
+  TutoriaisTela({super.key, this.authServico});
 
   @override
   State<TutoriaisTela> createState() => _TutoriaisTelaState();
 }
 
 class _TutoriaisTelaState extends State<TutoriaisTela> {
+  late final AutenticacaoServico _authServico;
   final _buscaController = TextEditingController();
   List<Tutorial> _tutoriaisFiltrados = [];
+  String _perfil = '';
 
-  // Lista completa de todos os tutoriais
   final List<Tutorial> _todosTutoriais = [
     // Categoria: Cadastros
     Tutorial(
@@ -29,7 +33,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '4. Se estiver com pressa, você pode usar o **"Cadastro Rápido"** no topo da tela, que exige apenas o nome e telefone.\n'
           '5. Após preencher, toque em **"SALVAR"**.\n\n'
           '**Dica:** O sistema valida o CPF automaticamente para garantir que os dados estejam corretos.',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoUrlGestor: null,
+      videoUrlTecnico: null,
     ),
     Tutorial(
       categoria: 'Cadastros',
@@ -42,7 +47,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '4. Selecione se o técnico terá permissões administrativas ou apenas operacionais.\n'
           '5. Clique em **"CADASTRAR"**.\n\n'
           '**Importante:** O técnico cadastrado receberá as notificações de agendamentos diretamente no celular dele assim que fizer o login.',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoUrlGestor: null,
+      perfisPermitidos: ['gestor'],
     ),
     // Categoria: Agendamentos
     Tutorial(
@@ -58,7 +64,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '6. O sistema fará uma verificação em tempo real: se o técnico já possuir um compromisso nesse horário, um aviso de conflito aparecerá.\n'
           '7. Toque em **"CONFIRMAR"**.\n\n'
           '**Nota:** Agendamentos criados offline serão sincronizados automaticamente assim que você recuperar o sinal de internet.',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoUrlGestor: null,
+      videoUrlTecnico: null,
     ),
     Tutorial(
       categoria: 'Agendamentos',
@@ -70,7 +77,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '3. Para finalizar: Toque em **"CONCLUIR"**. Isso abrirá automaticamente a tela para gerar a Ordem de Serviço.\n'
           '4. Para cancelar: Toque em **"INATIVAR"** e informe o motivo do cancelamento.\n\n'
           'Agendamentos inativados não aparecem mais na agenda principal, mas podem ser consultados no histórico do cliente.',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoUrlGestor: null,
+      videoUrlTecnico: null,
     ),
     // Categoria: Ordens de Serviço
     Tutorial(
@@ -86,7 +94,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '6. Defina o **Valor Total** e a **Forma de Pagamento**.\n'
           '7. Ao finalizar, você pode gerar um **PDF** para enviar ao cliente via WhatsApp ou E-mail.\n\n'
           '**Dica:** Você pode tirar fotos do serviço e anexar à OS para maior transparência.',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoUrlGestor: null,
+      videoUrlTecnico: null,
     ),
     Tutorial(
       categoria: 'Ordens de Serviço',
@@ -97,7 +106,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '2. Somente um **Gestor** visualiza o botão **"REABRIR OS"**.\n'
           '3. Ao clicar, o sistema solicitará uma **Justificativa**.\n'
           '4. A OS voltará para o status "Em Aberto", permitindo novas edições e atualizações pelo técnico.',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoUrlGestor: null,
+      perfisPermitidos: ['gestor'],
     ),
     // Categoria: Relatórios
     Tutorial(
@@ -111,24 +121,44 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '4. Use os filtros adicionais para refinar por cliente ou status de OS.\n'
           '5. Toque em **"GERAR"**.\n\n'
           'Os relatórios podem ser visualizados em gráficos interativos ou exportados em formato de planilha.',
-      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      videoUrlGestor: null,
+      perfisPermitidos: ['gestor'],
     ),
   ];
+
+  List<Tutorial> get _tutoriaisPermitidos => _perfil.isEmpty
+      ? _todosTutoriais
+      : _todosTutoriais
+          .where((t) => t.perfisPermitidos.contains(_perfil))
+          .toList();
 
   @override
   void initState() {
     super.initState();
+    _authServico = widget.authServico ?? AutenticacaoServico();
     _tutoriaisFiltrados = _todosTutoriais;
     _buscaController.addListener(_filtrarTutoriais);
+    _carregarPerfil();
+  }
+
+  Future<void> _carregarPerfil() async {
+    final dados = await _authServico.buscarDadosUsuarioLogado();
+    if (dados != null && mounted) {
+      setState(() {
+        _perfil = dados['perfil'] ?? '';
+        _filtrarTutoriais();
+      });
+    }
   }
 
   void _filtrarTutoriais() {
     final query = _buscaController.text.toLowerCase();
     setState(() {
+      final base = _tutoriaisPermitidos;
       if (query.isEmpty) {
-        _tutoriaisFiltrados = _todosTutoriais;
+        _tutoriaisFiltrados = base;
       } else {
-        _tutoriaisFiltrados = _todosTutoriais
+        _tutoriaisFiltrados = base
             .where((t) =>
                 t.titulo.toLowerCase().contains(query) ||
                 t.conteudo.toLowerCase().contains(query))
@@ -285,17 +315,21 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
   }
 
   Widget _buildTopico(BuildContext context, Tutorial tutorial) {
+    final temVideo = tutorial.videoUrlParaPerfil(_perfil) != null;
     return ListTile(
       leading: const Icon(Icons.help_outline, color: Colors.white70),
       title: Text(tutorial.titulo),
-      trailing: tutorial.videoUrl != null
+      trailing: temVideo
           ? const Icon(Icons.play_circle_outline, color: Colors.white38)
           : null,
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => DetalhesTutorialTela(tutorial: tutorial),
+            builder: (_) => DetalhesTutorialTela(
+              tutorial: tutorial,
+              perfil: _perfil,
+            ),
           ),
         );
       },

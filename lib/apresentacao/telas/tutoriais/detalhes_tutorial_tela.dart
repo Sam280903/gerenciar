@@ -6,7 +6,13 @@ import 'package:gerenciar/dominio/entidades/tutorial.dart';
 
 class DetalhesTutorialTela extends StatefulWidget {
   final Tutorial tutorial;
-  const DetalhesTutorialTela({super.key, required this.tutorial});
+  final String perfil;
+
+  const DetalhesTutorialTela({
+    super.key,
+    required this.tutorial,
+    this.perfil = '',
+  });
 
   @override
   State<DetalhesTutorialTela> createState() => _DetalhesTutorialTelaState();
@@ -22,8 +28,9 @@ class _DetalhesTutorialTelaState extends State<DetalhesTutorialTela> {
     super.initState();
     _temConexaoFuture = _verificarConexao();
 
-    if (widget.tutorial.videoUrl != null) {
-      final videoId = YoutubePlayer.convertUrlToId(widget.tutorial.videoUrl!);
+    final videoUrl = widget.tutorial.videoUrlParaPerfil(widget.perfil);
+    if (videoUrl != null) {
+      final videoId = YoutubePlayer.convertUrlToId(videoUrl);
       if (videoId != null) {
         _youtubeController = YoutubePlayerController(
           initialVideoId: videoId,
@@ -59,6 +66,7 @@ class _DetalhesTutorialTelaState extends State<DetalhesTutorialTela> {
 
   @override
   Widget build(BuildContext context) {
+    final videoUrl = widget.tutorial.videoUrlParaPerfil(widget.perfil);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.tutorial.titulo),
@@ -91,7 +99,7 @@ class _DetalhesTutorialTelaState extends State<DetalhesTutorialTela> {
                       const SizedBox(height: 16),
                     ],
                   );
-                } else if (!temInternet && widget.tutorial.videoUrl != null) {
+                } else if (!temInternet && videoUrl != null) {
                   return _buildAvisoOffline();
                 }
                 return const SizedBox.shrink();
