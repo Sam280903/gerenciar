@@ -5,6 +5,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i4;
 
+import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart'
+    as _i6;
 import 'package:gerenciar/dominio/casos_uso/agendamento/atualizar_agendamento.dart'
     as _i3;
 import 'package:gerenciar/dominio/entidades/agendamento.dart' as _i5;
@@ -66,4 +68,75 @@ class MockAtualizarAgendamento extends _i1.Mock
         returnValue: _i4.Future<void>.value(),
         returnValueForMissingStub: _i4.Future<void>.value(),
       ) as _i4.Future<void>);
+}
+
+/// A class which mocks [AgendamentoRepositorioAdaptativo].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAgendamentoRepositorioAdaptativo extends _i1.Mock
+    implements _i6.AgendamentoRepositorioAdaptativo {
+  MockAgendamentoRepositorioAdaptativo() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i4.Future<bool> verificarDisponibilidade(
+    String? idTecnico,
+    DateTime? dataHora, {
+    String? idExcluir,
+  }) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #verificarDisponibilidade,
+          [
+            idTecnico,
+            dataHora,
+          ],
+          {#idExcluir: idExcluir},
+        ),
+        returnValue: _i4.Future<bool>.value(false),
+      ) as _i4.Future<bool>);
+
+  @override
+  _i4.Future<void> adicionar(_i5.Agendamento? agendamento) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #adicionar,
+          [agendamento],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<void> atualizar(_i5.Agendamento? agendamento) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #atualizar,
+          [agendamento],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
+
+  @override
+  _i4.Future<_i5.Agendamento?> buscarPorId(String? id) => (super.noSuchMethod(
+        Invocation.method(
+          #buscarPorId,
+          [id],
+        ),
+        returnValue: _i4.Future<_i5.Agendamento?>.value(),
+      ) as _i4.Future<_i5.Agendamento?>);
+
+  @override
+  _i4.Future<List<_i5.Agendamento>> listarTodos({required String? idGestor}) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #listarTodos,
+          [],
+          {#idGestor: idGestor},
+        ),
+        returnValue:
+            _i4.Future<List<_i5.Agendamento>>.value(<_i5.Agendamento>[]),
+      ) as _i4.Future<List<_i5.Agendamento>>);
 }

@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:gerenciar/dados/repositorios/agendamento/agendamento_repositorio_adaptativo.dart';
 import 'package:gerenciar/dominio/casos_uso/agendamento/atualizar_agendamento.dart';
 import 'package:gerenciar/dominio/entidades/agendamento.dart';
+import 'package:gerenciar/dominio/interfaces/agendamento_repositorio_interface.dart';
 import 'package:intl/intl.dart';
 
 class EditarAgendamentoTela extends StatefulWidget {
   final Agendamento agendamento;
   final AtualizarAgendamento? atualizarAgendamento;
-  const EditarAgendamentoTela({super.key, required this.agendamento, this.atualizarAgendamento});
+  final AgendamentoRepositorioInterface? agendamentoRepo;
+  const EditarAgendamentoTela({
+    super.key,
+    required this.agendamento,
+    this.atualizarAgendamento,
+    this.agendamentoRepo,
+  });
 
   @override
   State<EditarAgendamentoTela> createState() => _EditarAgendamentoTelaState();
@@ -48,8 +55,8 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
     final data = await showDatePicker(
       context: context,
       initialDate: _dataSelecionada,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
     );
     if (data != null) {
       setState(() {
@@ -84,8 +91,8 @@ class _EditarAgendamentoTelaState extends State<EditarAgendamentoTela> {
           _horaSelecionada.minute,
         );
 
-        final temConflito = await AgendamentoRepositorioAdaptativo()
-            .verificarDisponibilidade(
+        final repo = widget.agendamentoRepo ?? AgendamentoRepositorioAdaptativo();
+        final temConflito = await repo.verificarDisponibilidade(
           widget.agendamento.idTecnico,
           dataHoraAgendamento,
           idExcluir: widget.agendamento.id,

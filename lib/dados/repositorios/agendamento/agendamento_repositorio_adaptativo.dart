@@ -10,6 +10,7 @@ class AgendamentoRepositorioAdaptativo
     implements AgendamentoRepositorioInterface {
   final _firebase = AgendamentoRepositorioImpl();
   final _sqlite = AgendamentoRepositorioImplSQLite();
+  final _sqliteFonte = AgendamentoSQLite();
 
   Future<bool> _temConexao() async {
     final List<ConnectivityResult> status =
@@ -33,7 +34,7 @@ class AgendamentoRepositorioAdaptativo
       // Online: salva no Firebase e espelha no SQLite
       await _firebase.adicionar(agendamento);
       final model = AgendamentoModel.fromEntidade(agendamento);
-      final sqlite = AgendamentoSQLite();
+      final sqlite = _sqliteFonte;
       await sqlite.adicionar(model);
       await sqlite.marcarComoSincronizado(agendamento.id);
     } else {
@@ -49,7 +50,7 @@ class AgendamentoRepositorioAdaptativo
       // Espelha no SQLite já marcado como sincronizado para evitar
       // que a sincronização suba o dado antigo de volta ao Firebase
       final model = AgendamentoModel.fromEntidade(agendamento);
-      final sqlite = AgendamentoSQLite();
+      final sqlite = _sqliteFonte;
       await sqlite.atualizar(model);
       await sqlite.marcarComoSincronizado(agendamento.id);
     } else {

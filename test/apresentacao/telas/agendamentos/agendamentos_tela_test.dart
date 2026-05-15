@@ -78,8 +78,7 @@ void main() {
       (WidgetTester tester) async {
     // ARRANGE - AQUI ESTÁ A CORREÇÃO PRINCIPAL
     when(mockAgendamentoRepo.listarTodos(
-            idGestor: anyNamed('idGestor'),
-            incluirInativos: anyNamed('incluirInativos')))
+            idGestor: anyNamed('idGestor')))
         .thenAnswer((_) async => [agendamentoProximo]);
 
     when(mockClienteRepo.buscarPorId(any))
@@ -101,8 +100,7 @@ void main() {
       (WidgetTester tester) async {
     // ARRANGE - AQUI ESTÁ A CORREÇÃO PRINCIPAL
     when(mockAgendamentoRepo.listarTodos(
-            idGestor: anyNamed('idGestor'),
-            incluirInativos: anyNamed('incluirInativos')))
+            idGestor: anyNamed('idGestor')))
         .thenAnswer((_) async => []);
 
     when(mockClienteRepo.buscarPorId(any)).thenAnswer((_) async => null);

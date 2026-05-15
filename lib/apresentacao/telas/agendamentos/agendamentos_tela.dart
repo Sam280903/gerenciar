@@ -114,84 +114,92 @@ class _AgendamentosTelaState extends State<AgendamentosTela>
 
     setState(() => _carregando = true);
 
-    final agendamentos = await ListarAgendamentos(_agendamentoRepo)
-        .executar(idGestor: _idGestor!);
+    try {
+      final agendamentos = await ListarAgendamentos(_agendamentoRepo)
+          .executar(idGestor: _idGestor!);
 
-    final hoje = DateUtils.dateOnly(DateTime.now());
+      final agora = DateTime.now();
 
-    // Cache de futures por ID — evita buscar o mesmo cliente/técnico mais de uma vez
-    final cacheClientes = <String, Future<dynamic>>{};
-    final cacheTecnicos = <String, Future<dynamic>>{};
+      // Cache de futures por ID — evita buscar o mesmo cliente/técnico mais de uma vez
+      final cacheClientes = <String, Future<dynamic>>{};
+      final cacheTecnicos = <String, Future<dynamic>>{};
 
-    Future<dynamic> buscarCliente(String id) =>
-        cacheClientes.putIfAbsent(id, () => BuscarClientePorId(_clienteRepo).executar(id));
-    Future<dynamic> buscarTecnico(String id) =>
-        cacheTecnicos.putIfAbsent(id, () => BuscarTecnicoPorId(_tecnicoRepo).executar(id));
+      Future<dynamic> buscarCliente(String id) =>
+          cacheClientes.putIfAbsent(id, () => BuscarClientePorId(_clienteRepo).executar(id));
+      Future<dynamic> buscarTecnico(String id) =>
+          cacheTecnicos.putIfAbsent(id, () => BuscarTecnicoPorId(_tecnicoRepo).executar(id));
 
-    final agFiltrados = agendamentos.where((ag) {
-      if (ag.idCliente.isEmpty || ag.idTecnico.isEmpty) return false;
-      if (_perfilUsuario == 'tecnico' && ag.idTecnico != _idUsuarioLogado) return false;
-      return true;
-    }).toList();
+      final agFiltrados = agendamentos.where((ag) {
+        if (ag.idCliente.isEmpty || ag.idTecnico.isEmpty) return false;
+        if (_perfilUsuario == 'tecnico' && ag.idTecnico != _idUsuarioLogado) return false;
+        return true;
+      }).toList();
 
-    // Busca cliente e técnico de todos os agendamentos em paralelo
-    final detalhados = await Future.wait(
-      agFiltrados.map((ag) async {
-        final clienteFuture = buscarCliente(ag.idCliente);
-        final tecnicoFuture = buscarTecnico(ag.idTecnico);
-        return AgendamentoDetalhado(
-          agendamento: ag,
-          cliente: await clienteFuture,
-          tecnico: await tecnicoFuture,
-        );
-      }),
-    );
+      // Busca cliente e técnico de todos os agendamentos em paralelo
+      final detalhados = await Future.wait(
+        agFiltrados.map((ag) async {
+          final clienteFuture = buscarCliente(ag.idCliente);
+          final tecnicoFuture = buscarTecnico(ag.idTecnico);
+          return AgendamentoDetalhado(
+            agendamento: ag,
+            cliente: await clienteFuture,
+            tecnico: await tecnicoFuture,
+          );
+        }),
+      );
 
-    List<AgendamentoDetalhado> pendentesTemp = [];
-    List<AgendamentoDetalhado> confirmadosTemp = [];
-    List<AgendamentoDetalhado> concluidosTemp = [];
-    List<AgendamentoDetalhado> antigosTemp = [];
-    List<AgendamentoDetalhado> canceladosTemp = [];
+      List<AgendamentoDetalhado> pendentesTemp = [];
+      List<AgendamentoDetalhado> confirmadosTemp = [];
+      List<AgendamentoDetalhado> concluidosTemp = [];
+      List<AgendamentoDetalhado> antigosTemp = [];
+      List<AgendamentoDetalhado> canceladosTemp = [];
 
-    for (final itemDetalhado in detalhados) {
-      final ag = itemDetalhado.agendamento;
-      if (ag.status == 'Cancelado') {
-        canceladosTemp.add(itemDetalhado);
-      } else if (ag.status == 'Concluído') {
-        concluidosTemp.add(itemDetalhado);
-      } else if (DateUtils.dateOnly(ag.dataHora).isBefore(hoje)) {
-        antigosTemp.add(itemDetalhado);
-      } else if (ag.status == 'Confirmado') {
-        confirmadosTemp.add(itemDetalhado);
-      } else {
-        pendentesTemp.add(itemDetalhado);
-      }
-    }
-    void ordenar(List<AgendamentoDetalhado> lista) {
-      lista.sort((a, b) {
-        if (_ordenarCrescente) {
-          return a.agendamento.dataHora.compareTo(b.agendamento.dataHora);
+      for (final itemDetalhado in detalhados) {
+        final ag = itemDetalhado.agendamento;
+        if (ag.status == 'Cancelado') {
+          canceladosTemp.add(itemDetalhado);
+        } else if (ag.status == 'Concluído') {
+          concluidosTemp.add(itemDetalhado);
+        } else if (ag.status == 'Confirmado') {
+          // Confirmado sempre fica na aba Confirmados, independente da data
+          confirmadosTemp.add(itemDetalhado);
+        } else if (ag.dataHora.isBefore(agora)) {
+          // Pendente com data/hora já passada vai para Antigos
+          antigosTemp.add(itemDetalhado);
+        } else {
+          pendentesTemp.add(itemDetalhado);
         }
-        return b.agendamento.dataHora.compareTo(a.agendamento.dataHora);
-      });
-    }
+      }
 
-    ordenar(pendentesTemp);
-    ordenar(confirmadosTemp);
-    ordenar(concluidosTemp);
-    ordenar(antigosTemp);
-    ordenar(canceladosTemp);
+      void ordenar(List<AgendamentoDetalhado> lista) {
+        lista.sort((a, b) {
+          if (_ordenarCrescente) {
+            return a.agendamento.dataHora.compareTo(b.agendamento.dataHora);
+          }
+          return b.agendamento.dataHora.compareTo(a.agendamento.dataHora);
+        });
+      }
 
-    if (mounted) {
-      setState(() {
-        _todosPendentes = pendentesTemp;
-        _todosConfirmados = confirmadosTemp;
-        _todosConcluidos = concluidosTemp;
-        _todosAntigos = antigosTemp;
-        _todosCancelados = canceladosTemp;
-        _carregando = false;
-        _filtrarAgendamentos();
-      });
+      ordenar(pendentesTemp);
+      ordenar(confirmadosTemp);
+      ordenar(concluidosTemp);
+      ordenar(antigosTemp);
+      ordenar(canceladosTemp);
+
+      if (mounted) {
+        setState(() {
+          _todosPendentes = pendentesTemp;
+          _todosConfirmados = confirmadosTemp;
+          _todosConcluidos = concluidosTemp;
+          _todosAntigos = antigosTemp;
+          _todosCancelados = canceladosTemp;
+          _filtrarAgendamentos();
+        });
+      }
+    } catch (_) {
+      // Garante que o spinner não trava em caso de falha no repositório
+    } finally {
+      if (mounted) setState(() => _carregando = false);
     }
   }
 

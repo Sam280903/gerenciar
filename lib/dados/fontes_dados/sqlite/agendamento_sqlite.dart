@@ -56,7 +56,9 @@ class AgendamentoSQLite {
 
   Future<void> atualizar(AgendamentoModel agendamento) async {
     final db = await _db;
-    final dados = agendamento.toMapForDb()..['sincronizado'] = 0;
+    final dados = agendamento.toMapForDb()
+      ..remove('id')
+      ..['sincronizado'] = 0;
     await db.update(
       'agendamentos',
       dados,
