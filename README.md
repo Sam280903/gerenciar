@@ -71,11 +71,11 @@ Este projeto foi construído utilizando uma arquitetura moderna e escalável, se
 
 | Login | Home | Cadastro de Técnico |
 | :---: | :---: | :---: |
-| <img src="https://github.com/flavioacmf/flavioacmf/blob/main/GerenciAr/Protótipos/Login.png?raw=true" alt="Tela de Login" width="250"/> | <img src="https://github.com/flavioacmf/flavioacmf/blob/main/GerenciAr/Protótipos/Home.png?raw=true" alt="Tela Home" width="250"/> | <img src="https://github.com/flavioacmf/flavioacmf/blob/main/GerenciAr/Protótipos/Cadastro%20de%20Técnico.png?raw=true" alt="Tela de Cadastro de Técnico" width="250"/> |
+| <img src="assets/imagens/Tela_Login.jpeg" alt="Tela de Login" width="250"/> | <img src="assets/imagens/Tela_Principal.jpeg" alt="Tela Home" width="250"/> | <img src="assets/imagens/Cadastro_Tecnico.jpeg" alt="Tela de Cadastro de Técnico" width="250"/> |
 
 | Agendamento | Ordem de Serviço | Relatórios |
 | :---: | :---: | :---: |
-| <img src="https://github.com/flavioacmf/flavioacmf/blob/main/GerenciAr/Protótipos/Duplicidade%20Atendimento.png?raw=true" alt="Tela de Agendamento" width="250"/> | <img src="https://github.com/flavioacmf/flavioacmf/blob/main/GerenciAr/Protótipos/Ordem%20de%20Serviço.png?raw=true" alt="Tela de Ordem de Serviço" width="250"/> | <img src="https://github.com/flavioacmf/flavioacmf/blob/main/GerenciAr/Protótipos/Relatório.png?raw=true" alt="Tela de Relatórios" width="250"/> |
+| <img src="assets/imagens/Cadastro_Tela_Agendamento.jpeg" alt="Tela de Agendamento" width="250"/> | <img src="assets/imagens/Abrir_OS.jpg" alt="Tela de Ordem de Serviço" width="250"/> | <img src="assets/imagens/Tela_Relatorio.jpg" alt="Tela de Relatórios" width="250"/> |
 
 ---
 
