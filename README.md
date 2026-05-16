@@ -75,7 +75,7 @@ Este projeto foi construído utilizando uma arquitetura moderna e escalável, se
 
 | Agendamento | Ordem de Serviço | Relatórios |
 | :---: | :---: | :---: |
-| <img src="assets/imagens/Cadastro_Tela_Agendamento.jpeg" alt="Tela de Agendamento" width="250"/> | <img src="assets/imagens/Abrir_OS.jpg" alt="Tela de Ordem de Serviço" width="250"/> | <img src="assets/imagens/Tela_Relatorio.jpg" alt="Tela de Relatórios" width="250"/> |
+| <img src="assets/imagens/Cadasto_Tela_Agendamento.jpeg" alt="Tela de Agendamento" width="250"/> | <img src="assets/imagens/Abrir_OS.jpg" alt="Tela de Ordem de Serviço" width="250"/> | <img src="assets/imagens/Tela_Relatorio.jpg" alt="Tela de Relatórios" width="250"/> |
 
 ---
 
