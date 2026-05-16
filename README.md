@@ -16,13 +16,13 @@
 
 ---
 
-### 🎯 O Problema
+### O Problema
 
 [cite_start]Muitos técnicos e prestadores de serviço, especialmente na área de refrigeração e climatização, ainda dependem de métodos manuais como agendas de papel, planilhas e aplicativos de mensagens para gerenciar suas operações[cite: 100, 212]. [cite_start]Essa abordagem é ineficiente, suscetível a erros, perda de informações e não oferece uma visão clara do negócio[cite: 101, 216].
 
 [cite_start]Além disso, sistemas existentes no mercado muitas vezes são complexos, caros ou apresentam falhas críticas de sincronização de dados em ambientes com conectividade instável, um cenário comum para quem trabalha em campo[cite: 102, 103, 219].
 
-### ✨ A Solução: GerenciAR
+### A Solução: GerenciAR
 
 O **GerenciAR** foi projetado para ser a solução definitiva para esses profissionais. Um sistema intuitivo, robusto e confiável que centraliza todas as operações essenciais do dia a dia em um único lugar, garantindo que o técnico tenha total controle de suas atividades, mesmo offline.
 
@@ -30,7 +30,7 @@ O **GerenciAR** foi projetado para ser a solução definitiva para esses profiss
 
 ---
 
-### 🚀 Funcionalidades Principais
+### Funcionalidades Principais
 
 * **Gestão Completa:**
     * [cite_start]**Clientes:** Cadastro completo e rápido de clientes[cite: 343, 346].
@@ -54,20 +54,20 @@ O **GerenciAR** foi projetado para ser a solução definitiva para esses profiss
 
 ---
 
-### 🛠️ Tecnologias Utilizadas
+### Tecnologias Utilizadas
 
 Este projeto foi construído utilizando uma arquitetura moderna e escalável, separando as responsabilidades em camadas de `Domínio`, `Dados` e `Apresentação`.
 
 | Categoria   | Tecnologia                                                                                                                                                            |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Mobile** | <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />                                               |
-| **Backend** | [cite_start]<img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" /> (Conforme documento do TFC [cite: 114])                                         |
+| **Backend** | <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />                                            |
 | **Banco de Dados** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" /> (Nuvem) <br> <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" /> (Local/Offline) |
 | **Arquitetura** | **Clean Architecture** (Adaptada) com Repositório Adaptativo para alternar entre fontes de dados online e offline. |
 
 ---
 
-### 🖼️ Telas do Aplicativo
+### Telas do Aplicativo
 
 | Login | Home | Cadastro de Técnico |
 | :---: | :---: | :---: |
@@ -79,7 +79,7 @@ Este projeto foi construído utilizando uma arquitetura moderna e escalável, se
 
 ---
 
-### 🏁 Como Executar o Projeto
+### Como Executar o Projeto
 
 Siga os passos abaixo para executar o projeto em sua máquina local.
 
