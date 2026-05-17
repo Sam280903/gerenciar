@@ -33,8 +33,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '4. Se estiver com pressa, você pode usar o **"Cadastro Rápido"** no topo da tela, que exige apenas o nome e telefone.\n'
           '5. Após preencher, toque em **"SALVAR"**.\n\n'
           '**Dica:** O sistema valida o CPF automaticamente para garantir que os dados estejam corretos.',
-      videoUrlGestor: null,
-      videoUrlTecnico: null,
+      videoUrlGestor: 'https://youtube.com/shorts/iktFo_-Iggg',
+      videoUrlTecnico: 'https://youtube.com/shorts/rLKqa1RKlyU',
     ),
     Tutorial(
       categoria: 'Cadastros',
@@ -47,7 +47,7 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '4. Selecione se o técnico terá permissões administrativas ou apenas operacionais.\n'
           '5. Clique em **"CADASTRAR"**.\n\n'
           '**Importante:** O técnico cadastrado receberá as notificações de agendamentos diretamente no celular dele assim que fizer o login.',
-      videoUrlGestor: null,
+      videoUrlGestor: 'https://youtube.com/shorts/7swmSd9E_QQ',
       perfisPermitidos: ['gestor'],
     ),
     // Categoria: Agendamentos
@@ -64,8 +64,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '6. O sistema fará uma verificação em tempo real: se o técnico já possuir um compromisso nesse horário, um aviso de conflito aparecerá.\n'
           '7. Toque em **"CONFIRMAR"**.\n\n'
           '**Nota:** Agendamentos criados offline serão sincronizados automaticamente assim que você recuperar o sinal de internet.',
-      videoUrlGestor: null,
-      videoUrlTecnico: null,
+      videoUrlGestor: 'https://youtube.com/shorts/1aYDmOSzf5g',
+      videoUrlTecnico: 'https://youtube.com/shorts/RfEsKAJ_29k',
     ),
     Tutorial(
       categoria: 'Agendamentos',
@@ -94,8 +94,8 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '6. Defina o **Valor Total** e a **Forma de Pagamento**.\n'
           '7. Ao finalizar, você pode gerar um **PDF** para enviar ao cliente via WhatsApp ou E-mail.\n\n'
           '**Dica:** Você pode tirar fotos do serviço e anexar à OS para maior transparência.',
-      videoUrlGestor: null,
-      videoUrlTecnico: null,
+      videoUrlGestor: 'https://youtube.com/shorts/RhLdNTjA-Ks',
+      videoUrlTecnico: 'https://youtube.com/shorts/_usccLTVOec',
     ),
     Tutorial(
       categoria: 'Ordens de Serviço',
@@ -121,7 +121,7 @@ class _TutoriaisTelaState extends State<TutoriaisTela> {
           '4. Use os filtros adicionais para refinar por cliente ou status de OS.\n'
           '5. Toque em **"GERAR"**.\n\n'
           'Os relatórios podem ser visualizados em gráficos interativos ou exportados em formato de planilha.',
-      videoUrlGestor: null,
+      videoUrlGestor: 'https://youtube.com/shorts/v0-0_QP3IIo',
       perfisPermitidos: ['gestor'],
     ),
   ];
