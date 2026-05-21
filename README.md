@@ -18,38 +18,38 @@
 
 ### O Problema
 
-[cite_start]Muitos técnicos e prestadores de serviço, especialmente na área de refrigeração e climatização, ainda dependem de métodos manuais como agendas de papel, planilhas e aplicativos de mensagens para gerenciar suas operações[cite: 100, 212]. [cite_start]Essa abordagem é ineficiente, suscetível a erros, perda de informações e não oferece uma visão clara do negócio[cite: 101, 216].
+Muitos técnicos e prestadores de serviço, especialmente na área de refrigeração e climatização, ainda dependem de métodos manuais como agendas de papel, planilhas e aplicativos de mensagens para gerenciar suas operações. Essa abordagem é ineficiente, suscetível a erros, perda de informações e não oferece uma visão clara do negócio.
 
-[cite_start]Além disso, sistemas existentes no mercado muitas vezes são complexos, caros ou apresentam falhas críticas de sincronização de dados em ambientes com conectividade instável, um cenário comum para quem trabalha em campo[cite: 102, 103, 219].
+Além disso, sistemas existentes no mercado muitas vezes são complexos, caros ou apresentam falhas críticas de sincronização de dados em ambientes com conectividade instável, um cenário comum para quem trabalha em campo.
 
 ### A Solução: GerenciAR
 
 O **GerenciAR** foi projetado para ser a solução definitiva para esses profissionais. Um sistema intuitivo, robusto e confiável que centraliza todas as operações essenciais do dia a dia em um único lugar, garantindo que o técnico tenha total controle de suas atividades, mesmo offline.
 
-[cite_start]O aplicativo permite o cadastro de clientes, agendamento inteligente de visitas, abertura e gestão de Ordens de Serviço (OS), e a sincronização automática de todos os dados assim que uma conexão com a internet é restabelecida[cite: 36, 105, 144].
+O aplicativo permite o cadastro de clientes, agendamento inteligente de visitas, abertura e gestão de Ordens de Serviço (OS), e a sincronização automática de todos os dados assim que uma conexão com a internet é restabelecida.
 
 ---
 
 ### Funcionalidades Principais
 
 * **Gestão Completa:**
-    * [cite_start]**Clientes:** Cadastro completo e rápido de clientes[cite: 343, 346].
-    * [cite_start]**Técnicos:** Gestores podem cadastrar e gerenciar suas equipes[cite: 285, 288].
-    * [cite_start]**Ordens de Serviço (OS):** Criação, atualização e conclusão de OS detalhadas[cite: 379, 382].
+    * **Clientes:** Cadastro completo e rápido de clientes.
+    * **Técnicos:** Gestores podem cadastrar e gerenciar suas equipes.
+    * **Ordens de Serviço (OS):** Criação, atualização e conclusão de OS detalhadas.
 * **Agendamento Inteligente:**
-    * [cite_start]Sistema que impede agendamentos simultâneos para o mesmo técnico, evitando conflitos de agenda[cite: 145, 255, 269].
+    * Sistema que impede agendamentos simultâneos para o mesmo técnico, evitando conflitos de agenda.
 * **Operação 100% Offline:**
-    * [cite_start]Todas as funcionalidades essenciais (cadastros, agendamentos, OS) funcionam perfeitamente sem internet[cite: 35, 142].
-    * [cite_start]Os dados são salvos localmente em um banco de dados **SQLite** e sincronizados automaticamente com o **Firebase** quando a conexão é restabelecida[cite: 694, 695, 702, 703].
+    * Todas as funcionalidades essenciais (cadastros, agendamentos, OS) funcionam perfeitamente sem internet.
+    * Os dados são salvos localmente em um banco de dados **SQLite** e sincronizados automaticamente com o **Firebase** quando a conexão é restabelecida.
 * **Perfis de Usuário:**
-    * [cite_start]**Gestor:** Acesso administrativo total para gerenciar técnicos, relatórios, reabrir OS e inativar cadastros[cite: 168, 172, 173].
-    * [cite_start]**Técnico:** Focado na execução, com permissões para cadastrar clientes, agendar e concluir atendimentos[cite: 170, 171].
+    * **Gestor:** Acesso administrativo total para gerenciar técnicos, relatórios, reabrir OS e inativar cadastros.
+    * **Técnico:** Focado na execução, com permissões para cadastrar clientes, agendar e concluir atendimentos.
 * **Relatórios e Exportação:**
-    * [cite_start]Geração de relatórios de atendimentos e financeiros com filtros personalizáveis[cite: 175, 491, 494].
-    * [cite_start]Exporte Ordens de Serviço concluídas para PDF[cite: 641, 644].
+    * Geração de relatórios de atendimentos e financeiros com filtros personalizáveis.
+    * Exporte Ordens de Serviço concluídas para PDF.
 * **Recursos Adicionais:**
-    * [cite_start]**Notificações:** Técnicos são notificados sobre seus agendamentos do dia[cite: 179, 550, 553].
-    * [cite_start]**Tutoriais:** Seção de ajuda integrada para facilitar o uso da ferramenta[cite: 176, 521, 524].
+    * **Notificações:** Técnicos são notificados sobre seus agendamentos do dia.
+    * **Tutoriais:** Seção de ajuda integrada para facilitar o uso da ferramenta.
     * **Temas:** Interface moderna e profissional com tema escuro.
 
 ---
