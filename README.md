@@ -1,121 +1,155 @@
-# GerenciAR - Gestão de Atendimentos Técnicos
-
-![Status do Projeto](https://img.shields.io/badge/status-em_desenvolvimento-yellowgreen)
-![Linguagem](https://img.shields.io/badge/linguagem-Dart-blue)
-![Framework](https://img.shields.io/badge/framework-Flutter-blue)
-
-<br>
-
 <p align="center">
-  <img src="assets/imagens/logo_gerenciar.png" alt="GerenciAR Logo" width="200"/>
+  <img src="assets/imagens/feature_graphic_final.png" alt="GerenciAR - Gestão de Atendimentos Técnicos" width="100%"/>
 </p>
 
 <p align="center">
-  Um aplicativo mobile completo, construído em Flutter, para otimizar a rotina de técnicos e prestadores de serviço, com foco em gestão de clientes, agendamentos e ordens de serviço, funcionando de forma eficiente **com ou sem conexão à internet**.
+  Aplicativo mobile completo, construído em Flutter, para otimizar a rotina de técnicos e prestadores de serviço — gestão de clientes, agendamentos e ordens de serviço, funcionando <strong>com ou sem conexão à internet</strong>.
+</p>
+
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=gerenciar.tfc.gerenciar"><strong>📲 Baixar na Google Play Store</strong></a>
+</p>
+
+<p align="center">
+  <code>Flutter</code> · <code>Dart</code> · <code>Firebase</code> · <code>SQLite</code> · <strong>Publicado na Play Store</strong>
 </p>
 
 ---
 
-### O Problema
+## Minha contribuição
 
-Muitos técnicos e prestadores de serviço, especialmente na área de refrigeração e climatização, ainda dependem de métodos manuais como agendas de papel, planilhas e aplicativos de mensagens para gerenciar suas operações. Essa abordagem é ineficiente, suscetível a erros, perda de informações e não oferece uma visão clara do negócio.
+> Este é o meu fork do projeto, desenvolvido em dupla como Trabalho de Fim de Curso.
+> Fui responsável por duas frentes:
 
-Além disso, sistemas existentes no mercado muitas vezes são complexos, caros ou apresentam falhas críticas de sincronização de dados em ambientes com conectividade instável, um cenário comum para quem trabalha em campo.
+### Arquitetura offline-first e sincronização
 
-### A Solução: GerenciAR
+O desafio central do produto: técnicos de refrigeração trabalham em campo, frequentemente em locais sem sinal — casas de máquinas, subsolos, zona rural. Um app que exige conexão é inútil nesse contexto.
 
-O **GerenciAR** foi projetado para ser a solução definitiva para esses profissionais. Um sistema intuitivo, robusto e confiável que centraliza todas as operações essenciais do dia a dia em um único lugar, garantindo que o técnico tenha total controle de suas atividades, mesmo offline.
+A solução implementada:
 
-O aplicativo permite o cadastro de clientes, agendamento inteligente de visitas, abertura e gestão de Ordens de Serviço (OS), e a sincronização automática de todos os dados assim que uma conexão com a internet é restabelecida.
+- **Persistência local em SQLite** como fonte primária de dados, não como cache
+- **Fila de operações pendentes**, registrando cadastros, edições e conclusões feitas offline
+- **Detecção de reconexão** e sincronização automática com o Firebase, sem ação do usuário
+- **Repositório adaptativo**, que alterna entre fonte local e remota de forma transparente para as camadas superiores
 
----
+O resultado é que o técnico usa o app normalmente sem internet e os dados sobem sozinhos quando o sinal volta — sem tela de erro, sem perda de trabalho, sem sincronização manual.
 
-### Funcionalidades Principais
+### Módulo de Ordens de Serviço
 
-* **Gestão Completa:**
-    * **Clientes:** Cadastro completo e rápido de clientes.
-    * **Técnicos:** Gestores podem cadastrar e gerenciar suas equipes.
-    * **Ordens de Serviço (OS):** Criação, atualização e conclusão de OS detalhadas.
-* **Agendamento Inteligente:**
-    * Sistema que impede agendamentos simultâneos para o mesmo técnico, evitando conflitos de agenda.
-* **Operação 100% Offline:**
-    * Todas as funcionalidades essenciais (cadastros, agendamentos, OS) funcionam perfeitamente sem internet.
-    * Os dados são salvos localmente em um banco de dados **SQLite** e sincronizados automaticamente com o **Firebase** quando a conexão é restabelecida.
-* **Perfis de Usuário:**
-    * **Gestor:** Acesso administrativo total para gerenciar técnicos, relatórios, reabrir OS e inativar cadastros.
-    * **Técnico:** Focado na execução, com permissões para cadastrar clientes, agendar e concluir atendimentos.
-* **Relatórios e Exportação:**
-    * Geração de relatórios de atendimentos e financeiros com filtros personalizáveis.
-    * Exporte Ordens de Serviço concluídas para PDF.
-* **Recursos Adicionais:**
-    * **Notificações:** Técnicos são notificados sobre seus agendamentos do dia.
-    * **Tutoriais:** Seção de ajuda integrada para facilitar o uso da ferramenta.
-    * **Temas:** Interface moderna e profissional com tema escuro.
+Fluxo completo de OS, da abertura à conclusão:
+
+- Criação vinculada a cliente, técnico e agendamento
+- Atualização de status ao longo do atendimento
+- Conclusão com registro de serviço executado e valores
+- **Exportação em PDF** para envio ao cliente
+- Regras de permissão: apenas gestores reabrem OS concluídas
 
 ---
 
-### Tecnologias Utilizadas
+## O Problema
 
-Este projeto foi construído utilizando uma arquitetura moderna e escalável, separando as responsabilidades em camadas de `Domínio`, `Dados` e `Apresentação`.
+Muitos técnicos e prestadores de serviço, especialmente na área de refrigeração e climatização, ainda dependem de agendas de papel, planilhas e aplicativos de mensagens para gerenciar suas operações. A abordagem é ineficiente, sujeita a erros e perda de informação, e não dá visão nenhuma do negócio.
 
-| Categoria   | Tecnologia                                                                                                                                                            |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Mobile** | <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />                                               |
-| **Backend** | <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" />                                            |
-| **Banco de Dados** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" /> (Nuvem) <br> <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" /> (Local/Offline) |
-| **Arquitetura** | **Clean Architecture** (Adaptada) com Repositório Adaptativo para alternar entre fontes de dados online e offline. |
+Sistemas existentes no mercado costumam ser complexos, caros, ou apresentam falhas críticas de sincronização em ambientes com conectividade instável — exatamente o cenário de quem trabalha em campo.
+
+## A Solução
+
+O **GerenciAR** centraliza as operações essenciais do dia a dia num único lugar, garantindo controle total das atividades mesmo offline: cadastro de clientes, agendamento inteligente de visitas, abertura e gestão de Ordens de Serviço, e sincronização automática assim que a conexão retorna.
 
 ---
 
-### Telas do Aplicativo
+## Funcionalidades
+
+**Gestão completa**
+- Clientes: cadastro completo e rápido
+- Técnicos: gestores cadastram e gerenciam suas equipes
+- Ordens de Serviço: criação, atualização e conclusão detalhadas
+
+**Agendamento inteligente**
+- Impede agendamentos simultâneos para o mesmo técnico, evitando conflito de agenda
+
+**Operação 100% offline**
+- Todas as funcionalidades essenciais funcionam sem internet
+- Dados salvos localmente em SQLite e sincronizados com o Firebase ao reconectar
+
+**Perfis de usuário**
+- **Gestor:** acesso administrativo total — gerenciar técnicos, relatórios, reabrir OS, inativar cadastros
+- **Técnico:** focado na execução — cadastrar clientes, agendar e concluir atendimentos
+
+**Relatórios e exportação**
+- Relatórios de atendimento e financeiros com filtros personalizáveis
+- Exportação de OS concluídas em PDF
+
+**Recursos adicionais**
+- Notificações dos agendamentos do dia
+- Seção de tutoriais integrada
+- Interface com tema escuro
+
+---
+
+## Tecnologias
+
+Arquitetura em camadas de `Domínio`, `Dados` e `Apresentação`.
+
+| Categoria | Tecnologia |
+|---|---|
+| **Mobile** | Flutter · Dart |
+| **Backend** | Node.js (Cloud Functions) |
+| **Banco de dados** | Firebase (nuvem) · SQLite (local/offline) |
+| **Arquitetura** | Clean Architecture adaptada, com repositório adaptativo alternando entre fontes online e offline |
+| **Notificações** | OneSignal |
+
+---
+
+## Telas
 
 | Login | Home | Cadastro de Técnico |
 | :---: | :---: | :---: |
-| <img src="assets/imagens/Tela_Login.jpeg" alt="Tela de Login" width="250"/> | <img src="assets/imagens/Tela_Principal.jpeg" alt="Tela Home" width="250"/> | <img src="assets/imagens/Cadastro_Tecnico.jpeg" alt="Tela de Cadastro de Técnico" width="250"/> |
+| <img src="assets/imagens/Tela_Login.jpeg" alt="Tela de Login" width="250"/> | <img src="assets/imagens/Tela_Principal.jpeg" alt="Tela Home" width="250"/> | <img src="assets/imagens/Cadastro_Tecnico.jpeg" alt="Cadastro de Técnico" width="250"/> |
 
 | Agendamento | Ordem de Serviço | Relatórios |
 | :---: | :---: | :---: |
-| <img src="assets/imagens/Cadasto_Tela_Agendamento.jpeg" alt="Tela de Agendamento" width="250"/> | <img src="assets/imagens/Abrir_OS.jpg" alt="Tela de Ordem de Serviço" width="250"/> | <img src="assets/imagens/Tela_Relatorio.jpg" alt="Tela de Relatórios" width="250"/> |
+| <img src="assets/imagens/Cadasto_Tela_Agendamento.jpeg" alt="Agendamento" width="250"/> | <img src="assets/imagens/Abrir_OS.jpg" alt="Ordem de Serviço" width="250"/> | <img src="assets/imagens/Tela_Relatorio.jpg" alt="Relatórios" width="250"/> |
 
 ---
 
-### Como Executar o Projeto
+## Como executar
 
-Siga os passos abaixo para executar o projeto em sua máquina local.
+**Pré-requisitos**
+- [Flutter](https://flutter.dev/docs/get-started/install) 3.x ou superior
+- Emulador Android/iOS ou dispositivo físico
 
-**Pré-requisitos:**
-* [Flutter](https://flutter.dev/docs/get-started/install) (Versão 3.x.x ou superior)
-* Um emulador Android/iOS ou um dispositivo físico
+**Passos**
 
-**Passos:**
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/Sam280903/gerenciar.git
+   cd gerenciar
+   ```
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone [https://github.com/flavioacmf/tfc.git](https://github.com/flavioacmf/tfc.git)
-    cd tfc
-    ```
+2. Instale as dependências:
+   ```bash
+   flutter pub get
+   ```
 
-2.  **Instale as dependências:**
-    ```bash
-    flutter pub get
-    ```
+3. Configure o Firebase:
+   - Crie um projeto no [console do Firebase](https://console.firebase.google.com/)
+   - Adicione o Flutter ao projeto e coloque o `google-services.json` em `android/app/`
 
-3.  **Configuração do Firebase:**
-    * Este projeto utiliza o Firebase. Você precisará criar um projeto no [console do Firebase](https://console.firebase.google.com/).
-    * Siga as instruções para adicionar o Flutter ao seu projeto Firebase e adicione o arquivo `google-services.json` (para Android) na pasta `android/app/`.
-
-4.  **Execute o aplicativo:**
-    ```bash
-    flutter run
-    ```
+4. Execute:
+   ```bash
+   flutter run
+   ```
 
 ---
 
-### Autores
+## Autores
 
-Este projeto é o Trabalho de Fim de Curso (TFC) desenvolvido por:
+Trabalho de Fim de Curso desenvolvido por:
 
-* **Flávio Amorim Chagas** - [flavioacmf](https://github.com/flavioacmf)
-* **Samuel Augusto Guimarães Lopes** - [Sam280903](https://github.com/Sam280903)
+- **Samuel Augusto Guimarães Lopes** — [@Sam280903](https://github.com/Sam280903) · *arquitetura offline-first e módulo de Ordens de Serviço*
+- **Flávio Amorim Chagas** — [@flavioacmf](https://github.com/flavioacmf)
 
-Sob orientação da Prof.ª Ma. Clarissa Avelino Xavier de Camargo, para o curso de Engenharia de Software da Universidade de Rio Verde (UniRV).
+Sob orientação da Prof.ª Ma. Clarissa Avelino Xavier de Camargo, curso de Engenharia de Software da Universidade de Rio Verde (UniRV).
+
+Repositório original: [flavioacmf/tfc](https://github.com/flavioacmf/tfc)
